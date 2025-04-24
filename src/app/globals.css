@@ -4,20 +4,32 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html {
-    font-family: 'Inter', sans-serif; /* Apply Inter globally */
+@layer utilities {
+  .font-pixel {
+    font-family: 'Pixelify Sans', monospace;
+    font-synthesis: none;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-@layer utilities {
-  .font-pixel {
-    font-family: 'Pixelify Sans', monospace; /* Define font-pixel utility */
-    font-synthesis: none; /* Prevent browser from synthesizing bold/italic for pixel fonts */
-    -webkit-font-smoothing: none; /* Ensure crisp pixel rendering on WebKit/Blink */
-    -moz-osx-font-smoothing: grayscale; /* Ensure crisp pixel rendering on Firefox/macOS */
-  }
+/* Optional: Style scrollbars for cyberpunk feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
+::-webkit-scrollbar-track {
+  background: hsl(var(--b3));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--p));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--pf));
+}
+
 /* Keep media query for dark mode if needed for specific overrides,
    but base theme switching is handled by daisyUI/Tailwind */
 /*
@@ -35,20 +47,3 @@
 /* Add a subtle grid background for arcade feel */
 /* Body styling is now handled primarily by @layer base and Tailwind preflight */
 /* Keep scrollbar styles if desired */
-
-/* Optional: Style scrollbars for cyberpunk feel */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: hsl(var(--b3)); /* Use daisyUI base-300 color */
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--p)); /* Use daisyUI primary color */
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--pf)); /* Use daisyUI primary-focus color */
-}

@@ -111,6 +111,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   alt="AutoMCP Logo"
                   width={32}
                   height={32}
+                  className="transition-transform duration-700 ease-in-out hover:rotate-[360deg]"
                 />
                 <span className="font-pixel text-2xl">AutoMCP</span>
               </Link>

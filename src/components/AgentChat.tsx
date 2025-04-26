@@ -14,6 +14,24 @@ import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Impo
 
 import type { ThoughtChainItem } from "@ant-design/x";
 
+import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const iceland = localFont({
+  src: '../fonts/Iceland-Regular.ttf',
+  display: 'swap',
+  preload: true,
+});
 // Define roles for Bubble.List using DaisyUI/Tailwind concepts if needed,
 // but @ant-design/x might handle basic styling.
 const roles: React.ComponentProps<typeof Bubble.List>["roles"] = {
@@ -141,10 +159,10 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
         style={{ marginLeft: 16 }}
         items={[
           {
-            title: "MCP Executing",
+            title: (<div className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}>MCP Log</div>),
             status: thoughtChainStatus,
             icon: status === "loading" ? <LoadingOutlined /> : <TagsOutlined twoToneColor={'green'}/>,
-            description: `request ${status}`,
+            description: <div className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}>request {status}</div>,
             content: (
               <div>
                 <div>Status: {status || "-"}</div>
@@ -227,7 +245,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
               <option value="1">X</option>
               <option value="2">KOL</option>
               <option value="3">Wallet</option>
-              <option value="4">K线</option>
+              <option value="4">Candlestick Chart</option>
             </select>
           </div>
 

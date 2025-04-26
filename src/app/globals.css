@@ -47,3 +47,7 @@
 /* Add a subtle grid background for arcade feel */
 /* Body styling is now handled primarily by @layer base and Tailwind preflight */
 /* Keep scrollbar styles if desired */
+
+.ant-bubble-content {
+  font-size: 1.25rem !important;
+}

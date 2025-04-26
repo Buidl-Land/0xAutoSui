@@ -16,6 +16,7 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Import icons
+import markdownit from 'markdown-it';
 
 import type { ThoughtChainItem } from "@ant-design/x";
 
@@ -37,6 +38,15 @@ const iceland = localFont({
   display: "swap",
   preload: true,
 });
+
+const md = markdownit({ html: true, breaks: true });
+const renderMarkdown = (content:any) => (
+<div>
+  {/* biome-ignore lint/security/noDangerouslySetInnerHtml: used in demo */}
+  <div className="renderMarkdown" dangerouslySetInnerHTML={{ __html: md.render(content) }} />
+</div>
+
+)
 // Define roles for Bubble.List using DaisyUI/Tailwind concepts if needed,
 // but @ant-design/x might handle basic styling.
 const roles: React.ComponentProps<typeof Bubble.List>["roles"] = {
@@ -278,6 +288,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
       loading: status === "loading",
       role: status === "local" ? "local" : "ai",
       content: message,
+      messageRender: renderMarkdown,
       footer:
         status === "local" ? (
           <div className="flex justify-between items-center mb-4">

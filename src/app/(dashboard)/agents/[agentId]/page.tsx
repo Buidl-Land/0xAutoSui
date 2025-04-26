@@ -19,16 +19,18 @@ const getMockAgentData = (agentId: string | string[] | undefined) => {
   const mockAgents = [
     {
       id: "1",
-      name: "Hourly ETH/USDC Arbitrage",
+      name: "跟王小二赚钱",
       status: "Running",
-      description: "Checks Uniswap & Sushiswap hourly...",
+      description: "跟单王小二Kol钱包自动交易Meme",
       lastModified: Date.now() - 86400000,
       creator: "AdminUser",
       triggerType: "Scheduled",
-      triggerConfig: [{ type: "Scheduled", interval: "hourly" }],
+      triggerConfig: [{ type: "跟单", interval: "5 min" }],
       mcpConfig: [
-        { name: "Price Feed MCP", id: "mcp1" },
-        { name: "DEX Swap MCP", id: "mcp2" },
+        { name: "WalletAnalyze", id: "mcp5" },
+        { name: "TwitterCrawler", id: "mcp2" },
+        { name: "GoPlus", id: "mcp6" },
+        { name: "JupSwap", id: "mcp7" },
       ],
       logs: [
         {
@@ -99,8 +101,10 @@ const getMockAgentData = (agentId: string | string[] | undefined) => {
         { type: "Event: Chain", event: "ContractDeployed", chain: "BNB" },
       ],
       mcpConfig: [
-        { name: "Chain Event MCP", id: "mcp5" },
-        { name: "DEX Swap MCP", id: "mcp2" },
+        { name: "WalletAnalyze", id: "mcp5" },
+        { name: "TwitterCrawler", id: "mcp2" },
+        { name: "GoPlus", id: "mcp6" },
+        { name: "JupSwap", id: "mcp7" },
       ],
       logs: [
         {

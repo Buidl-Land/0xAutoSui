@@ -9,7 +9,12 @@ import {
 } from "@ant-design/x";
 import React from "react";
 import { PaperClipIcon } from "@heroicons/react/24/outline"; // Using Heroicon
-import { UserOutlined, LoadingOutlined, TagsOutlined, CheckCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  LoadingOutlined,
+  CheckCircleOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Import icons
 
 import type { ThoughtChainItem } from "@ant-design/x";
@@ -76,6 +81,88 @@ interface AgentChatProps {
   // Add any other props needed, e.g., API endpoint for the agent
 }
 
+function getStatusIcon(status: ThoughtChainItem["status"]) {
+  switch (status) {
+    case "success":
+      return <CheckCircleOutlined />;
+    case "error":
+      return <InfoCircleOutlined />;
+    case "pending":
+      return <LoadingOutlined />;
+    default:
+      return undefined;
+  }
+}
+
+const mockServerResponseData: ThoughtChainItem[] = [];
+
+const delay = (ms: number) => {
+  return new Promise<void>((resolve) => {
+    const timer: NodeJS.Timeout = setTimeout(() => {
+      clearTimeout(timer);
+      resolve();
+    }, ms);
+  });
+};
+
+function addChainItem() {
+  const index = mockServerResponseData.length;
+  let title = "";
+let description = "";
+
+  switch (index) {
+    case 0:
+      title = "WalletAnalyze";
+      description=  '正在调用WalletAnalyze分析对应钱包记录 -> WalletAnalyze'
+      break;
+    case 1:
+      title = "TwitterCrawler";
+      description=  '正在调用分析推特热度 -> TwitterCrawler'
+
+      break;
+    case 2:
+      title = "GoPlus";
+      description=  '正在调用GoPlus分析代币安全性 —> GoPlus'
+      break;
+    case 3:
+      title = "JupSwap";
+      description=  '正在调用Jup Swap进行交易'
+      break;
+  }
+
+  mockServerResponseData.push({
+    title,
+    status: "pending",
+    icon: getStatusIcon("pending"),
+    description,
+  });
+}
+
+async function updateChainItem(status: ThoughtChainItem["status"]) {
+  await delay(1000);
+  const index = mockServerResponseData.length - 1;
+
+  let description = "";
+  switch (index) {
+    case 0:
+      description = "搜索到最近交易的代币Candle(A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL)";
+      break;
+    case 1:
+      description = "搜索到有30条推文，对最近5条文章进行分析，大家对代币保持积极的态度，认为Candle短期可以炒作";
+      break;
+    case 2:
+      description = "没有发现风险项，前十占比16.5%，符合交易规则，开始swap 1sol购买Candle";
+      break;
+    case 3:
+      description = "执行交易成功，流程结束";
+      break;
+  }
+
+  mockServerResponseData[index].status = status;
+  mockServerResponseData[index].icon = getStatusIcon(status);
+  mockServerResponseData[index].description = description;
+}
+
 const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
   // State for input content
   const [content, setContent] = React.useState("");
@@ -85,17 +172,35 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
     request: async ({ message }, { onSuccess }) => {
       console.log(`Sending to ${agentName}:`, message);
       // Simulate API delay
+      onClick();
+
       await new Promise((resolve) => setTimeout(resolve, 3000));
       // Mock response
-      setThoughtChainStatus("success");
+      onClick();
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      setThoughtChainStatus2("success");
+      onClick();
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      setThoughtChainStatus3("success");
+      onClick();
 
-      onSuccess(`Mock response from ${agentName} to: ${message}`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      onSuccess(`
+尊敬的用户，本次投资决策与执行已顺利完成，现将全流程复盘如下：
+
+一、数据洞察与分析阶段
+
+1. 钱包数据扫描：启动WalletAnalyze工具，精准定位到近期交互代币**Candle（合约地址：A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL）**，锁定潜在投资目标。
+
+2. 舆情动态监测：借助TwitterCrawler抓取到**30条相关推文**，深入剖析近5条高互动内容发现，市场情绪显著乐观，多数观点认为Candle具备**短期炒作价值**，印证市场关注度与投资潜力。
+
+3. 安全风险评估：通过GoPlus专业审计，确认代币**无安全漏洞**，且前十大持仓占比仅**16.5%**，流通结构分散，符合稳健投资的风控标准。
+
+二、交易执行阶段
+基于多维数据交叉验证，触发自动化交易指令：通过Jup Swap协议，以**1 SOL**成功购入Candle代币，交易瞬时完成，确保捕捉市场先机。
+
+三、后续行动建议
+建议持续关注Candle的链上数据与社区热度变化，我将实时监控价格波动、大户动向等指标，一旦触发止盈止损条件，将立即执行调仓策略，为您的资产保驾护航。 `);
     },
   });
 
@@ -144,100 +249,27 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
     // setIsModalOpen(false);
   };
 
-  const [thoughtChainStatus, setThoughtChainStatus] = React.useState("loading");
+  const [items, setItems] = React.useState<ThoughtChainItem[]>(
+    mockServerResponseData
+  );
+  const [loading, setLoading] = React.useState<boolean>(false);
 
-  const [thoughtChainStatus2, setThoughtChainStatus2] =
-    React.useState("loading");
+  const mockStatusChange = async () => {
+    // await updateChainItem('error');
+    // setItems([...mockServerResponseData]);
+    await updateChainItem("pending");
+    setItems([...mockServerResponseData]);
+    await updateChainItem("success");
+    setItems([...mockServerResponseData]);
+  };
 
-  const [thoughtChainStatus3, setThoughtChainStatus3] =
-    React.useState("loading");
-
-  const thoughts = [
-    {
-      title: (
-        <div
-          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          MCP Log1
-        </div>
-      ),
-      status: thoughtChainStatus,
-      icon:
-        thoughtChainStatus === "loading" ? (
-          <LoadingOutlined />
-        ) : (
-          <TagsOutlined twoToneColor={"green"} />
-        ),
-      description: (
-        <div
-          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          request {thoughtChainStatus}
-        </div>
-      ),
-      content: (
-        <div>
-          <div>Status: {thoughtChainStatus || "-"}</div>
-        </div>
-      ),
-    },
-    {
-      title: (
-        <div
-          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          MCP Log2
-        </div>
-      ),
-      status: thoughtChainStatus2,
-      icon:
-      thoughtChainStatus2 === "loading" ? (
-          <LoadingOutlined />
-        ) : (
-          <TagsOutlined twoToneColor={"green"} />
-        ),
-      description: (
-        <div
-          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          request {thoughtChainStatus2}
-        </div>
-      ),
-      content: (
-        <div>
-          <div>Status: {thoughtChainStatus2 || "-"}</div>
-        </div>
-      ),
-    },
-    {
-      title: (
-        <div
-          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          MCP Log3
-        </div>
-      ),
-      status: thoughtChainStatus3,
-      icon:
-      thoughtChainStatus3 === "loading" ? (
-          <LoadingOutlined />
-        ) : (
-          <TagsOutlined twoToneColor={"green"} />
-        ),
-      description: (
-        <div
-          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          request {thoughtChainStatus3}
-        </div>
-      ),
-      content: (
-        <div>
-          <div>Status: {thoughtChainStatus3 || "-"}</div>
-        </div>
-      ),
-    },
-  ]
+  const onClick = async () => {
+    setLoading(true);
+    addChainItem();
+    setItems([...mockServerResponseData]);
+    await mockStatusChange();
+    setLoading(false);
+  };
 
   // Map messages for Bubble.List
   const bubbleItems: React.ComponentProps<typeof Bubble.List>["items"] =
@@ -257,7 +289,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
             </button>
           </div>
         ) : (
-          <ThoughtChain style={{ marginLeft: 16 }} items={thoughts as ThoughtChainItem[]} />
+          <ThoughtChain style={{ marginLeft: 16 }} items={items} />
         ),
       // loadingRender: () => <div>Custom loading...</div>,
     }));
@@ -313,7 +345,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
             {/* Added nullish coalescing for safety */}
             <input
               type="text"
-              defaultValue={"test"}
+              defaultValue={"王小二跟单"}
               className="input input-bordered w-full"
             />
           </div>

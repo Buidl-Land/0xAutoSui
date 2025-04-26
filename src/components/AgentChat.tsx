@@ -9,7 +9,7 @@ import {
 } from "@ant-design/x";
 import React from "react";
 import { PaperClipIcon } from "@heroicons/react/24/outline"; // Using Heroicon
-import { UserOutlined, LoadingOutlined, TagsOutlined } from "@ant-design/icons";
+import { UserOutlined, LoadingOutlined, TagsOutlined, CheckCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Import icons
 
 import type { ThoughtChainItem } from "@ant-design/x";
@@ -28,8 +28,8 @@ const geistMono = Geist_Mono({
 });
 
 const iceland = localFont({
-  src: '../fonts/Iceland-Regular.ttf',
-  display: 'swap',
+  src: "../fonts/Iceland-Regular.ttf",
+  display: "swap",
   preload: true,
 });
 // Define roles for Bubble.List using DaisyUI/Tailwind concepts if needed,
@@ -85,9 +85,16 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
     request: async ({ message }, { onSuccess }) => {
       console.log(`Sending to ${agentName}:`, message);
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       // Mock response
-      setThoughtChainStatus('success')
+      setThoughtChainStatus("success");
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setThoughtChainStatus2("success");
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      setThoughtChainStatus3("success");
+
       onSuccess(`Mock response from ${agentName} to: ${message}`);
     },
   });
@@ -137,9 +144,100 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
     // setIsModalOpen(false);
   };
 
-  const [thoughtChainStatus, setThoughtChainStatus] =
-    React.useState<ThoughtChainItem["status"]>();
-  // const [lines, setLines] = React.useState<any[]>([]);
+  const [thoughtChainStatus, setThoughtChainStatus] = React.useState("loading");
+
+  const [thoughtChainStatus2, setThoughtChainStatus2] =
+    React.useState("loading");
+
+  const [thoughtChainStatus3, setThoughtChainStatus3] =
+    React.useState("loading");
+
+  const thoughts = [
+    {
+      title: (
+        <div
+          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          MCP Log1
+        </div>
+      ),
+      status: thoughtChainStatus,
+      icon:
+        thoughtChainStatus === "loading" ? (
+          <LoadingOutlined />
+        ) : (
+          <TagsOutlined twoToneColor={"green"} />
+        ),
+      description: (
+        <div
+          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          request {thoughtChainStatus}
+        </div>
+      ),
+      content: (
+        <div>
+          <div>Status: {thoughtChainStatus || "-"}</div>
+        </div>
+      ),
+    },
+    {
+      title: (
+        <div
+          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          MCP Log2
+        </div>
+      ),
+      status: thoughtChainStatus2,
+      icon:
+      thoughtChainStatus2 === "loading" ? (
+          <LoadingOutlined />
+        ) : (
+          <TagsOutlined twoToneColor={"green"} />
+        ),
+      description: (
+        <div
+          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          request {thoughtChainStatus2}
+        </div>
+      ),
+      content: (
+        <div>
+          <div>Status: {thoughtChainStatus2 || "-"}</div>
+        </div>
+      ),
+    },
+    {
+      title: (
+        <div
+          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          MCP Log3
+        </div>
+      ),
+      status: thoughtChainStatus3,
+      icon:
+      thoughtChainStatus3 === "loading" ? (
+          <LoadingOutlined />
+        ) : (
+          <TagsOutlined twoToneColor={"green"} />
+        ),
+      description: (
+        <div
+          className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          request {thoughtChainStatus3}
+        </div>
+      ),
+      content: (
+        <div>
+          <div>Status: {thoughtChainStatus3 || "-"}</div>
+        </div>
+      ),
+    },
+  ]
 
   // Map messages for Bubble.List
   const bubbleItems: React.ComponentProps<typeof Bubble.List>["items"] =
@@ -148,34 +246,21 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
       loading: status === "loading",
       role: status === "local" ? "local" : "ai",
       content: message,
-      footer: status === "local" ? (
-        <div className="flex justify-between items-center mb-4">
-          <button onClick={handleOpenModal} className="btn btn-primary btn-sm">
-            <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
-          </button>
-        </div>
-      ): (
-        <ThoughtChain
-        style={{ marginLeft: 16 }}
-        items={[
-          {
-            title: (<div className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}>MCP Log</div>),
-            status: thoughtChainStatus,
-            icon: status === "loading" ? <LoadingOutlined /> : <TagsOutlined twoToneColor={'green'}/>,
-            description: <div className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased`}>request {status}</div>,
-            content: (
-              <div>
-                <div>Status: {status || "-"}</div>
-                {/* <div>Update Times: {lines.length}</div> */}
-              </div>
-            ),
-          },
-        ]}
-      />
-      ),
+      footer:
+        status === "local" ? (
+          <div className="flex justify-between items-center mb-4">
+            <button
+              onClick={handleOpenModal}
+              className="btn btn-primary btn-sm"
+            >
+              <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
+            </button>
+          </div>
+        ) : (
+          <ThoughtChain style={{ marginLeft: 16 }} items={thoughts as ThoughtChainItem[]} />
+        ),
       // loadingRender: () => <div>Custom loading...</div>,
     }));
-
 
   return (
     <div className="flex flex-col h-full">
@@ -191,7 +276,6 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
           // className="messages" // Removed potentially conflicting class
         />
       </div>
-      
       {/* Sender Input - Apply DaisyUI/Tailwind styling */}
       <div className="p-4 border-t border-base-300">
         <Sender
@@ -251,7 +335,23 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
 
           <div className="form-control mb-4">
             <label className="label">
-              <span className="label-text">System Prompt</span>
+              <span className="label-text">Schedule</span>
+            </label>
+            <select
+              className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
+              defaultValue="1"
+            >
+              <option value="1">1 min</option>
+              <option value="2">5 min</option>
+              <option value="3">10 min</option>
+              <option value="4">30 min</option>
+              <option value="5">60 min</option>
+            </select>
+          </div>
+
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text">Trigger Prompt</span>
             </label>
             <textarea
               className="textarea textarea-bordered h-32 w-full" // Increased height

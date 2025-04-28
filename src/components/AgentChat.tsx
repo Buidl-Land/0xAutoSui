@@ -16,37 +16,22 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Import icons
-import markdownit from 'markdown-it';
+import markdownit from "markdown-it";
+
+import { useChat, useCompletion } from "@ai-sdk/react";
 
 import type { ThoughtChainItem } from "@ant-design/x";
 
-import { Geist, Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const iceland = localFont({
-  src: "../fonts/Iceland-Regular.ttf",
-  display: "swap",
-  preload: true,
-});
-
 const md = markdownit({ html: true, breaks: true });
-const renderMarkdown = (content:any) => (
-<div>
-  {/* biome-ignore lint/security/noDangerouslySetInnerHtml: used in demo */}
-  <div className="renderMarkdown" dangerouslySetInnerHTML={{ __html: md.render(content) }} />
-</div>
-
-)
+const renderMarkdown = (content: any) => (
+  <div>
+    {/* biome-ignore lint/security/noDangerouslySetInnerHtml: used in demo */}
+    <div
+      className="renderMarkdown"
+      dangerouslySetInnerHTML={{ __html: md.render(content) }}
+    />
+  </div>
+);
 // Define roles for Bubble.List using DaisyUI/Tailwind concepts if needed,
 // but @ant-design/x might handle basic styling.
 const roles: React.ComponentProps<typeof Bubble.List>["roles"] = {
@@ -118,25 +103,25 @@ const delay = (ms: number) => {
 function addChainItem() {
   const index = mockServerResponseData.length;
   let title = "";
-let description = "";
+  let description = "";
 
   switch (index) {
     case 0:
       title = "WalletAnalyze";
-      description=  '正在调用WalletAnalyze分析对应钱包记录 -> WalletAnalyze'
+      description = "正在调用WalletAnalyze分析对应钱包记录 -> WalletAnalyze";
       break;
     case 1:
       title = "TwitterCrawler";
-      description=  '正在调用分析推特热度 -> TwitterCrawler'
+      description = "正在调用分析推特热度 -> TwitterCrawler";
 
       break;
     case 2:
       title = "GoPlus";
-      description=  '正在调用GoPlus分析代币安全性 —> GoPlus'
+      description = "正在调用GoPlus分析代币安全性 —> GoPlus";
       break;
     case 3:
       title = "JupSwap";
-      description=  '正在调用Jup Swap进行交易'
+      description = "正在调用Jup Swap进行交易";
       break;
   }
 
@@ -155,13 +140,16 @@ async function updateChainItem(status: ThoughtChainItem["status"]) {
   let description = "";
   switch (index) {
     case 0:
-      description = "搜索到最近交易的代币Candle(A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL)";
+      description =
+        "搜索到最近交易的代币Candle(A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL)";
       break;
     case 1:
-      description = "搜索到有30条推文，对最近5条文章进行分析，大家对代币保持积极的态度，认为Candle短期可以炒作";
+      description =
+        "搜索到有30条推文，对最近5条文章进行分析，大家对代币保持积极的态度，认为Candle短期可以炒作";
       break;
     case 2:
-      description = "没有发现风险项，前十占比16.5%，符合交易规则，开始swap 1sol购买Candle";
+      description =
+        "没有发现风险项，前十占比16.5%，符合交易规则，开始swap 1sol购买Candle";
       break;
     case 3:
       description = "执行交易成功，流程结束";
@@ -173,7 +161,7 @@ async function updateChainItem(status: ThoughtChainItem["status"]) {
   mockServerResponseData[index].description = description;
 }
 
-const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
+const AgentChat0: React.FC<AgentChatProps> = ({ agentName }) => {
   // State for input content
   const [content, setContent] = React.useState("");
 
@@ -196,21 +184,21 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
       onSuccess(`
-尊敬的用户，本次投资决策与执行已顺利完成，现将全流程复盘如下：
+  尊敬的用户，本次投资决策与执行已顺利完成，现将全流程复盘如下：
 
-一、数据洞察与分析阶段
+  一、数据洞察与分析阶段
 
-1. 钱包数据扫描：启动WalletAnalyze工具，精准定位到近期交互代币**Candle（合约地址：A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL）**，锁定潜在投资目标。
+  1. 钱包数据扫描：启动WalletAnalyze工具，精准定位到近期交互代币**Candle（合约地址：A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL）**，锁定潜在投资目标。
 
-2. 舆情动态监测：借助TwitterCrawler抓取到**30条相关推文**，深入剖析近5条高互动内容发现，市场情绪显著乐观，多数观点认为Candle具备**短期炒作价值**，印证市场关注度与投资潜力。
+  2. 舆情动态监测：借助TwitterCrawler抓取到**30条相关推文**，深入剖析近5条高互动内容发现，市场情绪显著乐观，多数观点认为Candle具备**短期炒作价值**，印证市场关注度与投资潜力。
 
-3. 安全风险评估：通过GoPlus专业审计，确认代币**无安全漏洞**，且前十大持仓占比仅**16.5%**，流通结构分散，符合稳健投资的风控标准。
+  3. 安全风险评估：通过GoPlus专业审计，确认代币**无安全漏洞**，且前十大持仓占比仅**16.5%**，流通结构分散，符合稳健投资的风控标准。
 
-二、交易执行阶段
-基于多维数据交叉验证，触发自动化交易指令：通过Jup Swap协议，以**1 SOL**成功购入Candle代币，交易瞬时完成，确保捕捉市场先机。
+  二、交易执行阶段
+  基于多维数据交叉验证，触发自动化交易指令：通过Jup Swap协议，以**1 SOL**成功购入Candle代币，交易瞬时完成，确保捕捉市场先机。
 
-三、后续行动建议
-建议持续关注Candle的链上数据与社区热度变化，我将实时监控价格波动、大户动向等指标，一旦触发止盈止损条件，将立即执行调仓策略，为您的资产保驾护航。 `);
+  三、后续行动建议
+  建议持续关注Candle的链上数据与社区热度变化，我将实时监控价格波动、大户动向等指标，一旦触发止盈止损条件，将立即执行调仓策略，为您的资产保驾护航。 `);
     },
   });
 
@@ -431,6 +419,57 @@ const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
         </form>
       </dialog>
     </div>
+  );
+};
+
+const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    maxSteps: 5,
+  });
+
+  return (
+    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      {messages.map((message) => (
+        <div key={message.id} className="whitespace-pre-wrap">
+          {message.role === "user" ? "User: " : "AI: "}
+          {message.parts.map((part, i) => {
+            switch (part.type) {
+              case "text":
+                return <div key={`${message.id}-${i}`}>{part.text}</div>;
+            }
+          })}
+        </div>
+      ))}
+
+      <form onSubmit={handleSubmit}>
+        <input
+          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
+          value={input}
+          placeholder={`Chat with ${agentName}...`}
+          onChange={handleInputChange}
+        />
+      </form>
+    </div>
+  );
+};
+
+const AgentChat1: React.FC<AgentChatProps> = ({ agentName }) => {
+  const { completion, input, handleInputChange, handleSubmit } = useCompletion({
+    api: "/api/completion",
+  });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        name="prompt"
+        value={input}
+        placeholder={`Chat with ${agentName}...`}
+        onChange={handleInputChange}
+        id="input"
+      />
+      <button type="submit">Submit</button>
+      <div>{completion}</div>
+    </form>
   );
 };
 

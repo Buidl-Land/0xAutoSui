@@ -20,8 +20,8 @@ const iceland = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AutoMCP",
-  description: "Automate your trading strategy with AutoMCP",
+  title: "0xAuto",
+  description: "Automate your trading strategy with 0xAuto",
   icons: {
     icon: '/logo.png',
   },

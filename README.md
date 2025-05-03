@@ -1,8 +1,8 @@
-# AutoMCP: Automate your strategy, powered by MCP!
+# 0xAuto: Automate your strategy, powered by MCP!
 
-1. 产品名称: AutoMCP: Automate your strategy, powered by MCP!
+1. 产品名称: 0xAuto: Automate your strategy, powered by MCP!
 2. 项目概要:
-AutoMCP是一个为经验丰富的加密用户设计的自动化执行引擎。它允许用户配置“代理 (Agent)”，根据预设时间或实时事件触发（如 KOL 发帖、新闻、价格波动、链上事件）来与Model Context Protocol (MCP)交互。与现有手动聊天式 MCP 工具不同，我们的平台实现了完全自动化的交易、套利、理财和 NFT 操作，7x24 小时捕捉机会，节省用户时间。我们通过对 Agent 和 MCP 调用收取“点数”来盈利，并提供钱包绑定、自动购买点数等功能，让用户的 Agent + MCP 策略可以持续运行，实现自动化“赚米”。我们的目标是成为系统化加密自动执行的首选平台。
+0xAuto是一个为经验丰富的加密用户设计的自动化执行引擎。它允许用户配置“代理 (Agent)”，根据预设时间或实时事件触发（如 KOL 发帖、新闻、价格波动、链上事件）来与Model Context Protocol (MCP)交互。与现有手动聊天式 MCP 工具不同，我们的平台实现了完全自动化的交易、套利、理财和 NFT 操作，7x24 小时捕捉机会，节省用户时间。我们通过对 Agent 和 MCP 调用收取“点数”来盈利，并提供钱包绑定、自动购买点数等功能，让用户的 Agent + MCP 策略可以持续运行，实现自动化“赚米”。我们的目标是成为系统化加密自动执行的首选平台。
 
 3. 问题 (Problem):
 - 手动低效: 现有的 MCP 交互方式（如聊天界面）是手动的、缓慢的，不适合系统化或高频执行。

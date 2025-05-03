@@ -12,7 +12,7 @@ export default function Home() {
         scene="https://prod.spline.design/KiD7sWB6QevEsMgE/scene.splinecode"
         className="relative z-0"
       />
-      
+
       {/* Center Content */}
       <div className="absolute top-[22%] left-[5%] transform -translate-y-0 text-white z-10 w-full max-w-5xl px-4 pointer-events-none">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between">
@@ -28,19 +28,19 @@ export default function Home() {
             </div>
           </h1>
         </div>
-        
+
         <div className="flex mt-2 md:mt-4 mb-8">
           <div className="flex items-center w-full">
             <p className="text-4xl md:text-5xl font-semibold text-indigo-300 tracking-wider drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)] ml-2">
               Trade Smarter, Not Harder
             </p>
-            
-            <Link 
-              href="/agents" 
+
+            <Link
+              href="/agents"
               className="group relative flex flex-row items-center justify-between ml-4 px-6 py-2 rounded-xl bg-gradient-to-r from-transparent from-5% via-transparent via-20% via-indigo-400/20 via-40% via-indigo-500/30 via-60% to-indigo-600/50 text-white transform hover:translate-x-2 transition-all duration-300 border-r border-t border-b border-white/10 flex-grow flex-shrink-0 overflow-hidden pointer-events-auto"
             >
               <div className="absolute top-0 bottom-0 left-0 w-0 group-hover:w-full rounded-xl bg-gradient-to-r from-indigo-400/15 via-indigo-500/25 to-indigo-600/35 transition-[width] duration-700 ease-in-out"></div>
-              
+
               <div className="relative transition-transform duration-700 ease-in-out group-hover:translate-x-[1050%] z-10">
                 <FaRocket className="w-8 h-8 text-indigo-300 relative z-10" />
               </div>
@@ -49,7 +49,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      
+
       {/* Feature Cards */}
       <div className="absolute top-[74%] left-[5%] transform -translate-y-0 z-10 w-full max-w-5xl px-4 pointer-events-none">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
@@ -61,7 +61,7 @@ export default function Home() {
               24/7 strategy execution with real-time triggers based on KOL posts, market events, and on-chain activities
             </p>
           </div>
-          
+
           <div className="p-6 rounded-xl backdrop-blur-sm bg-white/25 border border-white/30 text-white hover:bg-white/50 transition-colors pointer-events-auto">
             <div className="flex items-center mb-3">
               <h3 className="text-xl md:text-2xl font-semibold text-gray-400">Multi-Dimensional Triggers</h3>
@@ -70,7 +70,7 @@ export default function Home() {
               Intelligent analysis of social media, market data, and on-chain events to capture every trading opportunity
             </p>
           </div>
-          
+
           <div className="p-6 rounded-xl backdrop-blur-sm bg-white/25 border border-white/30 text-white hover:bg-white/50 transition-colors pointer-events-auto">
             <div className="flex items-center mb-3">
               <h3 className="text-xl md:text-2xl font-semibold text-gray-400">Secure & Reliable</h3>
@@ -81,12 +81,12 @@ export default function Home() {
           </div>
         </div>
       </div>
-            
+
       {/* Footer and Social Media */}
       <div className="absolute bottom-4 left-0 w-full z-10 px-4 pointer-events-none">
         <div className="flex items-center justify-start ml-[5%]">
           <div className="text-gray-400 text-sm">
-            © 2025 AutoMCP
+            © 2025 0xAuto
           </div>
           <div className="flex space-x-4 ml-4">
             <a href="#" className="text-gray-400 hover:text-indigo-300 transition-colors pointer-events-auto">

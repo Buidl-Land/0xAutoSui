@@ -1,4 +1,4 @@
-# AutoMCP Mock-up Plan - Phase 1: Core Application Structure
+# 0xAuto Mock-up Plan - Phase 1: Core Application Structure
 
 **Goal:** Establish the core application structure including navigation and basic page layouts for Agents, Store, Dashboard, and Settings, focusing on layout and component placement.
 
@@ -28,7 +28,7 @@
     *   Individual pages will render within this layout.
 
 2.  **Navbar (Top - Part of `Layout.tsx`):**
-    *   **Left:** Logo/Application Name ("AutoMCP").
+    *   **Left:** Logo/Application Name ("0xAuto").
     *   **Right:**
         *   Placeholder for "Points Balance" (e.g., "Points: 1,234").
         *   User Profile / Wallet Connect Button: Use a daisyUI `dropdown dropdown-end` containing mock options like "Profile", "Settings", "Logout".

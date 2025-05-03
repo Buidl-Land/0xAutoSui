@@ -81,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <h1 className="flex-1 px-2 mx-2 font-pixel">
             {" "}
             {/* Title */}
-            AutoMCP
+            0xAuto
           </h1>
         </div>
         {/* Page content */}
@@ -108,12 +108,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 <Image
                   src="/logo.png"
-                  alt="AutoMCP Logo"
+                  alt="0xAuto Logo"
                   width={32}
                   height={32}
                   className="transition-transform duration-700 ease-in-out hover:rotate-[360deg]"
                 />
-                <span className="font-pixel text-2xl">AutoMCP</span>
+                <span className="font-pixel text-2xl">0xAuto</span>
               </Link>
             </div>
             <ul className="menu w-full">

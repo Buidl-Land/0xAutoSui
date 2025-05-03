@@ -5,19 +5,19 @@ const StorePage = () => {
   // Mock data - replace later
   // Mock data reflecting README examples - Added creator
   const publicAgents = [
-    { id: 'pa1', name: 'Simple ETH/USDC Arbitrage (Uniswap/Sushiswap)', description: 'Basic hourly arbitrage agent template using Price Feed & DEX Swap MCPs.', creator: 'AutoMCP Team' },
+    { id: 'pa1', name: 'Simple ETH/USDC Arbitrage (Uniswap/Sushiswap)', description: 'Basic hourly arbitrage agent template using Price Feed & DEX Swap MCPs.', creator: '0xAuto Team' },
     { id: 'pa2', name: 'Top 10 KOL Follower Template', description: 'Follows a curated list of KOLs via Social Feed MCP and executes trades via DEX Swap MCP.', creator: 'CommunityDev' },
     { id: 'pa3', name: 'NFT Floor Price Sweeper', description: 'Monitors floor price of a specified NFT collection via NFT Market MCP and buys listings below threshold.', creator: 'NFTMaster' },
   ];
 
   const mcpServices = [
-    { id: 'mcp-dex', name: 'DEX Swap MCP', description: 'Executes token swaps on decentralized exchanges (e.g., Uniswap, Sushiswap).', creator: 'AutoMCP Team' },
-    { id: 'mcp-price', name: 'Price Feed MCP', description: 'Provides real-time or historical price data for various assets.', creator: 'AutoMCP Team' },
+    { id: 'mcp-dex', name: 'DEX Swap MCP', description: 'Executes token swaps on decentralized exchanges (e.g., Uniswap, Sushiswap).', creator: '0xAuto Team' },
+    { id: 'mcp-price', name: 'Price Feed MCP', description: 'Provides real-time or historical price data for various assets.', creator: '0xAuto Team' },
     { id: 'mcp-social', name: 'Social Feed MCP', description: 'Monitors social media platforms (Twitter, Telegram) for keywords or specific users.', creator: 'CommunityDev' },
-    { id: 'mcp-chain', name: 'Chain Event MCP', description: 'Listens for specific on-chain events like contract deployments or wallet transactions.', creator: 'AutoMCP Team' },
+    { id: 'mcp-chain', name: 'Chain Event MCP', description: 'Listens for specific on-chain events like contract deployments or wallet transactions.', creator: '0xAuto Team' },
     { id: 'mcp-cex', name: 'CEX Trade MCP', description: 'Executes trades on centralized exchanges (requires API keys).', creator: 'ProUser123' },
     { id: 'mcp-nft', name: 'NFT Market MCP', description: 'Interacts with NFT marketplaces for listings, bids, and purchases.', creator: 'NFTMaster' },
-    { id: 'mcp-playwright', name: 'Playwright MCP', description: 'Enables browser automation tasks (useful for web interactions).', creator: 'AutoMCP Team' },
+    { id: 'mcp-playwright', name: 'Playwright MCP', description: 'Enables browser automation tasks (useful for web interactions).', creator: '0xAuto Team' },
   ];
 
   return (

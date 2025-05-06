@@ -1,476 +1,293 @@
 "use client";
 
-import {
-  Bubble,
-  Sender,
-  useXAgent,
-  useXChat,
-  ThoughtChain,
-} from "@ant-design/x";
-import React from "react";
-import { PaperClipIcon } from "@heroicons/react/24/outline"; // Using Heroicon
-import {
-  UserOutlined,
-  LoadingOutlined,
-  CheckCircleOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
-import { PlusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Import icons
+import React, { useState, useRef } from "react";
+import { useChat, Message } from "@ai-sdk/react"; // Import Message type
+import { PaperClipIcon, PlusCircleIcon } from "@heroicons/react/24/outline"; // Using Heroicon
 import markdownit from "markdown-it";
+import { nanoid } from 'nanoid'; // Import nanoid for unique IDs
 
-import { useChat, useCompletion } from "@ai-sdk/react";
-
-import type { ThoughtChainItem } from "@ant-design/x";
-
-const md = markdownit({ html: true, breaks: true });
-const renderMarkdown = (content: any) => (
-  <div>
-    {/* biome-ignore lint/security/noDangerouslySetInnerHtml: used in demo */}
-    <div
-      className="renderMarkdown"
-      dangerouslySetInnerHTML={{ __html: md.render(content) }}
-    />
-  </div>
-);
-// Define roles for Bubble.List using DaisyUI/Tailwind concepts if needed,
-// but @ant-design/x might handle basic styling.
-const roles: React.ComponentProps<typeof Bubble.List>["roles"] = {
-  ai: {
-    placement: "start",
-    // Add Tailwind/DaisyUI classes here if needed for custom styling
-    // className: 'chat chat-start', // Example DaisyUI classes
-    typing: { step: 10 },
-    avatar: {
-      icon: (
-        <img src="https://goin.obs.cn-north-4.myhuaweicloud.com/acticity/head/head03.jpg" />
-      ),
-      style: { background: "#fde3cf" },
-    },
-    styles: {
-      // Keep basic style overrides if necessary
-      content: { borderRadius: "1rem", padding: "0.75rem 1rem" }, // Example: Rounded corners and padding
-    },
-  },
-  local: {
-    placement: "end",
-    variant: "shadow",
-    avatar: {
-      icon: <UserOutlined />,
-      style: { background: "#87d068" },
-    },
-    // className: 'chat chat-end', // Example DaisyUI classes
-    styles: {
-      content: {
-        borderRadius: "1rem",
-        padding: "0.75rem 1rem",
-        backgroundColor: "hsl(var(--p))",
-        color: "hsl(var(--pc))",
-      }, // Example: Primary color bg
-    },
-    // variant: 'shadow', // This might be an antd-specific variant, removed
-  },
-};
+// Import TriggerModal (assuming path)
+import TriggerModal from './TriggerModal'; // Adjust path as needed
 
 interface AgentChatProps {
-  agentName: string;
+  agentName: string; // Used for placeholder text
+  agentId: string;
+  agentTitle: string; // Added for TriggerModal
+  agentDescription: string; // Added for TriggerModal
   // Add any other props needed, e.g., API endpoint for the agent
 }
 
-function getStatusIcon(status: ThoughtChainItem["status"]) {
-  switch (status) {
-    case "success":
-      return <CheckCircleOutlined />;
-    case "error":
-      return <InfoCircleOutlined />;
-    case "pending":
-      return <LoadingOutlined />;
-    default:
-      return undefined;
-  }
-}
+// Initialize Markdown renderer
+const md = markdownit({ html: true, breaks: true });
 
-const mockServerResponseData: ThoughtChainItem[] = [];
-
-const delay = (ms: number) => {
-  return new Promise<void>((resolve) => {
-    const timer: NodeJS.Timeout = setTimeout(() => {
-      clearTimeout(timer);
-      resolve();
-    }, ms);
-  });
+// Define mock chat histories keyed by agentId
+// Define simplified mock chat histories keyed by agentId (avoiding complex tool structures for initialMessages)
+const mockChatHistories: Record<string, Message[]> = {
+  '1': [ // DCA BTC
+    { id: nanoid(), role: 'user', content: 'Check the AHR999 index and buy $100 BTC if it\'s below 0.45.' },
+    { id: nanoid(), role: 'assistant', content: 'Okay, I need to check the AHR999 index first.' },
+    // Indicate Tool Call Start
+    { id: nanoid(), role: 'assistant', content: '```\nCalling AHR999 Info MCP...\n```' }, // Use markdown for visual distinction
+    // Tool Result (using role: 'data')
+    {
+      id: nanoid(),
+      role: 'data', // Use 'data' role for tool results
+      content: JSON.stringify({ tool_name: 'AHR999 Info MCP', result: { ahr999: 0.42 } }),
+    },
+    // Assistant response incorporating result
+    { id: nanoid(), role: 'assistant', content: 'The AHR999 index is 0.42, which is below 0.45. Proceeding to buy $100 BTC.' },
+    // Indicate Second Tool Call Start
+    { id: nanoid(), role: 'assistant', content: '```\nCalling BTC/USDT Trading MCP...\n```' },
+    // Second Tool Result (using role: 'data')
+    {
+      id: nanoid(),
+      role: 'data', // Use 'data' role
+      content: JSON.stringify({ tool_name: 'BTC/USDT Trading MCP', result: { status: 'success', filledAmount: 100 } }),
+    },
+    // Final Assistant Response
+    { id: nanoid(), role: 'assistant', content: 'Successfully bought $100 worth of BTC.' },
+  ],
+  '2': [ // X Info Collector
+    { id: nanoid(), role: 'user', content: 'Summarize relevant tweets from @VitalikButerin today.' },
+    { id: nanoid(), role: 'assistant', content: 'Alright, I\'ll fetch tweets from @VitalikButerin.' },
+    // Indicate Tool Call Start
+    { id: nanoid(), role: 'assistant', content: '```\nCalling X Info Fetch MCP...\n```' },
+    // Tool Result (using role: 'data')
+    {
+      id: nanoid(),
+      role: 'data', // Use 'data' role
+      content: JSON.stringify({
+        tool_name: 'X Info Fetch MCP',
+        result: [
+          { id: 'tweet1', text: '...', summary: 'Discussed L2 scaling solutions.' },
+          { id: 'tweet2', text: '...', summary: 'Mentioned upcoming ETH upgrades.' },
+        ],
+      }),
+    },
+    // Final Assistant Response
+    { id: nanoid(), role: 'assistant', content: 'Here\'s a summary of relevant tweets from @VitalikButerin today:\n- Discussed L2 scaling solutions.\n- Mentioned upcoming ETH upgrades.' },
+  ],
+  '3': [ // Market Analysis Agent
+    { id: nanoid(), role: 'user', content: 'Analyze the current BTC liquidation levels.' },
+    { id: nanoid(), role: 'assistant', content: 'Okay, I will fetch the BTC liquidation map data.' },
+    // Indicate Tool Call Start
+    { id: nanoid(), role: 'assistant', content: '```\nCalling Liquidation Map MCP...\n```' },
+    // Tool Result (using role: 'data')
+    {
+      id: nanoid(),
+      role: 'data', // Use 'data' role
+      content: JSON.stringify({
+        tool_name: 'Liquidation Map MCP',
+        result: { longLiquidationLevels: [60000, 58000], shortLiquidationLevels: [68000, 70000] },
+      }),
+    },
+    // Final Assistant Response
+    { id: nanoid(), role: 'assistant', content: 'Current BTC liquidation levels show significant long liquidations around $60k and $58k, and short liquidations around $68k and $70k.' },
+  ],
+  // Removed agent '4' mock data
+  'default': [ // Fallback
+    { id: nanoid(), role: 'assistant', content: 'Hello! How can I assist you today?' }
+  ]
 };
 
-function addChainItem() {
-  const index = mockServerResponseData.length;
-  let title = "";
-  let description = "";
 
-  switch (index) {
-    case 0:
-      title = "WalletAnalyze";
-      description = "正在调用WalletAnalyze分析对应钱包记录 -> WalletAnalyze";
-      break;
-    case 1:
-      title = "TwitterCrawler";
-      description = "正在调用分析推特热度 -> TwitterCrawler";
+const AgentChat: React.FC<AgentChatProps> = ({
+  agentName,
+  agentId,
+  agentTitle,
+  agentDescription,
+}) => {
+  // Select the appropriate initial messages based on agentId
+  const initialMessages = mockChatHistories[agentId] || mockChatHistories['default'];
 
-      break;
-    case 2:
-      title = "GoPlus";
-      description = "正在调用GoPlus分析代币安全性 —> GoPlus";
-      break;
-    case 3:
-      title = "JupSwap";
-      description = "正在调用Jup Swap进行交易";
-      break;
-  }
-
-  mockServerResponseData.push({
-    title,
-    status: "pending",
-    icon: getStatusIcon("pending"),
-    description,
-  });
-}
-
-async function updateChainItem(status: ThoughtChainItem["status"]) {
-  await delay(1000);
-  const index = mockServerResponseData.length - 1;
-
-  let description = "";
-  switch (index) {
-    case 0:
-      description =
-        "搜索到最近交易的代币Candle(A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL)";
-      break;
-    case 1:
-      description =
-        "搜索到有30条推文，对最近5条文章进行分析，大家对代币保持积极的态度，认为Candle短期可以炒作";
-      break;
-    case 2:
-      description =
-        "没有发现风险项，前十占比16.5%，符合交易规则，开始swap 1sol购买Candle";
-      break;
-    case 3:
-      description = "执行交易成功，流程结束";
-      break;
-  }
-
-  mockServerResponseData[index].status = status;
-  mockServerResponseData[index].icon = getStatusIcon(status);
-  mockServerResponseData[index].description = description;
-}
-
-const AgentChat0: React.FC<AgentChatProps> = ({ agentName }) => {
-  // State for input content
-  const [content, setContent] = React.useState("");
-
-  // Mock Agent Logic (Replace with actual API interaction)
-  const [agent] = useXAgent({
-    request: async ({ message }, { onSuccess }) => {
-      console.log(`Sending to ${agentName}:`, message);
-      // Simulate API delay
-      onClick();
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      // Mock response
-      onClick();
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      onClick();
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      onClick();
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      onSuccess(`
-  尊敬的用户，本次投资决策与执行已顺利完成，现将全流程复盘如下：
-
-  一、数据洞察与分析阶段
-
-  1. 钱包数据扫描：启动WalletAnalyze工具，精准定位到近期交互代币**Candle（合约地址：A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL）**，锁定潜在投资目标。
-
-  2. 舆情动态监测：借助TwitterCrawler抓取到**30条相关推文**，深入剖析近5条高互动内容发现，市场情绪显著乐观，多数观点认为Candle具备**短期炒作价值**，印证市场关注度与投资潜力。
-
-  3. 安全风险评估：通过GoPlus专业审计，确认代币**无安全漏洞**，且前十大持仓占比仅**16.5%**，流通结构分散，符合稳健投资的风控标准。
-
-  二、交易执行阶段
-  基于多维数据交叉验证，触发自动化交易指令：通过Jup Swap协议，以**1 SOL**成功购入Candle代币，交易瞬时完成，确保捕捉市场先机。
-
-  三、后续行动建议
-  建议持续关注Candle的链上数据与社区热度变化，我将实时监控价格波动、大户动向等指标，一旦触发止盈止损条件，将立即执行调仓策略，为您的资产保驾护航。 `);
-    },
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({ // Get append function
+    // api: '/api/chat', // Assuming your chat API endpoint
+    initialMessages: initialMessages, // <-- Set initial messages here
+    maxSteps: 5, // Example: Limit steps if needed
+    // Add error handling if desired
+    // onError: (error) => { console.error("Chat error:", error); },
   });
 
-  // Chat Hook
-  const { onRequest, messages } = useXChat({
-    agent,
-    requestPlaceholder: "Waiting...",
-    requestFallback: "Sorry, I can not answer your question now",
-  });
+  // State for Trigger Modal
+  const [isTriggerModalOpen, setIsTriggerModalOpen] = useState(false);
+  const [triggerPrompt, setTriggerPrompt] = useState("");
+  // const triggerModalRef = useRef<HTMLDialogElement>(null); // If using daisyUI modal - uncomment if needed
 
-  // Event Handlers
-  const handleSubmit = (nextContent: string) => {
-    if (!nextContent) return;
-    onRequest(nextContent);
-    setContent(""); // Clear input after sending
+  const handleOpenTriggerModal = (prompt: string) => {
+    setTriggerPrompt(prompt);
+    setIsTriggerModalOpen(true);
+    // triggerModalRef.current?.showModal(); // For daisyUI modal
   };
+
+  const handleCloseTriggerModal = () => {
+    setIsTriggerModalOpen(false);
+    setTriggerPrompt(""); // Clear prompt on close
+    // triggerModalRef.current?.close(); // For daisyUI modal
+  };
+
+   // Mock Save Handler for Trigger Modal (Placeholder)
+   const handleSaveTrigger = (triggerData: any) => {
+    console.log("Saving Trigger (Mock):", triggerData);
+    handleCloseTriggerModal();
+    // TODO: Implement actual save logic
+  };
+
 
   // Placeholder for attachment button functionality
   const attachmentsNode = (
     <button
+      type="button" // Prevent form submission
       className="btn btn-ghost btn-sm btn-circle"
       aria-label="Attach file"
+      // TODO: Implement file attachment logic
+      onClick={() => console.log("Attach file clicked")}
     >
       <PaperClipIcon className="h-5 w-5" />
     </button>
-    // TODO: Implement file attachment logic
   );
-
-  const agentModalRef = React.useRef<HTMLDialogElement>(null); // Ref for main agent modal
-
-  // Mock save function
-  const handleSaveChanges = () => {
-    console.log("Mock Save: Agent details would be saved here.");
-    // In a real app, you'd collect form data and send it to the backend
-    handleCloseAgentModal();
-  };
-
-  const handleOpenModal = () => {
-    // setIconPreviewUrl(agent?.settings?.icon || null); // Reset preview on open
-    agentModalRef.current?.showModal();
-    // setIsModalOpen(true); // Not strictly needed if using ref.showModal()
-  };
-
-  const handleCloseAgentModal = () => {
-    agentModalRef.current?.close();
-    // setIsModalOpen(false);
-  };
-
-  const [items, setItems] = React.useState<ThoughtChainItem[]>(
-    mockServerResponseData
-  );
-  const [loading, setLoading] = React.useState<boolean>(false);
-
-  const mockStatusChange = async () => {
-    // await updateChainItem('error');
-    // setItems([...mockServerResponseData]);
-    await updateChainItem("pending");
-    setItems([...mockServerResponseData]);
-    await updateChainItem("success");
-    setItems([...mockServerResponseData]);
-  };
-
-  const onClick = async () => {
-    setLoading(true);
-    addChainItem();
-    setItems([...mockServerResponseData]);
-    await mockStatusChange();
-    setLoading(false);
-  };
-
-  // Map messages for Bubble.List
-  const bubbleItems: React.ComponentProps<typeof Bubble.List>["items"] =
-    messages.map(({ id, message, status }) => ({
-      key: id,
-      loading: status === "loading",
-      role: status === "local" ? "local" : "ai",
-      content: message,
-      messageRender: renderMarkdown,
-      footer:
-        status === "local" ? (
-          <div className="flex justify-between items-center mb-4">
-            <button
-              onClick={handleOpenModal}
-              className="btn btn-primary btn-sm"
-            >
-              <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
-            </button>
-          </div>
-        ) : (
-          <ThoughtChain style={{ marginLeft: 16 }} items={items} />
-        ),
-      // loadingRender: () => <div>Custom loading...</div>,
-    }));
 
   return (
-    <div className="flex flex-col h-full">
-      {" "}
-      {/* Use flex column */}
-      {/* Message List */}
+    <div className="flex flex-col h-full bg-base-100">
+      {/* Message List Area */}
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
-        {" "}
-        {/* Scrollable message area */}
-        <Bubble.List
-          items={bubbleItems}
-          roles={roles}
-          // className="messages" // Removed potentially conflicting class
-        />
+        {messages.map((message) => {
+          // Determine chat alignment based on role
+          const chatAlignment = message.role === "user" ? "chat-end" : "chat-start";
+
+          // Determine bubble style based on role
+          let bubbleStyle = "chat-bubble-secondary"; // Default for assistant
+          if (message.role === "user") {
+            bubbleStyle = "chat-bubble-primary";
+          } else if (message.role === "data") {
+            bubbleStyle = "chat-bubble-accent"; // Use accent color for data/tool results
+          }
+
+          // Determine avatar
+          let avatar = <span className="text-xl flex items-center justify-center w-full h-full">🤖</span>; // Default assistant
+          if (message.role === "user") {
+            avatar = <span className="text-xl flex items-center justify-center w-full h-full">🧑‍💻</span>;
+          } else if (message.role === "data") {
+            avatar = <span className="text-xl flex items-center justify-center w-full h-full">🛠️</span>; // Tool/Data avatar
+          }
+
+          return (
+            <div key={message.id} className={`chat ${chatAlignment}`}>
+              <div className="chat-image avatar">
+                <div className="w-10 rounded-full bg-base-300 flex items-center justify-center">
+                  {avatar}
+                </div>
+              </div>
+              <div className={`chat-bubble ${bubbleStyle}`}>
+                {/* Render standard message content (User or Assistant) */}
+                {message.content && (message.role === 'user' || message.role === 'assistant') && (
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: used for markdown rendering
+                  <div dangerouslySetInnerHTML={{ __html: md.render(message.content) }} />
+                )}
+
+                {/* Render Tool Result Details (Data Role) */}
+                {message.role === 'data' && (
+                  <div className="mt-1">
+                     <span className="text-xs italic opacity-70 block mb-1">
+                      Tool Result:
+                    </span>
+                    <pre className="text-xs font-mono bg-base-300/50 p-1 rounded whitespace-pre-wrap break-all">
+                      {/* Attempt to parse and pretty-print JSON, fallback to raw string */}
+                      {(() => {
+                        try {
+                          // Attempt to parse the content as JSON
+                          const parsedResult = JSON.parse(message.content);
+                          // Try to extract the 'result' field if it exists, otherwise show the whole object
+                          const displayData = parsedResult.result !== undefined ? parsedResult.result : parsedResult;
+                          return JSON.stringify(displayData, null, 2);
+                        } catch (e) {
+                          // If parsing fails, display the raw content
+                          return message.content;
+                        }
+                      })()}
+                    </pre>
+                  </div>
+                )}
+                {/* Removed the specific toolInvocations rendering block */}
+              </div>
+
+              {/* Add Trigger Button for User messages */}
+              {message.role === 'user' && (
+                <div className="chat-footer opacity-50 mt-1 flex justify-end">
+                  <button
+                    onClick={() => handleOpenTriggerModal(message.content)}
+                    className="btn btn-xs btn-ghost text-primary hover:bg-primary hover:text-primary-content"
+                    aria-label="Add Trigger"
+                  >
+                    <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+         {/* Optional: Show loading indicator */}
+         {isLoading && (
+            <div className="chat chat-start">
+                <div className="chat-image avatar">
+                    <div className="w-10 rounded-full bg-base-300 flex items-center justify-center">
+                        <span className="text-xl">🤖</span>
+                    </div>
+                </div>
+                <div className="chat-bubble chat-bubble-secondary">
+                    <span className="loading loading-dots loading-md"></span>
+                </div>
+            </div>
+         )}
       </div>
-      {/* Sender Input - Apply DaisyUI/Tailwind styling */}
-      <div className="p-4 border-t border-base-300">
-        <Sender
-          value={content}
-          onSubmit={handleSubmit}
-          onChange={setContent}
-          prefix={attachmentsNode} // Add attachment button
-          loading={agent.isRequesting()}
-          placeholder={`Chat with ${agentName}...`}
-          // Apply styling via props if available, or wrap/style container
-          styles={{
-            // Basic styling for the input area
-            input: {
-              // Correct key for input styling
-              border: "1px solid hsl(var(--bc) / 0.2)",
-              borderRadius: "var(--rounded-btn, 0.5rem)",
-              padding: "0.5rem 0.75rem", // Adjust padding as needed for input element
-              minHeight: "40px", // Ensure minimum height
-              boxShadow: "none", // Remove default shadow if any
-            },
-          }}
-        />
-      </div>
-      <dialog id="agent_edit_modal" className="modal" ref={agentModalRef}>
-        {" "}
-        {/* Updated ref */}
-        <div className="modal-box w-11/12 max-w-2xl">
-          <h3 className="font-bold text-lg mb-4">Trigger Details</h3>
 
-          {/* Form Fields */}
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Trigger Name</span>
-            </label>
-            {/* Added nullish coalescing for safety */}
-            <input
-              type="text"
-              defaultValue={"王小二跟单"}
-              className="input input-bordered w-full"
-            />
-          </div>
-
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">MCP</span>
-            </label>
-            <select
-              className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
-              defaultValue="1"
-            >
-              <option value="1">X</option>
-              <option value="2">KOL</option>
-              <option value="3">Wallet</option>
-              <option value="4">Candlestick Chart</option>
-            </select>
-          </div>
-
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Schedule</span>
-            </label>
-            <select
-              className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
-              defaultValue="1"
-            >
-              <option value="1">1 min</option>
-              <option value="2">5 min</option>
-              <option value="3">10 min</option>
-              <option value="4">30 min</option>
-              <option value="5">60 min</option>
-            </select>
-          </div>
-
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Trigger Prompt</span>
-            </label>
-            <textarea
-              className="textarea textarea-bordered h-32 w-full" // Increased height
-              // Added nullish coalescing for safety
-              defaultValue={"test"}
-            ></textarea>
-          </div>
-
-          {/* Agent Modal Actions */}
-          <div className="modal-action mt-6">
-            <button className="btn btn-ghost" onClick={handleCloseAgentModal}>
-              Cancel
-            </button>{" "}
-            {/* Renamed handler */}
-            <button className="btn btn-primary" onClick={handleSaveChanges}>
-              Save Changes
-            </button>
-          </div>
-
-          {/* Agent Modal Close button */}
+      {/* Input Area */}
+      <div className="p-4 border-t border-base-300 bg-base-200">
+        <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+          {attachmentsNode}
+          <input
+            type="text"
+            className="input input-bordered flex-grow"
+            value={input}
+            onChange={handleInputChange}
+            placeholder={`Chat with ${agentName}...`}
+            disabled={isLoading} // Disable input while loading
+          />
           <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={handleCloseAgentModal}
-            aria-label="Close"
+            type="submit"
+            className="btn btn-primary"
+            disabled={isLoading || !input.trim()} // Disable if loading or input is empty
           >
-            {" "}
-            {/* Renamed handler */}
-            <XMarkIcon className="h-5 w-5" />
+            Send
           </button>
-        </div>
-        {/* Optional: Click backdrop to close */}
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
         </form>
-      </dialog>
-    </div>
-  );
-};
+        {/* Mocking controls removed */}
+      </div>
 
-const AgentChat: React.FC<AgentChatProps> = ({ agentName }) => {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    maxSteps: 5,
-  });
-
-  return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {messages.map((message) => (
-        <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.parts.map((part, i) => {
-            switch (part.type) {
-              case "text":
-                return <div key={`${message.id}-${i}`}>{part.text}</div>;
-            }
-          })}
-        </div>
-      ))}
-
-      <form onSubmit={handleSubmit}>
-        <input
-          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
-          value={input}
-          placeholder={`Chat with ${agentName}...`}
-          onChange={handleInputChange}
-        />
-      </form>
-    </div>
-  );
-};
-
-const AgentChat1: React.FC<AgentChatProps> = ({ agentName }) => {
-  const { completion, input, handleInputChange, handleSubmit } = useCompletion({
-    api: "/api/completion",
-  });
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        name="prompt"
-        value={input}
-        placeholder={`Chat with ${agentName}...`}
-        onChange={handleInputChange}
-        id="input"
+      {/* Trigger Modal */}
+      {/* Render the actual TriggerModal */}
+      <TriggerModal
+        isOpen={isTriggerModalOpen}
+        onClose={handleCloseTriggerModal}
+        initialPrompt={triggerPrompt} // Pass prompt from user message
+        agentId={agentId} // Pass agentId
+        onSave={handleSaveTrigger} // Pass mock save handler
+        initialData={null} // Always null for adding new trigger from chat
+        // agentTitle and agentDescription removed
+        // TODO: Pass actual onSave function and potentially mock MCP data if needed
       />
-      <button type="submit">Submit</button>
-      <div>{completion}</div>
-    </form>
+
+       {/* Placeholder for DaisyUI modal - remove if not using */}
+       {/*
+       <dialog ref={triggerModalRef} className="modal"> ... </dialog>
+       */}
+       {/* Remove the placeholder div below as the actual modal is now rendered */}
+       {/*
+        {isTriggerModalOpen && (
+             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"> ... </div>
+         )}
+        */}
+    </div>
   );
 };
 
-export default AgentChat; // Ensure the component is exported correctly
+export default AgentChat;

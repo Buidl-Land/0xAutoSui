@@ -182,26 +182,54 @@ const SettingPage = () => {
            <input type="text" defaultValue={username} className="input input-bordered w-full" />
          </div>
 
-         {/* Icon Upload */}
+         {/* Icon Upload - Enhanced UI */}
          <div className="form-control mb-4">
            <label className="label"><span className="label-text">Profile Icon</span></label>
+           {/* Enhanced Upload Area */}
            <div className="flex items-center gap-4">
-             <div className="avatar">
-               <div className="w-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                 <img src={profileIconPreviewUrl || '/logo.png'} alt="Profile Icon Preview" />
-               </div>
-             </div>
-             <label htmlFor="profile-icon-upload-modal" className="btn btn-outline btn-sm">
-               <ArrowUpTrayIcon className="h-4 w-4 mr-1" /> Upload Icon
-             </label>
-             <input
-               id="profile-icon-upload-modal"
-               type="file"
-               className="hidden"
-               accept="image/*"
-               onChange={handleProfileIconChange}
-             />
-           </div>
+              {/* Clickable Upload Area */}
+              <label htmlFor="profile-icon-upload-modal" className="cursor-pointer group">
+                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary group-hover:bg-base-200 flex flex-col items-center justify-center text-center p-2 transition-colors">
+                  {profileIconPreviewUrl && profileIconPreviewUrl !== '/logo.png' ? (
+                    <img
+                      src={profileIconPreviewUrl}
+                      alt="Profile Icon Preview"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <>
+                      <ArrowUpTrayIcon className="h-8 w-8 text-base-content/50 group-hover:text-primary mb-1" />
+                      <span className="text-xs text-base-content/70 group-hover:text-primary">Upload Icon</span>
+                    </>
+                  )}
+                </div>
+              </label>
+              {/* Hidden File Input */}
+              <input
+                id="profile-icon-upload-modal"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleProfileIconChange}
+              />
+              {/* Optional: Add a remove button */}
+              {profileIconPreviewUrl && profileIconPreviewUrl !== '/logo.png' && (
+                <button
+                  type="button" // Prevent form submission
+                  className="btn btn-ghost btn-xs text-error"
+                  onClick={() => {
+                    // Reset preview and potentially clear file state if you store the file object
+                    setProfileIconPreviewUrl("/logo.png");
+                    // If you were storing the file object: setProfileIconFile(null);
+                    // Reset the file input value so the same file can be selected again if needed
+                    const fileInput = document.getElementById('profile-icon-upload-modal') as HTMLInputElement;
+                    if (fileInput) fileInput.value = '';
+                  }}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
          </div>
 
          <div className="form-control mb-4">

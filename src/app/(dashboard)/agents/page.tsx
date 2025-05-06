@@ -9,31 +9,27 @@ const AgentsPage = () => {
   const agents = [
     {
       id: "1",
-      name: "跟王小二赚钱",
+      name: "DCA BTC",
       status: "Running",
-      description: "跟单王小二Kol钱包自动交易Meme",
+      description: "Automatically buys BTC based on the AHR999 index, placing remaining funds in DeFi lending protocols.",
+      mcps: ["AHR999 Info MCP", "BTC/USDT Trading MCP", "DeFi Lending MCP"],
       lastModified: Date.now() - 86400000,
     },
     {
       id: "2",
-      name: "KOL Tweet Trader (DegenMode)",
+      name: "X Info Collector",
       status: "Running",
-      description: "Monitors @CryptoKOL tweets...",
+      description: "Collects today's relevant tweets from specified Twitter accounts, filtering out ads/gossip and summarizing valuable information.",
+      mcps: ["X Info Fetch MCP", "TG Bot MCP"],
       lastModified: Date.now() - 172800000,
     },
     {
       id: "3",
-      name: "BTC Price Dip Buyer",
+      name: "Market Analysis Agent",
       status: "Stopped",
-      description: "Triggers when BTC price drops 5%...",
+      description: "Analyzes market conditions using liquidation maps, funding rates, and whale holdings changes, providing analysis reports.",
+      mcps: ["Liquidation Map MCP", "Funding Rate MCP", "Whale Holdings MCP", "TG Bot MCP"],
       lastModified: Date.now(),
-    },
-    {
-      id: "4",
-      name: "New CA Sniper (BNB Chain)",
-      status: "Running",
-      description: "Monitors new contract deployments...",
-      lastModified: Date.now() - 3600000,
     },
   ];
 

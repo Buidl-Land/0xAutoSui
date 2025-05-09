@@ -7,7 +7,8 @@ import markdownit from "markdown-it";
 import { nanoid } from 'nanoid'; // Import nanoid for unique IDs
 
 // Import TriggerModal (assuming path)
-import TriggerModal from './TriggerModal'; // Adjust path as needed
+import TaskConfigModal from './TaskConfigModal';
+import { TaskData } from '@/types/task'; // MODIFIED: Added import for TaskData
 
 interface AgentChatProps {
   agentName: string; // Used for placeholder text
@@ -108,28 +109,35 @@ const AgentChat: React.FC<AgentChatProps> = ({
     // onError: (error) => { console.error("Chat error:", error); },
   });
 
-  // State for Trigger Modal
-  const [isTriggerModalOpen, setIsTriggerModalOpen] = useState(false);
-  const [triggerPrompt, setTriggerPrompt] = useState("");
-  // const triggerModalRef = useRef<HTMLDialogElement>(null); // If using daisyUI modal - uncomment if needed
+  // State for TaskConfig Modal
+  const [isTaskConfigModalOpen, setIsTaskConfigModalOpen] = useState(false);
+  const [taskInitialPrompt, setTaskInitialPrompt] = useState<string | undefined>(undefined);
+  const [editingTask, setEditingTask] = useState<TaskData | null>(null); // Added for editing
 
-  const handleOpenTriggerModal = (prompt: string) => {
-    setTriggerPrompt(prompt);
-    setIsTriggerModalOpen(true);
-    // triggerModalRef.current?.showModal(); // For daisyUI modal
+  const handleOpenTaskConfigModalForAdd = (prompt?: string) => {
+    setEditingTask(null);
+    setTaskInitialPrompt(prompt);
+    setIsTaskConfigModalOpen(true);
   };
 
-  const handleCloseTriggerModal = () => {
-    setIsTriggerModalOpen(false);
-    setTriggerPrompt(""); // Clear prompt on close
-    // triggerModalRef.current?.close(); // For daisyUI modal
+  const handleOpenTaskConfigModalForEdit = (task: TaskData) => { // For editing existing tasks
+    setEditingTask(task);
+    setTaskInitialPrompt(undefined); // No initial prompt when editing an existing task's prompt
+    setIsTaskConfigModalOpen(true);
   };
 
-   // Mock Save Handler for Trigger Modal (Placeholder)
-   const handleSaveTrigger = (triggerData: any) => {
-    console.log("Saving Trigger (Mock):", triggerData);
-    handleCloseTriggerModal();
-    // TODO: Implement actual save logic
+  const handleCloseTaskConfigModal = () => {
+    setIsTaskConfigModalOpen(false);
+    setEditingTask(null);
+    setTaskInitialPrompt(undefined);
+  };
+
+   // Mock Save Handler for TaskConfig Modal (Placeholder)
+   const handleSaveTask = (taskData: TaskData) => {
+    console.log("Saving Task (Mock):", taskData);
+    // Here you would typically save to a backend or update global state
+    // For now, just logging and closing
+    handleCloseTaskConfigModal();
   };
 
 
@@ -214,11 +222,11 @@ const AgentChat: React.FC<AgentChatProps> = ({
               {message.role === 'user' && (
                 <div className="chat-footer opacity-50 mt-1 flex justify-end">
                   <button
-                    onClick={() => handleOpenTriggerModal(message.content)}
+                    onClick={() => handleOpenTaskConfigModalForAdd(message.content)}
                     className="btn btn-xs btn-ghost text-primary hover:bg-primary hover:text-primary-content"
-                    aria-label="Add Trigger"
+                    aria-label="Add Task"
                   >
-                    <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
+                    <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Task
                   </button>
                 </div>
               )}
@@ -265,15 +273,13 @@ const AgentChat: React.FC<AgentChatProps> = ({
 
       {/* Trigger Modal */}
       {/* Render the actual TriggerModal */}
-      <TriggerModal
-        isOpen={isTriggerModalOpen}
-        onClose={handleCloseTriggerModal}
-        initialPrompt={triggerPrompt} // Pass prompt from user message
-        agentId={agentId} // Pass agentId
-        onSave={handleSaveTrigger} // Pass mock save handler
-        initialData={null} // Always null for adding new trigger from chat
-        // agentTitle and agentDescription removed
-        // TODO: Pass actual onSave function and potentially mock MCP data if needed
+      <TaskConfigModal
+        isOpen={isTaskConfigModalOpen}
+        onClose={handleCloseTaskConfigModal}
+        initialPrompt={taskInitialPrompt}
+        agentId={agentId}
+        onSave={handleSaveTask}
+        initialData={editingTask}
       />
 
        {/* Placeholder for DaisyUI modal - remove if not using */}

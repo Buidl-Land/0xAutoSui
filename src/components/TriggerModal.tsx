@@ -238,7 +238,7 @@ const TriggerModal: React.FC<TriggerModalProps> = ({
                 id="trigger-name"
                 name="name"
                 type="text"
-                placeholder="e.g., Check BTC Price Hourly"
+                placeholder="e.g., Check SOL Price Hourly"
                 value={formData.name}
                 onChange={handleInputChange}
                 className="input input-bordered w-full"
@@ -254,7 +254,7 @@ const TriggerModal: React.FC<TriggerModalProps> = ({
               <textarea
                 id="trigger-prompt"
                 name="prompt"
-                placeholder="e.g., Check the AHR999 index and buy $100 BTC if it's below 0.45."
+                placeholder="e.g., Check the AHR999 index and buy $100 SOL if it's below 0.45."
                 value={formData.prompt}
                 onChange={handleInputChange}
                 className="textarea textarea-bordered w-full h-24" // Use textarea for longer prompts

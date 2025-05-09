@@ -1,52 +1,81 @@
-"use client"; // Required for useState, useEffect, and DOM manipulation
+"use client";
 
-import React, { useState, useEffect, useRef, ChangeEvent } from 'react'; // Added useRef, ChangeEvent
-import { PencilSquareIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'; // Import icons
+import React, { useState, useEffect, useRef, ChangeEvent, FormEvent } from 'react';
+import { PencilSquareIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { User } from '@/types/user'; // Import the User type
+
+// Mock function to get current user data - replace with actual data fetching
+const getMockCurrentUserData = (): User => {
+  // In a real app, this would fetch from an API or auth context
+  return {
+    id: "user-mock-123",
+    name: 'Trump', // Updated name
+    email: 'trump@example.com',
+    avatarUrl: '/logo.png', // Default or existing avatar
+  };
+};
 
 const SettingPage = () => {
-  // Mock data - replace later
-  const username = 'MockUser';
-  const currentPoints = 1234;
-
-  const [theme, setTheme] = useState('light'); // Default theme
-
-  // State for Profile Edit Modal
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileIconPreviewUrl, setProfileIconPreviewUrl] = useState<string | null>('/logo.png'); // Default/mock icon
-  const profileModalRef = useRef<HTMLDialogElement>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [formState, setFormState] = useState<{ name: string; avatarUrl: string | null }>({
+    name: '',
+    avatarUrl: null,
+  });
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // State for Delete Confirmation Modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const deleteModalRef = useRef<HTMLDialogElement>(null);
 
-  // Profile Modal Handlers
-  const handleOpenProfileModal = () => {
-    // Reset preview if needed, e.g., load current user icon
-    setProfileIconPreviewUrl('/logo.png'); // Reset to default/mock
-    profileModalRef.current?.showModal();
+  useEffect(() => {
+    const userData = getMockCurrentUserData();
+    setCurrentUser(userData);
+    setFormState({
+      name: userData.name,
+      avatarUrl: userData.avatarUrl || null,
+    });
+    setAvatarPreview(userData.avatarUrl || null);
+  }, []);
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormState(prevState => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
-  const handleCloseProfileModal = () => {
-    profileModalRef.current?.close();
-  };
-
-  const handleProfileIconChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setSelectedAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileIconPreviewUrl(reader.result as string);
+        setAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     } else {
-      setProfileIconPreviewUrl('/logo.png'); // Revert if no file selected
+      setSelectedAvatarFile(null);
+      setAvatarPreview(currentUser?.avatarUrl || null);
     }
   };
 
-  const handleSaveProfileChanges = () => {
-    console.log("Mock Save Profile: User details would be saved here.");
-    // Collect form data and send to backend
-    handleCloseProfileModal();
+  const handleSaveProfile = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log("Saving Profile:", formState);
+    if (selectedAvatarFile) {
+      console.log("Avatar to upload:", selectedAvatarFile.name);
+      // Mock upload logic:
+      // const uploadedAvatarUrl = `/path/to/uploaded/${selectedAvatarFile.name}`;
+      // setFormState(prev => ({...prev, avatarUrl: uploadedAvatarUrl}));
+      // setCurrentUser(prev => prev ? {...prev, name: formState.name, avatarUrl: uploadedAvatarUrl} : null);
+    } else {
+       // setCurrentUser(prev => prev ? {...prev, name: formState.name} : null);
+    }
+    // In a real app, call API to update user:
+    // apiToUpdateUser({ name: formState.name, avatarUrl: formState.avatarUrl });
+    alert("Profile saved (mock)!");
   };
 
   // Delete Modal Handlers
@@ -58,201 +87,99 @@ const SettingPage = () => {
   };
   const handleConfirmDelete = () => {
     console.log("Mock Delete Account: Account deletion initiated.");
-    // Add actual deletion logic here
     handleCloseDeleteModal();
   };
 
-  // Effect to load theme from local storage and apply it
-  useEffect(() => {
-    const storedTheme = localStorage.getItem('theme') || 'light'; // Default to light if nothing stored
-    setTheme(storedTheme);
-    document.documentElement.setAttribute('data-theme', storedTheme);
-  }, []);
-
-  // Function to handle theme change
-  const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTheme = e.target.checked ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
-
+  if (!currentUser) {
+    return <div className="p-4">Loading user data...</div>; // Or a proper loading spinner
+  }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <div className="p-4 md:p-6">
+      <h1 className="text-3xl font-bold mb-8 text-primary">User Settings</h1>
 
-      {/* Account Section */}
-      <section className="mb-8 p-6 card bg-base-100 shadow-xl">
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Account</h2>
-            <button className="btn btn-outline btn-sm" onClick={handleOpenProfileModal}>
-                <PencilSquareIcon className="h-4 w-4 mr-1" /> Edit Profile
-            </button>
-        </div>
-        <div className="form-control mb-4">
-          <label className="label">
-            <span id="username-label" className="label-text">Username</span>
-          </label>
-          <input id="username-input" type="text" value={username} readOnly className="input input-bordered w-full max-w-md" aria-labelledby="username-label" /> {/* Changed max-w-xs to max-w-md */}
-        </div>
-        {/* System Prompt */}
-        <div className="form-control mb-4">
-          <label className="label">
-            <span id="system-prompt-label" className="label-text">System Prompt</span>
-          </label>
-          <textarea
-            id="system-prompt-input"
-            className="textarea textarea-bordered h-24 w-full max-w-md" // Changed max-w-xs to max-w-md
-            placeholder="Enter system prompt..."
-            aria-labelledby="system-prompt-label"
-          ></textarea>
-           {/* TODO: Implement saving */}
-        </div>
-        {/* Upload Icon */}
-        <div className="form-control mb-4">
-           <label className="label">
-             <span id="icon-upload-label" className="label-text">Upload Icon</span>
-           </label>
-           <input
-             id="icon-upload-input"
-             type="file"
-             className="file-input file-input-bordered w-full max-w-md" // Changed max-w-xs to max-w-md
-             aria-labelledby="icon-upload-label"
-             accept="image/*" // Accept only image files
-           />
-           {/* TODO: Implement upload logic */}
-        </div>
-        {/* Removed redundant Save button as modal handles saving */}
-      </section>
+      {/* Profile Information Section */}
+      <section className="mb-10 p-6 card bg-base-100 shadow-xl">
+        <form onSubmit={handleSaveProfile}>
+          <h2 className="text-2xl font-semibold mb-6 text-secondary">Profile Information</h2>
 
-      {/* Billing Section */}
-      <section className="mb-8 p-6 card bg-base-100 shadow-xl">
-        <h2 className="text-xl font-semibold mb-4">Billing</h2>
-        <div className="flex items-center mb-4 gap-4 flex-wrap"> {/* Added flex-wrap */}
-           <p>Current Points: <span className="font-bold">{currentPoints}</span></p>
-           <button className="btn btn-primary btn-sm" onClick={() => console.log('Mock Recharge Clicked')}>Recharge</button> {/* Added mock onClick */}
-           {/* TODO: Implement recharge flow */}
-        </div>
-        <div className="form-control">
-          <label className="label cursor-pointer justify-start gap-4">
-            <span className="label-text">Enable Auto-Recharge</span>
-            <input
-              type="checkbox"
-              className="toggle toggle-primary"
-              onChange={(e) => console.log(`Mock Auto-Recharge Toggled: ${e.target.checked}`)} // Added mock onChange
-            />
-             {/* TODO: Add auto-recharge settings */}
-          </label>
-        </div>
-      </section>
-
-      {/* Appearance Section */}
-      <section className="mb-8 p-6 card bg-base-100 shadow-xl">
-        <h2 className="text-xl font-semibold mb-4">Appearance</h2>
-        <div className="form-control">
-          <label className="label cursor-pointer justify-start gap-4">
-            <span className="label-text">Dark Mode</span>
-            <input
-              type="checkbox"
-              className="toggle toggle-primary"
-              checked={theme === 'dark'}
-              onChange={handleThemeChange}
-            />
-          </label>
-        </div>
-      </section>
-
-      {/* Session Section */}
-      <section className="p-6 card bg-base-100 shadow-xl">
-        <h2 className="text-xl font-semibold mb-4">Account Management</h2> {/* Changed section title */}
-        {/* Updated Delete button to open modal */}
-        <button className="btn btn-error w-full max-w-md" onClick={handleOpenDeleteModal}>Delete Account</button>
-         {/* TODO: Implement account deletion functionality */}
-      </section>
-
-     {/* Profile Edit Modal */}
-     <dialog id="profile_edit_modal" className="modal" ref={profileModalRef}>
-       <div className="modal-box w-11/12 max-w-lg">
-         <h3 className="font-bold text-lg mb-4">Edit Profile</h3>
-
-         {/* Form Fields */}
-         <div className="form-control mb-4">
-           <label className="label"><span className="label-text">Username</span></label>
-           <input type="text" defaultValue={username} className="input input-bordered w-full" />
-         </div>
-
-         {/* Icon Upload - Enhanced UI */}
-         <div className="form-control mb-4">
-           <label className="label"><span className="label-text">Profile Icon</span></label>
-           {/* Enhanced Upload Area */}
-           <div className="flex items-center gap-4">
-              {/* Clickable Upload Area */}
-              <label htmlFor="profile-icon-upload-modal" className="cursor-pointer group">
-                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary group-hover:bg-base-200 flex flex-col items-center justify-center text-center p-2 transition-colors">
-                  {profileIconPreviewUrl && profileIconPreviewUrl !== '/logo.png' ? (
-                    <img
-                      src={profileIconPreviewUrl}
-                      alt="Profile Icon Preview"
-                      className="w-full h-full object-cover rounded-full"
-                    />
+          {/* Avatar Upload */}
+          <div className="form-control mb-6">
+            <label className="label" htmlFor="user-avatar-upload">
+              <span className="label-text text-base">Profile Picture</span>
+            </label>
+            <div className="flex items-center gap-4">
+              <label htmlFor="user-avatar-upload" className="cursor-pointer group">
+                <div className="relative w-28 h-28 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary flex items-center justify-center overflow-hidden bg-base-200">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                   ) : (
-                    <>
-                      <ArrowUpTrayIcon className="h-8 w-8 text-base-content/50 group-hover:text-primary mb-1" />
-                      <span className="text-xs text-base-content/70 group-hover:text-primary">Upload Icon</span>
-                    </>
+                    <ArrowUpTrayIcon className="h-12 w-12 text-base-content/40 group-hover:text-primary" />
                   )}
                 </div>
               </label>
-              {/* Hidden File Input */}
-              <input
-                id="profile-icon-upload-modal"
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleProfileIconChange}
-              />
-              {/* Optional: Add a remove button */}
-              {profileIconPreviewUrl && profileIconPreviewUrl !== '/logo.png' && (
-                <button
-                  type="button" // Prevent form submission
-                  className="btn btn-ghost btn-xs text-error"
-                  onClick={() => {
-                    // Reset preview and potentially clear file state if you store the file object
-                    setProfileIconPreviewUrl("/logo.png");
-                    // If you were storing the file object: setProfileIconFile(null);
-                    // Reset the file input value so the same file can be selected again if needed
-                    const fileInput = document.getElementById('profile-icon-upload-modal') as HTMLInputElement;
-                    if (fileInput) fileInput.value = '';
-                  }}
-                >
-                  Remove
-                </button>
+              <input id="user-avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
+              {avatarPreview && avatarPreview !== (currentUser.avatarUrl || '/logo.png') && (
+                 <button
+                    type="button"
+                    className="btn btn-xs btn-ghost text-error"
+                    onClick={() => {
+                        setSelectedAvatarFile(null);
+                        setAvatarPreview(currentUser.avatarUrl || null);
+                        const fileInput = document.getElementById('user-avatar-upload') as HTMLInputElement;
+                        if (fileInput) fileInput.value = '';
+                    }}
+                 >
+                   Cancel Change
+                 </button>
               )}
             </div>
-         </div>
+          </div>
 
-         <div className="form-control mb-4">
-           <label className="label"><span className="label-text">System Prompt</span></label>
-           <textarea
-             className="textarea textarea-bordered h-24 w-full"
-             placeholder="Enter default system prompt..."
-             // defaultValue={/* Load actual user prompt here */}
-           ></textarea>
-         </div>
+          {/* Username Input */}
+          <div className="form-control mb-6">
+            <label className="label" htmlFor="user-name-input">
+              <span className="label-text text-base">Username</span>
+            </label>
+            <input
+              id="user-name-input"
+              name="name"
+              type="text"
+              className="input input-bordered w-full max-w-md"
+              value={formState.name}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
 
-         {/* Modal Actions */}
-         <div className="modal-action mt-6">
-           <button className="btn btn-ghost" onClick={handleCloseProfileModal}>Cancel</button>
-           <button className="btn btn-primary" onClick={handleSaveProfileChanges}>Save Profile</button>
-         </div>
+          <button type="submit" className="btn btn-primary">Save Profile</button>
+        </form>
+      </section>
 
-         <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={handleCloseProfileModal} aria-label="Close">
-           <XMarkIcon className="h-5 w-5"/>
-         </button>
-       </div>
-       <form method="dialog" className="modal-backdrop"><button>close</button></form>
-     </dialog>
+      {/* Billing Section - Kept as is from original, can be refactored if needed */}
+      <section className="mb-10 p-6 card bg-base-100 shadow-xl">
+        <h2 className="text-2xl font-semibold mb-6 text-secondary">Billing</h2>
+        <div className="flex items-center mb-4 gap-4 flex-wrap">
+           <p>Current Points: <span className="font-bold">{currentUser.id === "user-mock-123" ? 1234 : 0}</span></p> {/* Mock points */}
+           <button className="btn btn-primary btn-sm" onClick={() => console.log('Mock Recharge Clicked')}>Recharge</button>
+        </div>
+        <div className="form-control">
+          <label className="label cursor-pointer justify-start gap-4">
+            <span className="label-text text-base">Enable Auto-Recharge</span>
+            <input
+              type="checkbox"
+              className="toggle toggle-primary"
+              onChange={(e) => console.log(`Mock Auto-Recharge Toggled: ${e.target.checked}`)}
+            />
+          </label>
+        </div>
+      </section>
+
+      {/* Account Management Section - Kept as is */}
+      <section className="p-6 card bg-base-100 shadow-xl">
+        <h2 className="text-2xl font-semibold mb-6 text-secondary">Account Management</h2>
+        <button className="btn btn-error w-full max-w-md" onClick={handleOpenDeleteModal}>Delete Account</button>
+      </section>
 
      {/* Delete Account Confirmation Modal */}
      <dialog id="delete_account_modal" className="modal" ref={deleteModalRef}>
@@ -260,21 +187,16 @@ const SettingPage = () => {
          <h3 className="font-bold text-lg text-error">Confirm Account Deletion</h3>
          <p className="py-4">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
          <div className="modal-action">
-           <button className="btn btn-ghost" onClick={handleCloseDeleteModal}>Cancel</button>
-           <button className="btn btn-error" onClick={handleConfirmDelete}>Delete Account</button>
+           <button type="button" className="btn btn-ghost" onClick={handleCloseDeleteModal}>Cancel</button>
+           <button type="button" className="btn btn-error" onClick={handleConfirmDelete}>Delete Account</button>
          </div>
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={handleCloseDeleteModal} aria-label="Close">
+          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={handleCloseDeleteModal} aria-label="Close delete confirmation modal">
            <XMarkIcon className="h-5 w-5"/>
          </button>
        </div>
-        <form method="dialog" className="modal-backdrop"><button>close</button></form>
+        <form method="dialog" className="modal-backdrop"><button type="button" onClick={handleCloseDeleteModal}>close</button></form>
      </dialog>
-
-     {/* Delete Account Confirmation Modal - Moved inside main div */}
-      {/* Misplaced modal block removed */}
-
    </div>
-
   );
 };
 

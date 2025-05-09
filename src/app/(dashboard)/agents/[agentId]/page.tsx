@@ -1,9 +1,9 @@
-"use client"; // Needed for params and potentially state later
+"use client";
 
-import React, { useState, useRef, ChangeEvent, useEffect } from "react"; // Import useState, useRef, ChangeEvent, useEffect
-import { useParams } from "next/navigation"; // To get agentId from URL
-import AgentChat from "@/components/AgentChat"; // Import the new AgentChat component
-import TriggerModal from "@/components/TriggerModal"; // Import the new TriggerModal component
+import React, { useState, useRef, ChangeEvent, useEffect, FormEvent } from "react";
+import { useParams } from "next/navigation";
+import AgentChat from "@/components/AgentChat";
+import TriggerModal from "@/components/TriggerModal";
 import {
   PlusCircleIcon,
   PencilSquareIcon,
@@ -11,246 +11,265 @@ import {
   EyeIcon,
   XMarkIcon,
   ArrowUpTrayIcon,
-} from "@heroicons/react/24/outline"; // Import icons
+  Cog6ToothIcon,
+  ShareIcon,
+  ListBulletIcon,
+  ChatBubbleLeftEllipsisIcon,
+  CommandLineIcon,
+  CpuChipIcon,
+} from "@heroicons/react/24/outline";
+import { Agent, AgentType, TaskTypeOption, ActionTypeOption, AgentConnection } from "../../../../types/agent";
+import { TriggerData, TriggerTimeType } from "../../../../types/trigger"; // Import TriggerData
 
-// Mock function to get agent data by ID - replace with actual data fetching
-const getMockAgentData = (agentId: string | string[] | undefined) => {
-  if (!agentId || Array.isArray(agentId)) return null; // Handle invalid ID
-  // Find agent from a mock list (could reuse/expand the list from agents/page.tsx)
-  const mockAgents = [
+interface MockTriggerConfig extends TriggerData {
+  type?: string;
+  [key: string]: any;
+}
+
+interface MockMcpConfig {
+  name: string;
+  id: string;
+}
+
+interface MockLog {
+  id: string;
+  timestamp: number;
+  message: string;
+}
+interface MockAgent extends Agent {
+  status?: string;
+  lastModified?: Date | number;
+  creator?: string;
+  triggerConfig?: MockTriggerConfig[];
+  mcpConfig?: MockMcpConfig[];
+  logs?: MockLog[];
+}
+
+const getMockAgentData = (agentId: string | string[] | undefined): MockAgent | null => {
+  if (!agentId || Array.isArray(agentId)) return null;
+  const mockAgents: MockAgent[] = [
     {
       id: "1",
-      name: "DCA BTC", // Updated from Plan1.md
+      name: "DCA SOL",
       status: "Running",
-      description: "通过AHR999指数来自动抄底BTC，其余资金放在Defi借贷理财中", // Updated from Plan1.md
-      lastModified: Date.now() - 86400000,
+      description: "通过AHR999指数来自动抄底SOL，其余资金放在Defi借贷理财中",
+      lastModified: new Date(Date.now() - 86400000),
       creator: "AdminUser",
-      triggerType: "Scheduled",
-      triggerConfig: [{ type: "跟单", interval: "5 min" }], // Kept original trigger for now
-      mcpConfig: [ // Updated from Plan1.md
+      triggerConfig: [
+        { id: "t1", type: "跟单", interval: "5min", name: "DCA Trigger", prompt: "Execute DCA", timeType: "interval" as TriggerTimeType },
+      ],
+      mcpConfig: [
         { name: "AHR999信息获取MCP", id: "mcp-ahr999" },
-        { name: "BTC/USDT交易MCP", id: "mcp-btc-trade" },
+        { name: "SOL/USDT交易MCP", id: "mcp-SOL-trade" },
         { name: "Defi借贷理财MCP", id: "mcp-defi-lend" },
       ],
       logs: [
-        {
-          id: "log1",
-          timestamp: Date.now() - 3600000,
-          message: "Run 1: Success",
-        },
+        { id: "log1", timestamp: Date.now() - 3600000, message: "Run 1: Success" },
         { id: "log2", timestamp: Date.now(), message: "Run 2: Success" },
       ],
-      // Give one agent a mock icon path to help TS infer string | null type
-      settings: { systemPrompt: "Act as an arbitrage bot.", icon: "/logo.png" },
+      iconUrl: "/logo.png",
+      systemPrompt: "Act as an arbitrage bot.",
+      agentType: {
+        taskType: TaskTypeOption.TASK,
+        actionType: ActionTypeOption.API_CALL,
+      },
+      a2aConnections: [
+        { connectedAgentId: "2", connectionType: "DATA_EXCHANGE" },
+      ],
+      ownerId: "user-123",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
       id: "2",
-      name: "X信息收集整理", // Updated from Plan1.md
+      name: "X信息收集整理",
       status: "Running",
-      description: "用户指定对应的推特账户，Agent会自动收集对应的推特信息的今日信息，并且过滤广告和八卦内容，只保留有价值的信息，并且进行整理", // Updated from Plan1.md
-      lastModified: Date.now() - 172800000,
+      description: "用户指定对应的推特账户，Agent会自动收集对应的推特信息的今日信息，并且过滤广告和八卦内容，只保留有价值的信息，并且进行整理",
+      lastModified: new Date(Date.now() - 172800000),
       creator: "TraderX",
-      triggerType: "Event: Social", // Kept original trigger type for now
-      triggerConfig: [ // Kept original trigger config for now
-        { type: "Event: Social", keyword: "#DegenToken", user: "@CryptoKOL" },
+      triggerConfig: [
+        { id: "t2", type: "Event: Social", keyword: "#DegenToken", user: "@CryptoKOL", name: "X Social Trigger", prompt: "Monitor X for #DegenToken", timeType: "interval" as TriggerTimeType, interval: "15min" },
       ],
-      mcpConfig: [ // Updated from Plan1.md
+      mcpConfig: [
         { name: "X信息获取MCP", id: "mcp-x-info" },
         { name: "TG机器人MCP", id: "mcp-tg-bot" },
       ],
       logs: [
-        {
-          id: "log3",
-          timestamp: Date.now() - 7200000,
-          message: "Run 1: Bought 100 DT",
-        },
+        { id: "log3", timestamp: Date.now() - 7200000, message: "Run 1: Bought 100 DT" },
         { id: "log4", timestamp: Date.now(), message: "Run 2: No trigger" },
       ],
-      settings: { systemPrompt: "Act as a degen trader.", icon: null },
+      iconUrl: null,
+      systemPrompt: "Act as a degen trader.",
+      agentType: {
+        taskType: TaskTypeOption.INFORMATION_RETRIEVAL,
+      },
+      a2aConnections: [],
+      ownerId: "user-456",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
       id: "3",
-      name: "市场分析Agent", // Updated from Plan1.md
+      name: "市场分析Agent",
       status: "Stopped",
-      description: "Agent可以根据合约清算图，资金费率表，巨鲸持仓变化，来分析市场情况，并且给出对应的分析报告", // Updated from Plan1.md
-      lastModified: Date.now(),
+      description: "Agent可以根据合约清算图，资金费率表，巨鲸持仓变化，来分析市场情况，并且给出对应的分析报告",
+      lastModified: new Date(),
       creator: "AdminUser",
-      triggerType: "Event: Price", // Kept original trigger type for now
-      triggerConfig: [{ type: "Event: Price", asset: "BTC", threshold: "-5%" }], // Kept original trigger config for now
-      mcpConfig: [ // Updated from Plan1.md
+      triggerConfig: [
+        { id: "t3", type: "Event: Price", asset: "SOL", threshold: "-5%", name: "Market Analysis Trigger", prompt: "Analyze SOL market", timeType: "cron" as TriggerTimeType, cronExpression: "0 * * * *" },
+      ],
+      mcpConfig: [
         { name: "合约清算图MCP", id: "mcp-liq-map" },
         { name: "资金费率表MCP", id: "mcp-funding-rate" },
         { name: "巨鲸持仓变化MCP", id: "mcp-whale-holdings" },
-        { name: "TG机器人MCP", id: "mcp-tg-bot" }, // Added TG bot MCP
+        { name: "TG机器人MCP", id: "mcp-tg-bot" },
       ],
-      logs: [
-        {
-          id: "log5",
-          timestamp: Date.now(),
-          message: "Run 1: Stopped manually",
-        },
-      ],
-      settings: { systemPrompt: "Buy the dip.", icon: null },
-    },
-    {
-      id: "4",
-      name: "New CA Sniper (BNB Chain)",
-      status: "Error",
-      description: "Monitors new contract deployments...",
-      lastModified: Date.now() - 3600000,
-      creator: "SniperJoe",
-      triggerType: "Event: Chain",
-      triggerConfig: [
-        { type: "Event: Chain", event: "ContractDeployed", chain: "BNB" },
-      ],
-      mcpConfig: [
-        { name: "WalletAnalyze", id: "mcp5" },
-        { name: "TwitterCrawler", id: "mcp2" },
-        { name: "GoPlus", id: "mcp6" },
-        { name: "JupSwap", id: "mcp7" },
-      ],
-      logs: [
-        {
-          id: "log6",
-          timestamp: Date.now(),
-          message: "Run 1: Error - Insufficient funds",
-        },
-      ],
-      settings: { systemPrompt: "Snipe new tokens.", icon: null },
+      logs: [{ id: "log5", timestamp: Date.now(), message: "Run 1: Stopped manually" }],
+      iconUrl: null,
+      systemPrompt: "Buy the dip.",
+      agentType: {
+        taskType: TaskTypeOption.CHAT,
+      },
+      a2aConnections: [],
+      ownerId: "user-123",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ];
-  return mockAgents.find((agent) => agent.id === agentId);
+  return mockAgents.find((agent) => agent.id === agentId) || null;
 };
+
+interface AgentSettingsFormState {
+  name: string;
+  description: string;
+  iconUrl: string | null;
+  systemPrompt: string;
+  agentType: AgentType;
+}
 
 const AgentDetailPage = () => {
   const params = useParams();
-  const agentId = params?.agentId; // Get agentId from URL params
-  const agent = getMockAgentData(agentId);
-  // Mock state for active tab
-  const [activeTab, setActiveTab] = useState("triggers"); // Default to triggers tab per user request
-  // State for Edit Agent Modal
-  const [isAgentModalOpen, setIsAgentModalOpen] = useState(false); // Renamed for clarity
-  const [agentName, setAgentName] = useState(agent?.name || "");
-  const [agentDescription, setAgentDescription] = useState(agent?.description || "");
-  const [agentSystemPrompt, setAgentSystemPrompt] = useState(agent?.settings?.systemPrompt || "");
-  const [agentIconFile, setAgentIconFile] = useState<File | null>(null);
-  const [agentIconPreviewUrl, setAgentIconPreviewUrl] = useState<string | null>(
-    agent?.settings?.icon || "/logo.png" // Use default logo as fallback
-  ); // Initialize with existing icon if available
-  const agentModalRef = useRef<HTMLDialogElement>(null); // Ref for main agent modal
-
-  // State for MCP Modal
+  const agentId = params?.agentId;
+  const [agent, setAgent] = useState<MockAgent | null>(null);
+  const [activeTab, setActiveTab] = useState("task");
+  const [formState, setFormState] = useState<AgentSettingsFormState>({
+    name: "",
+    description: "",
+    iconUrl: "/logo.png",
+    systemPrompt: "",
+    agentType: {
+      taskType: TaskTypeOption.TASK,
+      actionType: undefined,
+    },
+  });
+  const [selectedIconFile, setSelectedIconFile] = useState<File | null>(null);
+  const [iconPreview, setIconPreview] = useState<string | null>("/logo.png");
   const [isMcpModalOpen, setIsMcpModalOpen] = useState(false);
-  const [editingMcp, setEditingMcp] = useState<any>(null); // Store the MCP being edited
+  const [editingMcp, setEditingMcp] = useState<MockMcpConfig | null>(null);
   const mcpModalRef = useRef<HTMLDialogElement>(null);
-
-  // State for Trigger Modal
   const [isTriggerModalOpen, setIsTriggerModalOpen] = useState(false);
-  const [editingTrigger, setEditingTrigger] = useState<any>(null); // Store the Trigger being edited
+  const [editingTrigger, setEditingTrigger] = useState<MockTriggerConfig | null>(null);
   const triggerModalRef = useRef<HTMLDialogElement>(null);
-
-  // State for Log Modal
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
-  const [viewingLog, setViewingLog] = useState<any>(null); // Store the log being viewed
+  const [viewingLog, setViewingLog] = useState<MockLog | null>(null);
   const logModalRef = useRef<HTMLDialogElement>(null);
+  const agentChatRef = useRef<React.ReactNode>(null);
 
-  // 创建一个 AgentChat 的引用，确保它不会被重新创建
-  const agentChatRef = useRef<React.ReactNode>(
-    agent && agentId ? (
-      <AgentChat
-        agentName={agent.name} // Used for placeholder
-        agentId={agentId as string}
-        agentTitle={agent.name} // Pass agent name as title
-        agentDescription={agent.description} // Pass agent description
-      />
-    ) : null
-  );
-
-  // Effect to update modal state when agent data changes (e.g., after saving)
-  // Note: In a real app with proper state management/data fetching, this might be handled differently.
   useEffect(() => {
-    if (agent) {
-      setAgentName(agent.name);
-      setAgentDescription(agent.description);
-      setAgentSystemPrompt(agent.settings?.systemPrompt || "");
-      setAgentIconPreviewUrl(agent.settings?.icon || "/logo.png");
-      setAgentIconFile(null); // Reset file on agent data change
+    if (agent && agentId && !agentChatRef.current) {
+      agentChatRef.current = (
+        <AgentChat
+          agentName={agent.name}
+          agentId={agentId as string}
+          agentTitle={agent.name}
+          agentDescription={agent.description}
+        />
+      );
     }
-  }, [agent]);
+  }, [agent, agentId]);
 
+  useEffect(() => {
+    const currentAgent = getMockAgentData(agentId);
+    setAgent(currentAgent);
+    if (currentAgent) {
+      setFormState({
+        name: currentAgent.name,
+        description: currentAgent.description,
+        iconUrl: currentAgent.iconUrl || "/logo.png",
+        systemPrompt: currentAgent.systemPrompt,
+        agentType: currentAgent.agentType || { taskType: TaskTypeOption.TASK, actionType: undefined },
+      });
+      setIconPreview(currentAgent.iconUrl || "/logo.png");
+      setSelectedIconFile(null);
+    }
+  }, [agentId]);
 
   if (!agent) {
-    // Render not found message if agent data is unavailable
-    return <div className="text-center text-error p-10">Agent not found!</div>; // Removed font-pixel
+    return <div className="text-center text-error p-10">Agent not found!</div>;
   }
 
-  // Edit Agent Modal Handlers
-  const handleOpenAgentModal = () => {
-    // Reset state to current agent data when opening
-    setAgentName(agent?.name || "");
-    setAgentDescription(agent?.description || "");
-    setAgentSystemPrompt(agent?.settings?.systemPrompt || "");
-    setAgentIconPreviewUrl(agent?.settings?.icon || "/logo.png"); // Reset preview on open
-    setAgentIconFile(null); // Clear selected file
-    agentModalRef.current?.showModal();
-    setIsAgentModalOpen(true);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (name === "taskType") {
+      setFormState(prevState => ({
+        ...prevState,
+        agentType: {
+          ...prevState.agentType,
+          taskType: value as TaskTypeOption,
+          actionType: value === TaskTypeOption.TASK ? prevState.agentType.actionType : undefined,
+        }
+      }));
+    } else if (name === "actionType") {
+      setFormState(prevState => ({
+        ...prevState,
+        agentType: {
+          ...prevState.agentType,
+          actionType: value as ActionTypeOption,
+        }
+      }));
+    } else {
+      setFormState(prevState => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleCloseAgentModal = (event?: React.MouseEvent<HTMLButtonElement>) => {
-     // Prevent form submission if called from backdrop click
-     event?.preventDefault();
-    agentModalRef.current?.close();
-    setIsAgentModalOpen(false);
-  };
-
-  const handleAgentIconChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleIconChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setAgentIconFile(file); // Store the file object
+      setSelectedIconFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setAgentIconPreviewUrl(reader.result as string);
+        setIconPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     } else {
-      setAgentIconFile(null);
-      setAgentIconPreviewUrl(agent?.settings?.icon || "/logo.png"); // Revert if no file selected
+      setSelectedIconFile(null);
+      setIconPreview(agent?.iconUrl || "/logo.png");
     }
   };
 
-  // Save Agent Changes
-  const handleSaveAgentChanges = () => {
-    console.log("Mock Save Agent Changes:");
-    console.log("Name:", agentName);
-    console.log("Description:", agentDescription);
-    console.log("System Prompt:", agentSystemPrompt);
-    if (agentIconFile) {
-      console.log("Icon File:", agentIconFile.name, agentIconFile.type);
-      // TODO: Implement actual file upload logic here
-      // On successful upload, update the agent data (mock or real)
-      // For mock: agent.settings.icon = agentIconPreviewUrl;
+  const handleSaveSettings = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Saving Agent Settings:", formState);
+    if (selectedIconFile) {
+      console.log("Icon to upload:", selectedIconFile.name);
     }
-     // TODO: Call API to save changes
-     // For mock purposes, we can update the header directly (won't persist on refresh)
-     // In a real app, refetch agent data or update state management store
-     if (agent) {
-        agent.name = agentName;
-        agent.description = agentDescription;
-        agent.settings.systemPrompt = agentSystemPrompt;
-        // If icon was uploaded and saved, update the agent object
-        if (agentIconFile) {
-             // Simulate saving the preview URL after successful upload
-             // Type should now be correctly inferred as string | null
-             agent.settings.icon = agentIconPreviewUrl;
-        }
-     }
-     // Force a re-render by updating a dummy state or refetching data in a real app
-     // For now, closing the modal might be enough if useEffect handles updates
-    handleCloseAgentModal();
+    if (agent) {
+      const updatedAgentData: Partial<MockAgent> = {
+        name: formState.name,
+        description: formState.description,
+        iconUrl: selectedIconFile ? iconPreview : (agent.iconUrl || null),
+        systemPrompt: formState.systemPrompt,
+        agentType: formState.agentType,
+      };
+      setAgent(prevAgent => prevAgent ? { ...prevAgent, ...updatedAgentData } : null);
+      alert("Settings saved (mock)!");
+    }
   };
 
-  // MCP Modal Handlers
-  const handleOpenMcpModal = (mcp: any) => {
+  const handleOpenMcpModal = (mcp: MockMcpConfig) => {
     setEditingMcp(mcp);
     mcpModalRef.current?.showModal();
     setIsMcpModalOpen(true);
@@ -262,52 +281,39 @@ const AgentDetailPage = () => {
   };
   const handleSaveMcpChanges = () => {
     console.log("Mock Save MCP:", editingMcp);
-    // Add save logic here
     handleCloseMcpModal();
   };
 
-  // Trigger Modal Handlers
-  const handleOpenAddTriggerModal = () => { // New handler for Add button
-    setEditingTrigger(null); // Ensure we are in 'add' mode
-    setIsTriggerModalOpen(true); // Open the modal
-    // No need to call showModal directly if using the component's useEffect
+  const handleOpenAddTriggerModal = () => {
+    setEditingTrigger(null);
+    setIsTriggerModalOpen(true);
   };
 
-  const handleOpenEditTriggerModal = (trigger: any) => { // Renamed for clarity
+  const handleOpenEditTriggerModal = (trigger: MockTriggerConfig) => {
     setEditingTrigger(trigger);
-    setIsTriggerModalOpen(true); // Open the modal
-    // No need to call showModal directly if using the component's useEffect
+    setIsTriggerModalOpen(true);
   };
 
   const handleCloseTriggerModal = () => {
-    // triggerModalRef.current?.close(); // Modal component handles closing now
     setIsTriggerModalOpen(false);
     setEditingTrigger(null);
   };
 
-  const handleSaveTriggerChanges = (triggerData: any) => { // Receive data from modal
+  const handleSaveTriggerChanges = (triggerData: TriggerData) => {
     if (editingTrigger) {
-      // --- Edit Logic (Placeholder) ---
       console.log("Mock Edit Trigger:", { ...editingTrigger, ...triggerData });
-      // TODO: Find trigger in agent.triggerConfig and update it
     } else {
-      // --- Add Logic ---
-      const newTrigger = {
+      const newTrigger: MockTriggerConfig = {
         ...triggerData,
-        id: `agent-trigger-${Date.now()}`, // Mock ID specific to agent page
-        agentName: agent.name, // Associate with current agent
+        type: triggerData.name,
+        id: `agent-trigger-${Date.now()}`,
       };
       console.log("Mock Add Trigger:", newTrigger);
-      // TODO: Add newTrigger to agent.triggerConfig (mock or real state update)
-      // Example mock update (won't persist):
-      // agent.triggerConfig.push(newTrigger);
-      // In a real app, update state that holds agent data to trigger re-render
     }
     handleCloseTriggerModal();
   };
 
-  // Log Modal Handlers
-  const handleOpenLogModal = (log: any) => {
+  const handleOpenLogModal = (log: MockLog) => {
     setViewingLog(log);
     logModalRef.current?.showModal();
     setIsLogModalOpen(true);
@@ -318,50 +324,50 @@ const AgentDetailPage = () => {
     setViewingLog(null);
   };
 
-  if (!agent) {
-    // Render not found message if agent data is unavailable
-    return <div className="text-center text-error p-10">Agent not found!</div>; // Removed font-pixel
-  }
-
-  // Render agent details only if agent exists
   return (
     <div className="p-4">
-      {/* Header */}
-      {/* Header with Edit Button */}
       <div className="mb-6 flex justify-between items-start">
         <div>
           <h1 className="text-3xl mb-2">{agent.name}</h1>
-          <p className="text-base-content/70 mb-2">{agent.description}</p>
+          <p className="text-base-content/70 mb-2">{formState.description}</p>
           <span
             className={`badge badge-lg ${
-              agent.status === "Running"
+              agent?.status === "Running"
                 ? "badge-success"
-                : agent.status === "Stopped"
+                : agent?.status === "Stopped"
                 ? "badge-ghost"
-                : agent.status === "Error"
+                : agent?.status === "Error"
                 ? "badge-error"
                 : "badge-neutral"
             }`}
           >
-            {agent.status}
+            {agent?.status || "Unknown"}
           </span>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={handleOpenAgentModal}>
-          <PencilSquareIcon className="h-4 w-4 mr-1" /> Edit Agent
-        </button>
       </div>
-      {/* Tab List */}
+
       <div role="tablist" className="tabs tabs-lifted tabs-lg">
         <input
-          id="tab-triggers"
+          id="tab-task"
           type="radio"
           name="agent_tabs"
           role="tab"
           className="tab"
-          aria-label="Triggers"
-          aria-controls="panel-triggers"
-          checked={activeTab === "triggers"}
-          onChange={() => setActiveTab("triggers")}
+          aria-label="Task"
+          aria-controls="panel-task"
+          checked={activeTab === "task"}
+          onChange={() => setActiveTab("task")}
+        />
+        <input
+          id="tab-a2a"
+          type="radio"
+          name="agent_tabs"
+          role="tab"
+          className="tab"
+          aria-label="A2A"
+          aria-controls="panel-a2a"
+          checked={activeTab === "a2a"}
+          onChange={() => setActiveTab("a2a")}
         />
         <input
           id="tab-mcp"
@@ -407,29 +413,105 @@ const AgentDetailPage = () => {
           checked={activeTab === "settings"}
           onChange={() => setActiveTab("settings")}
         />
-        {/* Add a dummy tab to make the border extend correctly for the last active tab */}
         <a role="tab" className="tab [--tab-border-color:transparent]"></a>
       </div>
-      {/* Tab Panels (Rendered conditionally outside tablist) */}
+
       <div className="mt-[-1px]">
-        {" "}
-        {/* Negative margin to visually connect panel with lifted tab */}
-        {/* Chat Panel */}
         <div
-          id="panel-chat"
+          id="panel-task"
           role="tabpanel"
-          aria-labelledby="tab-chat"
-          className={`bg-base-100 border-base-300 border rounded-box rounded-tl-none p-0 ${
-            activeTab === "chat" ? "block" : "hidden"
+          aria-labelledby="tab-task"
+          className={`bg-base-100 border-base-300 border rounded-box rounded-tl-none p-6 ${
+            activeTab === "task" ? "block" : "hidden"
           }`}
         >
-          <div className="h-[70vh]">
-            {" "}
-            {/* Adjust height as needed */}
-            {agentChatRef.current}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl">Task Configuration</h2>
+            <button className="btn btn-primary btn-sm" onClick={handleOpenAddTriggerModal}>
+              <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Task Trigger
+            </button>
+          </div>
+          <p className="mb-4 text-base-content/70">
+            Define when and how this agent's tasks are triggered.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {agent?.triggerConfig?.map((trigger, index) => (
+              <div key={trigger.id || index} className="card bg-base-200 shadow">
+                <div className="card-body p-4">
+                  <h3 className="card-title text-lg">{trigger.name || trigger.type}</h3>
+                  <div className="text-sm mt-2 space-y-1">
+                    {Object.entries(trigger).map(([key, value]) => {
+                      if (key === "type" && trigger.name) return null;
+                      if (key === "id" || key === "name" || key === "prompt" || key === "timeType") return null;
+                      return (
+                        <p key={key}>
+                          <span className="font-semibold capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>{" "}
+                          <span className="opacity-80">{String(value)}</span>
+                        </p>
+                      );
+                    })}
+                     <p><span className="font-semibold">Time:</span> <span className="opacity-80">{trigger.timeType === "interval" ? trigger.interval : trigger.cronExpression}</span></p>
+                     <p><span className="font-semibold">Prompt:</span> <span className="opacity-80">{trigger.prompt}</span></p>
+                  </div>
+                  <div className="card-actions justify-end mt-2">
+                    <button className="btn btn-ghost btn-xs" aria-label={`Edit Trigger ${trigger.name || trigger.type}`} onClick={() => handleOpenEditTriggerModal(trigger)}>
+                      <PencilSquareIcon className="h-4 w-4" />
+                    </button>
+                    <button className="btn btn-ghost btn-xs text-error" aria-label={`Delete Trigger ${trigger.name || trigger.type}`} onClick={() => alert(`Mock Delete Trigger: ${trigger.name || trigger.type}`)}>
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        {/* MCP Panel */}
+
+        <div
+          id="panel-a2a"
+          role="tabpanel"
+          aria-labelledby="tab-a2a"
+          className={`bg-base-100 border-base-300 border rounded-box rounded-tl-none p-6 ${
+            activeTab === "a2a" ? "block" : "hidden"
+          }`}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl">Agent-to-Agent (A2A) Connections</h2>
+            <button className="btn btn-primary btn-sm" onClick={() => alert("Open Add A2A Connection Modal")} aria-label="Add New A2A Connection">
+              <PlusCircleIcon className="h-4 w-4 mr-1" /> Add New Connection
+            </button>
+          </div>
+          <p className="mb-4 text-base-content/70">
+            Manage connections to other agents for collaboration and data exchange.
+          </p>
+          {agent?.a2aConnections && agent.a2aConnections.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {agent.a2aConnections.map((conn, index) => (
+                <div key={index} className="card bg-base-200 shadow">
+                  <div className="card-body p-4">
+                    <h3 className="card-title text-lg">To: {conn.connectedAgentId}</h3>
+                    <p className="text-sm">Type: {conn.connectionType}</p>
+                    <div className="card-actions justify-end mt-2">
+                      <button className="btn btn-ghost btn-xs" aria-label={`Edit A2A connection to ${conn.connectedAgentId}`} onClick={() => alert(`Edit A2A connection to ${conn.connectedAgentId}`)}>
+                        <PencilSquareIcon className="h-4 w-4" />
+                      </button>
+                      <button className="btn btn-ghost btn-xs text-error" aria-label={`Remove A2A connection to ${conn.connectedAgentId}`} onClick={() => alert(`Remove A2A connection to ${conn.connectedAgentId}`)}>
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <ShareIcon className="h-16 w-16 mx-auto text-base-content/30 mb-4" />
+              <p className="text-lg text-base-content/70">No A2A connections configured yet.</p>
+              <p className="text-sm text-base-content/50">Click "Add New Connection" to link this agent with others.</p>
+            </div>
+          )}
+        </div>
+
         <div
           id="panel-mcp"
           role="tabpanel"
@@ -440,107 +522,32 @@ const AgentDetailPage = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl">MCP Configuration</h2>
-            <button className="btn btn-primary btn-sm">
+            <button className="btn btn-primary btn-sm" aria-label="Add MCP">
               <PlusCircleIcon className="h-4 w-4 mr-1" /> Add MCP
             </button>
-            {/* TODO: Implement Add MCP */}
           </div>
           <p className="mb-4 text-base-content/70">
             Select and configure the MCP services this agent will use.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {agent.mcpConfig.map((mcp) => (
+            {agent?.mcpConfig?.map((mcp: MockMcpConfig) => (
               <div key={mcp.id} className="card bg-base-200 shadow">
                 <div className="card-body p-4">
                   <h3 className="card-title text-lg">{mcp.name}</h3>
-                  {/* Placeholder for MCP config details */}
                   <div className="card-actions justify-end mt-2">
-                    {/* Updated MCP Edit Button onClick */}
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      aria-label={`Edit MCP ${mcp.name}`}
-                      onClick={() => handleOpenMcpModal(mcp)}
-                    >
+                    <button className="btn btn-ghost btn-xs" aria-label={`Edit MCP ${mcp.name}`} onClick={() => handleOpenMcpModal(mcp)}>
                       <PencilSquareIcon className="h-4 w-4" />
                     </button>
-                    <button
-                      className="btn btn-ghost btn-xs text-error"
-                      aria-label={`Delete MCP ${mcp.name}`}
-                      onClick={() => alert(`Mock Delete MCP: ${mcp.name}`)}
-                    >
+                    <button className="btn btn-ghost btn-xs text-error" aria-label={`Delete MCP ${mcp.name}`} onClick={() => alert(`Mock Delete MCP: ${mcp.name}`)}>
                       <TrashIcon className="h-4 w-4" />
-                    </button>{" "}
-                    {/* Keep delete as alert for now */}
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        {/* Triggers Panel */}
-        <div
-          id="panel-triggers"
-          role="tabpanel"
-          aria-labelledby="tab-triggers"
-          className={`bg-base-100 border-base-300 border rounded-box rounded-tl-none p-6 ${
-            activeTab === "triggers" ? "block" : "hidden"
-          }`}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl">Trigger Configuration</h2>
-            {/* Updated Add Trigger Button */}
-            <button className="btn btn-primary btn-sm" onClick={handleOpenAddTriggerModal}>
-              <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
-            </button>
-          </div>
-          <p className="mb-4 text-base-content/70">
-            Define when this agent should run.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {agent.triggerConfig.map((trigger, index) => (
-              <div key={index} className="card bg-base-200 shadow">
-                <div className="card-body p-4">
-                  <h3 className="card-title text-lg">{trigger.type}</h3>
-                  {/* Display specific trigger details */}
-                  <div className="text-sm mt-2 space-y-1">
-                    {Object.entries(trigger).map(([key, value]) => {
-                      if (key === "type") return null; // Don't repeat the type
-                      return (
-                        <p key={key}>
-                          <span className="font-semibold capitalize">
-                            {key}:
-                          </span>{" "}
-                          <span className="opacity-80">{String(value)}</span>
-                        </p>
-                      );
-                    })}
-                  </div>
-                  <div className="card-actions justify-end mt-2">
-                    {/* Updated Trigger Edit Button onClick */}
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      aria-label={`Edit Trigger ${trigger.type}`}
-                      onClick={() => handleOpenEditTriggerModal(trigger)} // Use renamed handler
-                    >
-                      <PencilSquareIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="btn btn-ghost btn-xs text-error"
-                      aria-label={`Delete Trigger ${trigger.type}`}
-                      onClick={() =>
-                        alert(`Mock Delete Trigger: ${trigger.type}`)
-                      }
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>{" "}
-                    {/* Keep delete as alert for now */}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Logs Panel */}
+
         <div
           id="panel-logs"
           role="tabpanel"
@@ -553,42 +560,41 @@ const AgentDetailPage = () => {
           <p className="mb-4 text-base-content/70">
             View the history of agent runs.
           </p>
-          {/* Placeholder for Logs */}
           <div className="space-y-2">
-            {agent.logs.map((log) => (
-              <div
-                key={log.id}
-                className="card card-compact bg-base-200 shadow"
-              >
+            {agent?.logs?.map((log: MockLog) => (
+              <div key={log.id} className="card card-compact bg-base-200 shadow">
                 <div className="card-body flex-row justify-between items-center p-3">
                   <span className="text-xs font-mono">
                     {new Date(log.timestamp).toLocaleString()}
                   </span>
                   <p className="flex-grow px-4 text-sm">{log.message}</p>
                   <div className="card-actions">
-                    {/* Updated Log View Button onClick */}
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      aria-label={`View Log Details ${log.id}`}
-                      onClick={() => handleOpenLogModal(log)}
-                    >
+                    <button className="btn btn-ghost btn-xs" aria-label={`View Log Details ${log.id}`} onClick={() => handleOpenLogModal(log)}>
                       <EyeIcon className="h-4 w-4" />
                     </button>
-                    <button
-                      className="btn btn-ghost btn-xs text-error"
-                      aria-label={`Delete Log ${log.id}`}
-                      onClick={() => alert(`Mock Delete Log: ${log.id}`)}
-                    >
+                    <button className="btn btn-ghost btn-xs text-error" aria-label={`Delete Log ${log.id}`} onClick={() => alert(`Mock Delete Log: ${log.id}`)}>
                       <TrashIcon className="h-4 w-4" />
-                    </button>{" "}
-                    {/* Keep delete as alert */}
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        {/* Settings Panel */}
+
+        <div
+          id="panel-chat"
+          role="tabpanel"
+          aria-labelledby="tab-chat"
+          className={`bg-base-100 border-base-300 border rounded-box rounded-tl-none p-0 ${
+            activeTab === "chat" ? "block" : "hidden"
+          }`}
+        >
+          <div className="h-[70vh]">
+            {agentChatRef.current}
+          </div>
+        </div>
+
         <div
           id="panel-settings"
           role="tabpanel"
@@ -597,278 +603,167 @@ const AgentDetailPage = () => {
             activeTab === "settings" ? "block" : "hidden"
           }`}
         >
-          <h2 className="text-xl mb-4">Agent Settings</h2>
-          {/* System Prompt */}
-          <div className="form-control mb-4 max-w-md">
-            {" "}
-            {/* Added max-w-md */}
-            <label className="label">
-              <span id="agent-system-prompt-label" className="label-text">
-                System Prompt
-              </span>
-            </label>
-            <textarea
-              id="agent-system-prompt-input"
-              className="textarea textarea-bordered h-24 w-full"
-              placeholder="Enter agent-specific system prompt..."
-              defaultValue={agent.settings?.systemPrompt || ""}
-              aria-labelledby="agent-system-prompt-label"
-            ></textarea>
-            {/* TODO: Implement saving */}
-          </div>
-          {/* Upload Icon */}
-          <div className="form-control mb-4 max-w-md">
-            {" "}
-            {/* Added max-w-md */}
-            <label className="label">
-              <span id="agent-icon-upload-label" className="label-text">
-                Upload Agent Icon
-              </span>
-            </label>
-            <input
-              id="agent-icon-upload-input"
-              type="file"
-              className="file-input file-input-bordered w-full"
-              aria-labelledby="agent-icon-upload-label"
-              accept="image/*" // Accept only image files
-            />
-            {/* TODO: Implement upload logic */}
-          </div>
-          <button className="btn btn-primary max-w-md">Save Settings</button>{" "}
-          {/* Added Save Button */}
-          {/* TODO: Implement save settings */}
-        </div>
-      </div>{" "}
-      {/* End of Tab Panels Container */}
-      {/* Edit Agent Modal */}
-      <dialog id="agent_edit_modal" className="modal" ref={agentModalRef}>
-        {" "}
-        {/* Updated ref */}
-        <div className="modal-box w-11/12 max-w-2xl">
-          <h3 className="font-bold text-lg mb-4">Edit Agent Details</h3>
-
-          {/* Form Fields */}
-          <div className="form-control mb-4">
-            <label className="label" htmlFor="agent-name-input">
-              <span className="label-text">Agent Name</span>
-            </label>
-            <input
-              id="agent-name-input"
-              type="text"
-              value={agentName}
-              onChange={(e) => setAgentName(e.target.value)}
-              className="input input-bordered w-full"
-              required // Example: Make name required
-            />
-          </div>
-
-          <div className="form-control mb-4">
-            <label className="label" htmlFor="agent-description-input">
-              <span className="label-text">Description</span>
-            </label>
-            <textarea
-              id="agent-description-input"
-              className="textarea textarea-bordered h-24 w-full"
-              value={agentDescription}
-              onChange={(e) => setAgentDescription(e.target.value)}
-            ></textarea>
-          </div>
-
-          {/* Icon Upload - Improved Styling */}
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text">Agent Icon</span>
-            </label>
-            {/* Enhanced Upload Area */}
-            <div className="flex items-center gap-4">
-               {/* Clickable Upload Area */}
-               <label htmlFor="agent-icon-upload-input-modal" className="cursor-pointer group">
-                 <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary group-hover:bg-base-200 flex flex-col items-center justify-center text-center p-2 transition-colors">
-                   {agentIconPreviewUrl && agentIconPreviewUrl !== '/logo.png' ? (
-                     <img
-                       src={agentIconPreviewUrl}
-                       alt="Agent Icon Preview"
-                       className="w-full h-full object-cover rounded-full"
-                     />
-                   ) : (
-                     <>
-                       <ArrowUpTrayIcon className="h-8 w-8 text-base-content/50 group-hover:text-primary mb-1" />
-                       <span className="text-xs text-base-content/70 group-hover:text-primary">Upload Icon</span>
-                     </>
-                   )}
-                 </div>
-               </label>
-               {/* Hidden File Input */}
-               <input
-                 id="agent-icon-upload-input-modal"
-                 type="file"
-                 className="hidden"
-                 accept="image/*"
-                 onChange={handleAgentIconChange} // Use updated handler
-               />
-               {/* Optional: Add a remove button */}
-               {agentIconPreviewUrl && agentIconPreviewUrl !== '/logo.png' && (
-                 <button
-                   type="button" // Prevent form submission
-                   className="btn btn-ghost btn-xs text-error"
-                   onClick={() => {
-                     setAgentIconFile(null);
-                     setAgentIconPreviewUrl("/logo.png");
-                   }}
-                 >
-                   Remove
-                 </button>
-               )}
-             </div>
-          </div>
-
-          <div className="form-control mb-4">
-            <label className="label" htmlFor="agent-system-prompt-modal-input">
-              <span className="label-text">System Prompt</span>
-            </label>
-            <textarea
-              id="agent-system-prompt-modal-input"
-              className="textarea textarea-bordered h-32 w-full" // Increased height
-              value={agentSystemPrompt}
-              onChange={(e) => setAgentSystemPrompt(e.target.value)}
-            ></textarea>
-          </div>
-
-          {/* Agent Modal Actions */}
-          <div className="modal-action mt-6">
-            <button className="btn btn-ghost" onClick={handleCloseAgentModal}>
-              Cancel
-            </button>
-            <button className="btn btn-primary" onClick={handleSaveAgentChanges}> {/* Use updated handler */}
-              Save Changes
-            </button>
-          </div>
-
-          {/* Agent Modal Close button */}
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={handleCloseAgentModal}
-            aria-label="Close"
-          >
-            {" "}
-            {/* Renamed handler */}
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-        {/* Click backdrop to close */}
-        <form method="dialog" className="modal-backdrop">
-          {/* Use button type="button" or call preventDefault in handler */}
-          <button onClick={handleCloseAgentModal}>close</button>
-        </form>
-      </dialog>
-      {/* MCP Edit Modal */}
-      <dialog id="mcp_edit_modal" className="modal" ref={mcpModalRef}>
-        <div className="modal-box w-11/12 max-w-lg">
-          <h3 className="font-bold text-lg mb-4">Edit MCP Configuration</h3>
-          {editingMcp && (
-            <div>
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">MCP Name</span>
+          <form onSubmit={handleSaveSettings}>
+            <h2 className="text-2xl font-semibold mb-6">Agent Settings</h2>
+            <div className="mb-8 p-6 bg-base-200 rounded-lg shadow">
+              <h3 className="text-xl font-medium mb-4 text-primary">Basic Information</h3>
+              <div className="form-control mb-6">
+                <label className="label" htmlFor="agent-icon-upload">
+                  <span className="label-text text-base">Agent Icon</span>
                 </label>
-                <input
-                  type="text"
-                  defaultValue={editingMcp.name}
-                  className="input input-bordered w-full"
-                />
-              </div>
-              {/* Enhanced MCP Fields */}
-              <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">Variables (JSON)</span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered h-24 w-full font-mono"
-                  placeholder='{\n  "apiKey": "YOUR_KEY",\n  "threshold": 0.5\n}'
-                ></textarea>
-                {/* TODO: Add validation and actual data binding */}
+                <div className="flex items-center gap-4">
+                  <label htmlFor="agent-icon-upload" className="cursor-pointer group">
+                    <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary flex items-center justify-center overflow-hidden">
+                      {iconPreview ? (
+                        <img src={iconPreview} alt="Icon Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <ArrowUpTrayIcon className="h-10 w-10 text-base-content/50 group-hover:text-primary" />
+                      )}
+                    </div>
+                  </label>
+                  <input id="agent-icon-upload" type="file" className="hidden" accept="image/*" onChange={handleIconChange} />
+                  {iconPreview && iconPreview !== "/logo.png" && (
+                    <button type="button" className="btn btn-xs btn-ghost text-error" onClick={() => { setSelectedIconFile(null); setIconPreview(agent?.iconUrl || "/logo.png"); }}>
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="form-control mb-4">
-                <label className="label">
-                  <span className="label-text">
-                    Allowed Operations (comma-separated)
-                  </span>
+                <label className="label" htmlFor="agent-name">
+                  <span className="label-text text-base">Agent Name</span>
                 </label>
-                <input
-                  type="text"
-                  placeholder="read_data, execute_trade"
-                  className="input input-bordered w-full"
-                />
-                {/* TODO: Add actual data binding */}
+                <input id="agent-name" name="name" type="text" placeholder="Enter agent name" className="input input-bordered w-full" value={formState.name} onChange={handleInputChange} required />
+              </div>
+              <div className="form-control">
+                <label className="label" htmlFor="agent-description">
+                  <span className="label-text text-base">Description</span>
+                </label>
+                <textarea id="agent-description" name="description" className="textarea textarea-bordered h-24 w-full" placeholder="Describe the agent's purpose" value={formState.description} onChange={handleInputChange}></textarea>
               </div>
             </div>
-          )}
-          <div className="modal-action mt-6">
-            <button className="btn btn-ghost" onClick={handleCloseMcpModal}>
-              Cancel
-            </button>
-            <button className="btn btn-primary" onClick={handleSaveMcpChanges}>
-              Save MCP
-            </button>
-          </div>
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={handleCloseMcpModal}
-            aria-label="Close"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-      {/* Use the new TriggerModal component */}
-      <TriggerModal
-        isOpen={isTriggerModalOpen}
-        onClose={handleCloseTriggerModal}
-        onSave={handleSaveTriggerChanges} // Pass the updated save handler
-        initialData={editingTrigger} // Pass null for add, trigger data for edit
-        agentId={agentId as string} // Pass agentId
-        // agentTitle and agentDescription removed
-      />
-      {/* Log Details Modal - Moved inside main div */}
-      <dialog id="log_view_modal" className="modal" ref={logModalRef}>
-        <div className="modal-box w-11/12 max-w-2xl">
-          <h3 className="font-bold text-lg mb-4">Log Details</h3>
-          {viewingLog && (
-            <div className="space-y-2">
-              <p>
-                <span className="font-semibold">Timestamp:</span>{" "}
-                {new Date(viewingLog.timestamp).toLocaleString()}
-              </p>
-              <div>
-                <p className="font-semibold mb-1">Message:</p>
-                <pre className="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap break-words">
-                  {viewingLog.message}
-                </pre>
+            <div className="mb-8 p-6 bg-base-200 rounded-lg shadow">
+              <h3 className="text-xl font-medium mb-4 text-primary">Agent Behavior</h3>
+              <div className="form-control mb-4">
+                <label className="label" htmlFor="agent-taskType">
+                  <span className="label-text text-base">Task Type</span>
+                </label>
+                <select id="agent-taskType" name="taskType" className="select select-bordered w-full" value={formState.agentType.taskType} onChange={handleInputChange}>
+                  {Object.values(TaskTypeOption).map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
               </div>
-              {/* Add more log details here if available */}
+              {formState.agentType.taskType === TaskTypeOption.TASK && (
+                <div className="form-control mb-4">
+                  <label className="label" htmlFor="agent-actionType">
+                    <span className="label-text text-base">Action Type</span>
+                  </label>
+                  <select id="agent-actionType" name="actionType" className="select select-bordered w-full" value={formState.agentType.actionType || ""} onChange={handleInputChange}>
+                    <option value="" disabled>Select action type</option>
+                    {Object.values(ActionTypeOption).map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="form-control">
+                <label className="label" htmlFor="agent-systemPrompt">
+                  <span className="label-text text-base">System Prompt</span>
+                </label>
+                <textarea id="agent-systemPrompt" name="systemPrompt" className="textarea textarea-bordered h-32 w-full" placeholder="Define the agent's core instructions and personality" value={formState.systemPrompt} onChange={handleInputChange} required></textarea>
+              </div>
             </div>
-          )}
-          <div className="modal-action mt-6">
-            <button className="btn" onClick={handleCloseLogModal}>
-              Close
-            </button>
-          </div>
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={handleCloseLogModal}
-            aria-label="Close"
-          >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
+            <button type="submit" className="btn btn-primary w-full md:w-auto">Save Agent Settings</button>
+          </form>
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-    </div> // End of main container div
+      </div>
+
+      {agent && (
+        <>
+          <dialog id="mcp_edit_modal" className="modal" ref={mcpModalRef}>
+            <div className="modal-box w-11/12 max-w-lg">
+              <h3 className="font-bold text-lg mb-4">Edit MCP Configuration</h3>
+              {editingMcp && (
+                <div>
+                  <div className="form-control mb-4">
+                    <label className="label">
+                      <span className="label-text">MCP Name</span>
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue={editingMcp.name}
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+                  <div className="form-control mb-4">
+                    <label className="label">
+                      <span className="label-text">Variables (JSON)</span>
+                    </label>
+                    <textarea
+                      className="textarea textarea-bordered h-24 w-full font-mono"
+                      placeholder='{\n  "apiKey": "YOUR_KEY",\n  "threshold": 0.5\n}'
+                    ></textarea>
+                  </div>
+                  <div className="form-control mb-4">
+                    <label className="label">
+                      <span className="label-text">
+                        Allowed Operations (comma-separated)
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="read_data, execute_trade"
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="modal-action mt-6">
+                <button type="button" className="btn btn-ghost" onClick={handleCloseMcpModal}>Cancel</button>
+                <button type="button" className="btn btn-primary" onClick={handleSaveMcpChanges}>Save MCP</button>
+              </div>
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={handleCloseMcpModal} aria-label="Close Edit MCP Modal">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <form method="dialog" className="modal-backdrop"><button type="button" onClick={handleCloseMcpModal}>close</button></form>
+          </dialog>
+
+          <TriggerModal
+            isOpen={isTriggerModalOpen}
+            onClose={handleCloseTriggerModal}
+            onSave={handleSaveTriggerChanges}
+            initialData={editingTrigger as TriggerData | null}
+            agentId={agentId as string}
+          />
+
+          <dialog id="log_view_modal" className="modal" ref={logModalRef}>
+            <div className="modal-box w-11/12 max-w-2xl">
+              <h3 className="font-bold text-lg mb-4">Log Details</h3>
+              {viewingLog && (
+                <div className="space-y-2">
+                  <p><span className="font-semibold">Timestamp:</span> {new Date(viewingLog.timestamp).toLocaleString()}</p>
+                  <div>
+                    <p className="font-semibold mb-1">Message:</p>
+                    <pre className="bg-base-200 p-3 rounded text-sm whitespace-pre-wrap break-words">
+                      {viewingLog.message}
+                    </pre>
+                  </div>
+                </div>
+              )}
+              <div className="modal-action mt-6">
+                <button type="button" className="btn" onClick={handleCloseLogModal}>Close</button>
+              </div>
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={handleCloseLogModal} aria-label="Close Log Details Modal">
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <form method="dialog" className="modal-backdrop"><button type="button" onClick={handleCloseLogModal}>close</button></form>
+          </dialog>
+        </>
+      )}
+    </div>
   );
 };
 

@@ -9,10 +9,10 @@ const AgentsPage = () => {
   const agents = [
     {
       id: "1",
-      name: "DCA BTC",
+      name: "DCA SOL",
       status: "Running",
-      description: "Automatically buys BTC based on the AHR999 index, placing remaining funds in DeFi lending protocols.",
-      mcps: ["AHR999 Info MCP", "BTC/USDT Trading MCP", "DeFi Lending MCP"],
+      description: "Automatically buys SOL based on the AHR999 index, placing remaining funds in DeFi lending protocols.",
+      mcps: ["AHR999 Info MCP", "SOL/USDT Trading MCP", "DeFi Lending MCP"],
       lastModified: Date.now() - 86400000,
     },
     {

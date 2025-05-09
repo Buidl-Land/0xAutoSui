@@ -15,11 +15,11 @@ import { TriggerData, TriggerTimeType, MCPCondition } from "@/types/trigger"; //
 const mockTriggers: TriggerData[] = [
   {
     id: "trigger-1",
-    name: "BTC 5min Check",
-    prompt: "Check BTC price and log it.", // Added mock prompt
+    name: "SOL 5min Check",
+    prompt: "Check SOL price and log it.", // Added mock prompt
     timeType: "interval",
     interval: "5min",
-    agentName: "DCA BTC", // Updated based on Plan1.md
+    agentName: "DCA SOL", // Updated based on Plan1.md
     status: "Active",
   },
   {

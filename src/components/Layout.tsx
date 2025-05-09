@@ -39,8 +39,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: "/store", label: "Store", icon: BuildingStorefrontIcon },
     { path: "/dashboard", label: "Dashboard", icon: ChartBarIcon },
     { path: "/subscription", label: "Subscription", icon: StarIcon }, // Added Subscription item
-    { path: "/setting", label: "Setting", icon: Cog6ToothIcon },
   ];
+
+  const settingMenuItem = { path: "/setting", label: "Setting", icon: Cog6ToothIcon };
 
   // Mock data for points (replace with actual data later)
   const userPoints = 1234;
@@ -135,6 +136,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </Link>
                 </li>
               ))}
+              {/* Setting Menu Item, always last */}
+              <li key={settingMenuItem.path} className="mb-2">
+                <Link
+                  href={settingMenuItem.path}
+                  className={`${
+                    pathname.startsWith(settingMenuItem.path) ? "active" : ""
+                  } flex gap-2 p-2 text-lg w-full`}
+                >
+                  <settingMenuItem.icon className="h-6 w-6 flex-shrink-0" />
+                  <span className="flex-grow">{settingMenuItem.label}</span>
+                </Link>
+              </li>
             </ul>
           </div>
           {/* Bottom section: Points and User */}
@@ -169,7 +182,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </div>
                 </div>
                 {/* Username */}
-                <span className="flex-grow text-left mr-1">MockUser</span>{" "}
+                <span className="flex-grow text-left mr-1">Trump</span>{" "}
                 {/* Adjusted margin */}
                 {/* Theme Toggle Button */}
               </div>
@@ -177,10 +190,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 tabIndex={0}
                 className="mb-1 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 rounded-box w-52"
               >
-                <li>
-                  <a>Profile</a>
-                </li>{" "}
-                {/* Placeholder */}
                 <li>
                   <Link href="/setting">Settings</Link>
                 </li>{" "}

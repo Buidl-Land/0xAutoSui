@@ -23,8 +23,8 @@ const md = markdownit({ html: true, breaks: true });
 // Define mock chat histories keyed by agentId
 // Define simplified mock chat histories keyed by agentId (avoiding complex tool structures for initialMessages)
 const mockChatHistories: Record<string, Message[]> = {
-  '1': [ // DCA BTC
-    { id: nanoid(), role: 'user', content: 'Check the AHR999 index and buy $100 BTC if it\'s below 0.45.' },
+  '1': [ // DCA SOL
+    { id: nanoid(), role: 'user', content: 'Check the AHR999 index and buy $100 SOL if it\'s below 0.45.' },
     { id: nanoid(), role: 'assistant', content: 'Okay, I need to check the AHR999 index first.' },
     // Indicate Tool Call Start
     { id: nanoid(), role: 'assistant', content: '```\nCalling AHR999 Info MCP...\n```' }, // Use markdown for visual distinction
@@ -35,17 +35,17 @@ const mockChatHistories: Record<string, Message[]> = {
       content: JSON.stringify({ tool_name: 'AHR999 Info MCP', result: { ahr999: 0.42 } }),
     },
     // Assistant response incorporating result
-    { id: nanoid(), role: 'assistant', content: 'The AHR999 index is 0.42, which is below 0.45. Proceeding to buy $100 BTC.' },
+    { id: nanoid(), role: 'assistant', content: 'The AHR999 index is 0.42, which is below 0.45. Proceeding to buy $100 SOL.' },
     // Indicate Second Tool Call Start
-    { id: nanoid(), role: 'assistant', content: '```\nCalling BTC/USDT Trading MCP...\n```' },
+    { id: nanoid(), role: 'assistant', content: '```\nCalling SOL/USDT Trading MCP...\n```' },
     // Second Tool Result (using role: 'data')
     {
       id: nanoid(),
       role: 'data', // Use 'data' role
-      content: JSON.stringify({ tool_name: 'BTC/USDT Trading MCP', result: { status: 'success', filledAmount: 100 } }),
+      content: JSON.stringify({ tool_name: 'SOL/USDT Trading MCP', result: { status: 'success', filledAmount: 100 } }),
     },
     // Final Assistant Response
-    { id: nanoid(), role: 'assistant', content: 'Successfully bought $100 worth of BTC.' },
+    { id: nanoid(), role: 'assistant', content: 'Successfully bought $100 worth of SOL.' },
   ],
   '2': [ // X Info Collector
     { id: nanoid(), role: 'user', content: 'Summarize relevant tweets from @VitalikButerin today.' },
@@ -68,8 +68,8 @@ const mockChatHistories: Record<string, Message[]> = {
     { id: nanoid(), role: 'assistant', content: 'Here\'s a summary of relevant tweets from @VitalikButerin today:\n- Discussed L2 scaling solutions.\n- Mentioned upcoming ETH upgrades.' },
   ],
   '3': [ // Market Analysis Agent
-    { id: nanoid(), role: 'user', content: 'Analyze the current BTC liquidation levels.' },
-    { id: nanoid(), role: 'assistant', content: 'Okay, I will fetch the BTC liquidation map data.' },
+    { id: nanoid(), role: 'user', content: 'Analyze the current SOL liquidation levels.' },
+    { id: nanoid(), role: 'assistant', content: 'Okay, I will fetch the SOL liquidation map data.' },
     // Indicate Tool Call Start
     { id: nanoid(), role: 'assistant', content: '```\nCalling Liquidation Map MCP...\n```' },
     // Tool Result (using role: 'data')
@@ -82,7 +82,7 @@ const mockChatHistories: Record<string, Message[]> = {
       }),
     },
     // Final Assistant Response
-    { id: nanoid(), role: 'assistant', content: 'Current BTC liquidation levels show significant long liquidations around $60k and $58k, and short liquidations around $68k and $70k.' },
+    { id: nanoid(), role: 'assistant', content: 'Current SOL liquidation levels show significant long liquidations around $60k and $58k, and short liquidations around $68k and $70k.' },
   ],
   // Removed agent '4' mock data
   'default': [ // Fallback

@@ -7,7 +7,7 @@ export interface AgentConnection {
   // For now, keeping it simple as per pseudocode for initial A2A tab structure
 }
 
-export type AgentType = 'Task' | 'Action';
+export type AgentType = 'Task' | 'Action' | 'Chat';
 
 export enum TriggerType {
   MANUAL = "MANUAL",
@@ -112,7 +112,12 @@ export interface ActionAgent extends BaseAgent {
   // For now, they inherit the full config.
 }
 
-export type Agent = TaskAgent | ActionAgent;
+export interface ChatAgent extends BaseAgent {
+  agentType: 'Chat';
+  // Chat-specific properties can be added here later
+}
+
+export type Agent = TaskAgent | ActionAgent | ChatAgent;
 
 export enum AgentStatus {
   RUNNING = "RUNNING",

@@ -17,8 +17,9 @@ import {
   ClockIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
-import { Agent, AgentStatus, TaskAgent, ActionAgent } from "@/types/agent"; // Adjusted imports
+import { Agent, AgentStatus, TaskAgent, ActionAgent, AgentType, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency } from "@/types/agent"; // Adjusted imports
 import { mockAgents, ExtendedAgent, MockLog } from "@/data/mockAgents"; // Using ExtendedAgent for mock data flexibility
+import AgentChat from "@/components/AgentChat"; // Import AgentChat
 
 const getMockAgentData = (agentId: string | string[] | undefined): ExtendedAgent | null => {
   if (!agentId || Array.isArray(agentId)) return null;
@@ -53,10 +54,22 @@ const AgentDetailPage = () => {
   const [agent, setAgent] = useState<ExtendedAgent | null>(null);
   const [logFilterLevel, setLogFilterLevel] = useState<string>("All");
   const [logFilterTime, setLogFilterTime] = useState<string>("All");
+  const [activeTab, setActiveTab] = useState<"Logs" | "Chat">("Logs");
 
   useEffect(() => {
     const currentAgent = getMockAgentData(agentId);
     setAgent(currentAgent);
+    // Default to Chat tab for Chat agents, otherwise Logs
+    if (currentAgent) {
+      if (currentAgent.agentType === 'Chat') {
+        setActiveTab("Chat");
+      } else {
+        setActiveTab("Logs");
+      }
+    } else {
+      // Fallback if agent is null (though typically handled by early return)
+      setActiveTab("Logs");
+    }
   }, [agentId]);
 
   if (!agent) {
@@ -117,125 +130,168 @@ const AgentDetailPage = () => {
         </div>
       </div>
 
-      {/* Configuration Overview */}
-      <div className="mb-8 p-6 bg-base-200 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-6 flex items-center">
-          <CpuChipIcon className="h-7 w-7 mr-3 text-primary" />
-          Configuration Overview
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          <div>
-            <h3 className="text-lg font-medium mb-1">Trigger</h3>
-            <p className="text-base-content/80">
-              {agent.triggerConfig?.[0]?.name || agent.triggerType || "Not Configured"}
-              {agent.triggerConfig?.[0]?.type && ` (${agent.triggerConfig[0].type})`}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-1">Dependent MCPs</h3>
-            {agent.mcpConfig && agent.mcpConfig.length > 0 ? (
-              <ul className="list-disc list-inside text-base-content/80">
-                {agent.mcpConfig.map(mcp => (
-                  <li key={mcp.id}>{mcp.name} {/* TODO: Display parameters */}</li>
-                ))}
-              </ul>
-            ) : <p className="text-base-content/80">None</p>}
-          </div>
-          {agent.agentType === 'Task' && (agent as TaskAgent).a2aConnections && (
-            <div>
-              <h3 className="text-lg font-medium mb-1">Dependent Agents (A2A)</h3>
-              {(agent as TaskAgent).a2aConnections!.length > 0 ? (
-                <ul className="list-disc list-inside text-base-content/80">
-                  {(agent as TaskAgent).a2aConnections!.map(conn => (
-                    <li key={conn.connectedAgentId}>Agent ID: {conn.connectedAgentId} ({conn.connectionType})</li>
-                  ))}
-                </ul>
-              ) : <p className="text-base-content/80">None</p>}
-            </div>
-          )}
-          <div>
-            <h3 className="text-lg font-medium mb-1">Output Configuration</h3>
-            <p className="text-base-content/80">{/* TODO: Display Output Config */ "Not specified"}</p>
-          </div>
-          <div>
-            <h3 className="text-lg font-medium mb-1 flex items-center">
-              <WalletIcon className="h-5 w-5 mr-2 text-accent" /> Associated Wallet
-            </h3>
-            <p className="text-base-content/80">
-              {/* TODO: Display Wallet Address and SOL Balance */}
-              Address: <span className="font-mono">XYZ...abc</span> (Balance: <span className="font-semibold">0.00 SOL</span>)
-            </p>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div role="tablist" className="tabs tabs-lifted tabs-lg mb-8">
+        <a
+          role="tab"
+          className={`tab ${activeTab === "Logs" ? "tab-active [--tab-bg:hsl(var(--b2))] [--tab-border-color:hsl(var(--b2))]" : "hover:[--tab-bg:hsl(var(--b2)/0.4)]"}`}
+          onClick={() => setActiveTab("Logs")}
+        >
+          Logs
+        </a>
+        <a
+          role="tab"
+          className={`tab ${activeTab === "Chat" ? "tab-active [--tab-bg:hsl(var(--b2))] [--tab-border-color:hsl(var(--b2))]" : "hover:[--tab-bg:hsl(var(--b2)/0.4)]"}`}
+          onClick={() => setActiveTab("Chat")}
+        >
+          Chat
+        </a>
       </div>
 
-      {/* Running Logs */}
-      <div className="p-6 bg-base-200 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-6 flex items-center">
-          <DocumentTextIcon className="h-7 w-7 mr-3 text-secondary" />
-          Running Logs
-        </h2>
-        {/* Log Filters */}
-        <div className="flex flex-wrap gap-4 mb-6 items-end">
-          <div className="form-control">
-            <label className="label"><span className="label-text">Log Level</span></label>
-            <select
-              className="select select-bordered"
-              value={logFilterLevel}
-              onChange={(e) => setLogFilterLevel(e.target.value)}
-              aria-label="Filter logs by level"
-            >
-              <option value="All">All Levels</option>
-              <option value="Info">Info</option>
-              <option value="Warning">Warning</option>
-              <option value="Error">Error</option>
-              <option value="Debug">Debug</option>
-            </select>
-          </div>
-          <div className="form-control">
-            <label className="label"><span className="label-text">Time Range</span></label>
-            <select
-              className="select select-bordered"
-              value={logFilterTime}
-              onChange={(e) => setLogFilterTime(e.target.value)}
-              aria-label="Filter logs by time range"
-            >
-              <option value="All">All Time</option>
-              <option value="LastHour">Last Hour</option>
-              <option value="Last24Hours">Last 24 Hours</option>
-              <option value="Last7Days">Last 7 Days</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Log List */}
-        {filteredLogs.length > 0 ? (
-          <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-            {filteredLogs.map((log) => (
-              <div key={log.id} className="card card-compact bg-base-100 shadow">
-                <div className="card-body">
-                  <div className="flex justify-between items-start">
-                    <p className="text-xs text-base-content/60">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </p>
-                    {/* Placeholder for log level badge */}
-                    {/* <span className="badge badge-sm badge-info">INFO</span> */}
-                  </div>
-                  <p className="text-sm mt-1 whitespace-pre-wrap break-words">
-                    {log.message || log.userPrompt || "No message content."}
-                  </p>
-                  {/* Could add a "View Details" button here if logs become more complex */}
-                </div>
+      {/* Tab Content */}
+      {activeTab === "Logs" && (
+        <>
+          {/* Configuration Overview */}
+          <div className="mb-8 p-6 bg-base-200 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6 flex items-center">
+              <CpuChipIcon className="h-7 w-7 mr-3 text-primary" />
+              Configuration Overview
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-1">Trigger</h3>
+                <p className="text-base-content/80">
+                  {agent.triggerConfig
+                    ? agent.triggerType === TriggerType.SCHEDULED
+                      ? `Scheduled: ${(agent.triggerConfig as ScheduledTriggerConfig).frequency} at ${(agent.triggerConfig as ScheduledTriggerConfig).timeValue}`
+                      : agent.triggerType === TriggerType.EVENT_DRIVEN
+                        ? `Event: ${(agent.triggerConfig as EventDrivenTriggerConfig).eventType} from ${(agent.triggerConfig as EventDrivenTriggerConfig).eventSource}`
+                        : agent.triggerType
+                    : agent.triggerType || "Not Configured"}
+                </p>
               </div>
-            ))}
+              <div>
+                <h3 className="text-lg font-medium mb-1">Dependent MCPs</h3>
+                {agent.mcpConfig && agent.mcpConfig.length > 0 ? (
+                  <ul className="list-disc list-inside text-base-content/80">
+                    {agent.mcpConfig.map(mcp => (
+                      <li key={mcp.id}>{mcp.name} {/* TODO: Display parameters */}</li>
+                    ))}
+                  </ul>
+                ) : <p className="text-base-content/80">None</p>}
+              </div>
+              {agent.agentType === 'Task' && agent.config?.dependentAgents && (
+                <div>
+                  <h3 className="text-lg font-medium mb-1">Dependent Agents (A2A)</h3>
+                  {agent.config.dependentAgents.length > 0 ? (
+                    <ul className="list-disc list-inside text-base-content/80">
+                      {agent.config.dependentAgents.map((depAgent: AgentDependency) => (
+                        <li key={depAgent.dependentAgentId}>
+                          {depAgent.dependentAgentName} (ID: {depAgent.dependentAgentId})
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p className="text-base-content/80">None</p>}
+                </div>
+              )}
+              <div>
+                <h3 className="text-lg font-medium mb-1">Output Configuration</h3>
+                <p className="text-base-content/80">{/* TODO: Display Output Config */ "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium mb-1 flex items-center">
+                  <WalletIcon className="h-5 w-5 mr-2 text-accent" /> Associated Wallet
+                </h3>
+                <p className="text-base-content/80">
+                  {/* TODO: Display Wallet Address and SOL Balance */}
+                  Address: <span className="font-mono">XYZ...abc</span> (Balance: <span className="font-semibold">0.00 SOL</span>)
+                </p>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-10">
-            <CommandLineIcon className="h-16 w-16 mx-auto text-base-content/30 mb-4" />
-            <p className="text-lg text-base-content/70">No logs available for the selected filters.</p>
+
+          {/* Running Logs */}
+          <div className="p-6 bg-base-200 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6 flex items-center">
+              <DocumentTextIcon className="h-7 w-7 mr-3 text-secondary" />
+              Running Logs
+            </h2>
+            {/* Log Filters */}
+            <div className="flex flex-wrap gap-4 mb-6 items-end">
+              <div className="form-control">
+                <label className="label"><span className="label-text">Log Level</span></label>
+                <select
+                  className="select select-bordered"
+                  value={logFilterLevel}
+                  onChange={(e) => setLogFilterLevel(e.target.value)}
+                  aria-label="Filter logs by level"
+                >
+                  <option value="All">All Levels</option>
+                  <option value="Info">Info</option>
+                  <option value="Warning">Warning</option>
+                  <option value="Error">Error</option>
+                  <option value="Debug">Debug</option>
+                </select>
+              </div>
+              <div className="form-control">
+                <label className="label"><span className="label-text">Time Range</span></label>
+                <select
+                  className="select select-bordered"
+                  value={logFilterTime}
+                  onChange={(e) => setLogFilterTime(e.target.value)}
+                  aria-label="Filter logs by time range"
+                >
+                  <option value="All">All Time</option>
+                  <option value="LastHour">Last Hour</option>
+                  <option value="Last24Hours">Last 24 Hours</option>
+                  <option value="Last7Days">Last 7 Days</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Log List */}
+            {filteredLogs.length > 0 ? (
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                {filteredLogs.map((log) => (
+                  <div key={log.id} className="card card-compact bg-base-100 shadow">
+                    <div className="card-body">
+                      <div className="flex justify-between items-start">
+                        <p className="text-xs text-base-content/60">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </p>
+                        {/* Placeholder for log level badge */}
+                        {/* <span className="badge badge-sm badge-info">INFO</span> */}
+                      </div>
+                      <p className="text-sm mt-1 whitespace-pre-wrap break-words">
+                        {log.message || log.userPrompt || "No message content."}
+                      </p>
+                      {/* Could add a "View Details" button here if logs become more complex */}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <CommandLineIcon className="h-16 w-16 mx-auto text-base-content/30 mb-4" />
+                <p className="text-lg text-base-content/70">No logs available for the selected filters.</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
+
+      {activeTab === "Chat" && (
+        <>
+          <AgentChat
+            agentId={agent.id}
+            agentName={agent.name}
+            agentTitle={agent.name} // Using name as title for now
+            agentDescription={agent.description}
+            // Pass agentType to AgentChat for conditional logic there
+            agentType={agent.agentType as AgentType}
+          />
+        </>
+      )}
     </div>
   );
 };

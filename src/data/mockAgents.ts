@@ -332,10 +332,44 @@ const marketAnalysisAgent: ExtendedAgent = {
   associatedWalletId: "wallet-market-analysis",
 };
 
+const chatAgent: ExtendedAgent = {
+  id: "chat-agent-01",
+  name: "Helpful Assistant",
+  status: AgentStatus.IDLE,
+  description: "A friendly chat assistant to help you with your queries.",
+  lastModified: new Date(),
+  creator: "System",
+  triggerType: TriggerType.MANUAL,
+  triggerConfig: null,
+  config: {
+    dependentMCPs: [],
+    dependentAgents: [],
+    outputActions: [],
+  },
+  logs: [
+    {
+      id: "log-chat-001",
+      timestamp: Date.now() - 120000,
+      userPrompt: "Hello there!",
+      agentResponse: "Hi! How can I help you today?",
+      executionSteps: ["Responded to greeting."],
+      message: "Initial interaction"
+    }
+  ],
+  iconUrl: null,
+  systemPrompt: "You are a helpful and friendly assistant. Answer user queries concisely.",
+  agentType: 'Chat',
+  ownerId: "user-default-01",
+  createdAt: new Date(Date.now() - 600000), // 10 minutes ago
+  updatedAt: new Date(),
+  tasks: [],
+  associatedWalletId: null,
+};
 
 export const mockAgents: ExtendedAgent[] = [
   alphaTraderAgent,
   dcaSolAgent,
   xInfoCollectorAgent,
   marketAnalysisAgent,
+  chatAgent,
 ];

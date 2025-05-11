@@ -328,10 +328,26 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
                 />
                 <span className="label-text ml-2">Action Agent</span>
               </label>
+              <label className="label cursor-pointer">
+                <input
+                  type="radio"
+                  name="agentType"
+                  className="radio radio-primary"
+                  value="Chat"
+                  checked={formState.agentType === "Chat"}
+                  onChange={handleInputChange}
+                />
+                <span className="label-text ml-2">Chat Agent</span>
+              </label>
             </div>
             {formState.agentType === 'Action' && (
               <p className="text-xs text-base-content/70 mt-1">
                 Action Agents can be used by Task Agents but do not have their own task execution or A2A configurations.
+              </p>
+            )}
+            {formState.agentType === 'Chat' && (
+              <p className="text-xs text-base-content/70 mt-1">
+                Chat Agents provide a conversational interface.
               </p>
             )}
           </div>

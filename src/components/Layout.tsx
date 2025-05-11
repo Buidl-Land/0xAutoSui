@@ -16,6 +16,7 @@ import {
   MoonIcon, // For theme toggle
   BellIcon, // For Notifications
   WalletIcon, // For Wallet
+  SquaresPlusIcon, // For MCP Hub
 } from "@heroicons/react/24/outline"; // Import necessary icons
 
 interface LayoutProps {
@@ -40,6 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: "/agents", label: "My Agents", icon: CpuChipIcon },
     { path: "/wallet", label: "Wallet", icon: WalletIcon },
     { path: "/store", label: "Agent Store", icon: BuildingStorefrontIcon },
+    { path: "/store", label: "MCP Hub", icon: SquaresPlusIcon }, // Added MCP Hub
   ];
 
   const userProfileMenuItem = { path: "/setting", label: "User Profile", icon: UserCircleIcon };

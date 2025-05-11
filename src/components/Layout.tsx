@@ -14,6 +14,8 @@ import {
   StarIcon, // Added for Subscription
   SunIcon, // For theme toggle
   MoonIcon, // For theme toggle
+  BellIcon, // For Notifications
+  WalletIcon, // For Wallet
 } from "@heroicons/react/24/outline"; // Import necessary icons
 
 interface LayoutProps {
@@ -21,202 +23,161 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const pathname = usePathname(); // Get current path
-  const [currentTheme, setCurrentTheme] = useState("cyberpunk"); // Default theme
+  const pathname = usePathname();
+  const [currentTheme, setCurrentTheme] = useState("black-purple");
 
-  // Apply theme to HTML tag
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", currentTheme);
   }, [currentTheme]);
 
   const toggleTheme = () => {
-    setCurrentTheme(currentTheme === "cyberpunk" ? "light" : "cyberpunk");
+    setCurrentTheme(currentTheme === "black-purple" ? "blue-white" : "black-purple");
   };
 
-  // Define menu items with icons
-  const menuItems = [
-    { path: "/agents", label: "Agents", icon: CpuChipIcon },
-    { path: "/store", label: "Store", icon: BuildingStorefrontIcon },
+  // Define menu items with icons - Filtered for implemented pages
+  const mainNavItems = [
     { path: "/dashboard", label: "Dashboard", icon: ChartBarIcon },
-    { path: "/subscription", label: "Subscription", icon: StarIcon }, // Added Subscription item
+    { path: "/agents", label: "My Agents", icon: CpuChipIcon },
+    { path: "/wallet", label: "Wallet", icon: WalletIcon },
+    { path: "/store", label: "Agent Store", icon: BuildingStorefrontIcon },
   ];
 
-  const settingMenuItem = { path: "/setting", label: "Setting", icon: Cog6ToothIcon };
+  const userProfileMenuItem = { path: "/setting", label: "User Profile", icon: UserCircleIcon };
+  // Removed settingsMenuItem as /settings page is not implemented
 
-  // Mock data for points (replace with actual data later)
-  const userPoints = 1234;
+  const userPoints = 1234; // Mock data
 
   return (
-    <div className="drawer lg:drawer-open">
-      <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
-        {" "}
-        {/* Main content area */}
-        {/* Navbar - Simplified, only shows toggle on small screens */}
-        <div className="navbar bg-base-100 w-full sticky top-0 z-30 lg:hidden">
-          {" "}
-          {/* Only visible on small screens */}
-          <div className="flex-none">
-            {" "}
-            {/* Drawer toggle */}
-            <label
-              htmlFor="my-drawer-2"
-              aria-label="open sidebar"
-              className="btn btn-square btn-ghost"
-            >
+    <div className="flex flex-col min-h-screen">
+      {/* Top Navigation Bar */}
+      <div className="navbar bg-base-200 sticky top-0 z-30 shadow-md px-4">
+        {/* Navbar Start: Logo and Mobile Menu Toggle */}
+        <div className="navbar-start">
+          <div className="dropdown">
+            <label tabIndex={0} className="btn btn-ghost lg:hidden">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
-                className="inline-block h-5 w-5 stroke-current"
+                stroke="currentColor"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                ></path>
+                  d="M4 6h16M4 12h8m-8 6h16"
+                />
               </svg>
             </label>
-          </div>
-          <h1 className="flex-1 px-2 mx-2 font-pixel">
-            {" "}
-            {/* Title */}
-            0xAuto
-          </h1>
-        </div>
-        {/* Page content */}
-        <main className="p-4 w-full flex-grow">{children}</main>
-      </div>
-      <div className="drawer-side">
-        {" "}
-        {/* Sidebar */}
-        <label
-          htmlFor="my-drawer-2"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        {/* Use flex column and justify-between to push user section to bottom */}
-        <div className="flex flex-col justify-between p-4 w-72 min-h-full bg-base-200 text-base-content">
-          {" "}
-          {/* Increased width to w-72 */}
-          {/* Top section: Logo and Menu */}
-          <div>
-            <div className="mb-4 text-lg font-bold">
-              <Link
-                className="font-pixel flex items-center gap-2"
-                href="/agents"
-              >
-                <Image
-                  src="/logo.png"
-                  alt="0xAuto Logo"
-                  width={32}
-                  height={32}
-                  className="transition-transform duration-700 ease-in-out hover:rotate-[360deg]"
-                />
-                <span className="font-pixel text-2xl">0xAuto</span>
-              </Link>
-            </div>
-            <ul className="menu w-full">
-              {/* Map through menu items */}
-              {menuItems.map((item) => (
-                <li key={item.path} className="mb-2">
-                  {" "}
-                  {/* Added mb-2 for spacing */}
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              {mainNavItems.map((item) => (
+                <li key={item.path}>
                   <Link
                     href={item.path}
-                    className={`${
-                      pathname.startsWith(item.path) ? "active" : ""
-                    } flex gap-2 p-2 text-lg w-full`} // Check if pathname starts with item.path for active state
+                    className={`${pathname.startsWith(item.path) ? "active" : ""} flex gap-2`}
                   >
-                    <item.icon className="h-6 w-6 flex-shrink-0" />{" "}
-                    {/* Increased icon size slightly, added flex-shrink-0 */}
-                    <span className="flex-grow">{item.label}</span>{" "}
-                    {/* Allow label to grow */}
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
                   </Link>
                 </li>
               ))}
-              {/* Setting Menu Item, always last */}
-              <li key={settingMenuItem.path} className="mb-2">
+              <li>
                 <Link
-                  href={settingMenuItem.path}
-                  className={`${
-                    pathname.startsWith(settingMenuItem.path) ? "active" : ""
-                  } flex gap-2 p-2 text-lg w-full`}
+                  href={userProfileMenuItem.path}
+                  className={`${pathname.startsWith(userProfileMenuItem.path) ? "active" : ""} flex gap-2`}
                 >
-                  <settingMenuItem.icon className="h-6 w-6 flex-shrink-0" />
-                  <span className="flex-grow">{settingMenuItem.label}</span>
+                  <userProfileMenuItem.icon className="h-5 w-5" />
+                  {userProfileMenuItem.label}
                 </Link>
               </li>
             </ul>
           </div>
-          {/* Bottom section: Points and User */}
-          <div className="mt-auto pt-4 border-t border-base-300">
-            {" "}
-            {/* Add margin-top auto and padding-top */}
-            {/* Points Display */}
-            <div className="mb-2 p-2 rounded bg-base-300 text-sm flex items-center gap-2">
-              <CreditCardIcon className="h-4 w-4 opacity-70" />
-              <span>Points: {userPoints}</span>
-            </div>
-            {/* Theme Toggle will be moved next to username */}
-            {/* User Avatar Dropdown */}
-            <div className="dropdown dropdown-top w-50%">
-              {" "}
-              {/* Changed to dropdown-top */}
-              {/* Adjusted padding & height */}
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost w-full justify-start items-center px-1 py-1 h-auto"
-              >
-                {/* User Avatar */}
-                <div className="avatar w-8 mr-2 flex-shrink-0">
-                  {" "}
-                  {/* Added flex-shrink-0 */}
-                  <div className="rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
-                    {" "}
-                    {/* Added ring for visibility */}
-                    <UserCircleIcon className="w-full h-full text-base-content opacity-60" />{" "}
-                    {/* Using Heroicon */}
-                  </div>
-                </div>
-                {/* Username */}
-                <span className="flex-grow text-left mr-1">Trump</span>{" "}
-                {/* Adjusted margin */}
-                {/* Theme Toggle Button */}
+          <Link className="font-pixel flex items-center gap-2 text-xl lg:text-2xl" href="/agents">
+            <Image
+              src="/logo.png"
+              alt="0xAuto Logo"
+              width={32}
+              height={32}
+              className="transition-transform duration-700 ease-in-out hover:rotate-[360deg]"
+            />
+            0xAuto
+          </Link>
+        </div>
+
+        {/* Navbar Center: Desktop Menu Items */}
+        <div className="navbar-center hidden lg:flex">
+          <ul className="menu menu-horizontal px-1">
+            {mainNavItems.map((item) => (
+              <li key={item.path}>
+                <Link
+                  href={item.path}
+                  className={`${
+                    pathname.startsWith(item.path) ? "active" : ""
+                  } flex gap-2 items-center`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Navbar End: Points, Theme Toggle, User Avatar */}
+        <div className="navbar-end space-x-2">
+          {/* Points Display */}
+          <div className="hidden sm:flex items-center gap-1 p-2 rounded bg-base-300 text-sm">
+            <CreditCardIcon className="h-4 w-4 opacity-70" />
+            <span>{userPoints}</span>
+          </div>
+
+          {/* Theme Toggle */}
+          <label className="swap swap-rotate btn btn-ghost btn-circle">
+            <input
+              type="checkbox"
+              onChange={toggleTheme}
+              checked={currentTheme === "blue-white"}
+              aria-label="Toggle theme"
+            />
+            <SunIcon className="swap-on h-5 w-5" />
+            <MoonIcon className="swap-off h-5 w-5" />
+          </label>
+
+          {/* User Avatar Dropdown */}
+          <div className="dropdown dropdown-end">
+            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+              <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
+                <UserCircleIcon className="w-full h-full text-base-content opacity-60" />
               </div>
-              <ul
-                tabIndex={0}
-                className="mb-1 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 rounded-box w-52"
-              >
-                <li>
-                  <Link href="/setting">Settings</Link>
-                </li>{" "}
-                {/* Link to settings */}
-                <li>
-                  <a>Logout</a>
-                </li>{" "}
-                {/* Placeholder */}
-              </ul>
-            </div>
-            <label className="swap swap-rotate btn btn-ghost btn-circle btn-lg ml-auto">
-              {" "}
-              {/* Use circle, small size, align right */}
-              <input
-                type="checkbox"
-                onChange={toggleTheme}
-                checked={currentTheme === "light"}
-                aria-label="Toggle theme"
-              />
-              <SunIcon className="swap-on h-4 w-4" />{" "}
-              {/* Slightly smaller icon */}
-              <MoonIcon className="swap-off h-4 w-4" />{" "}
-              {/* Slightly smaller icon */}
             </label>
+            <ul
+              tabIndex={0}
+              className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+            >
+              <li>
+                <Link href={userProfileMenuItem.path} className="flex gap-2">
+                  <userProfileMenuItem.icon className="h-5 w-5" />
+                  {userProfileMenuItem.label}
+                </Link>
+              </li>
+              {/* Add other user-specific links here if needed, e.g., Settings (if re-implemented) */}
+              <li>
+                <a className="flex gap-2">
+                  {/* Placeholder for Logout Icon if available */}
+                  Logout
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
+
+      {/* Page content */}
+      <main className="p-4 w-full flex-grow">{children}</main>
     </div>
   );
 };

@@ -9,6 +9,59 @@ export interface AgentConnection {
 
 export type AgentType = 'Task' | 'Action';
 
+export enum TriggerType {
+  MANUAL = "MANUAL",
+  SCHEDULED = "SCHEDULED",
+  EVENT_DRIVEN = "EVENT_DRIVEN",
+}
+
+export enum ScheduledTriggerFrequency {
+  HOURLY = "HOURLY",
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  CUSTOM_CRON = "CUSTOM_CRON",
+}
+
+export interface ScheduledTriggerConfig {
+  frequency: ScheduledTriggerFrequency;
+  timeValue: string; // e.g., "08:00" or cron string "0 8 * * *"
+}
+
+export interface EventDrivenTriggerConfig { // Future use
+  eventType: string;
+  eventSource: string;
+  filterConditions: Record<string, any>;
+}
+
+export type TriggerConfig = ScheduledTriggerConfig | EventDrivenTriggerConfig | null;
+
+
+export interface MCPDependency {
+  mcpId: string;
+  mcpName: string; // Denormalized for display
+  order: number;
+  parameters: Record<string, any>; // User-configured parameters
+}
+
+export interface AgentDependency {
+  dependentAgentId: string;
+  dependentAgentName: string; // Denormalized for display
+  interactionConfig: Record<string, any>; // Defines data flow
+}
+
+export interface OutputAction {
+  outputType: string; // e.g., "TELEGRAM_NOTIFIER"
+  outputProviderId?: string; // Optional, e.g., ID of a generic Webhook MCP
+  outputProviderName: string; // Denormalized for display
+  parameters: Record<string, any>; // e.g., { "channelId": "@...", "messageTemplate": "..." }
+}
+
+export interface AgentConfig {
+  dependentMCPs: MCPDependency[];
+  dependentAgents: AgentDependency[];
+  outputActions: OutputAction[];
+}
+
 interface BaseAgent {
   id: string;
   name: string;
@@ -20,13 +73,26 @@ interface BaseAgent {
   createdAt?: Date; // As per domain model
   updatedAt?: Date; // As per domain model
 
+  triggerType: TriggerType;
+  triggerConfig: TriggerConfig;
+  config: AgentConfig;
+  associatedWalletId?: string | null;
+  autoRefillServiceCredits?: boolean;
+  serviceCreditsRefillThreshold?: number;
+  serviceCreditsRefillAmount?: number;
+  autoRefillSol?: boolean;
+  solRefillThreshold?: number; // Using number for decimal, adjust if specific decimal type is used
+  solRefillAmount?: number; // Using number for decimal
+  solRefillSourceEoa?: string;
+
+
   // Optional properties from mock data / existing fields
-  status?: string;
+  status?: AgentStatus; // Changed to use Enum
   lastModified?: Date | number;
   creator?: string;
-  triggerType?: string; // Will be deprecated by agentType
-  triggerConfig?: any[]; // Replace 'any' with a proper TriggerConfig type if available
-  mcpConfig?: { name: string; id: string }[];
+  // triggerType?: string; // Deprecated by new triggerType ENUM
+  // triggerConfig?: any[]; // Deprecated by new triggerConfig Typed Object
+  mcpConfig?: { name: string; id: string }[]; // This seems to be a simpler version of dependentMCPs, review if it should be merged/removed
   logs?: { id: string; timestamp: number; message?: string }[]; // Made message optional
   // TODO: Review if these optional fields should be part of the core Agent type
   // or handled differently, e.g. via a richer internal type for mock data.
@@ -35,16 +101,27 @@ interface BaseAgent {
 export interface TaskAgent extends BaseAgent {
   agentType: 'Task';
   tasks?: any[]; // Define more specific type if known
-  a2aConnections?: AgentConnection[]; // For A2A Tab
+  // a2aConnections?: AgentConnection[]; // This is now part of AgentConfig.dependentAgents
 }
 
 export interface ActionAgent extends BaseAgent {
   agentType: 'Action';
   // Action-specific properties, but no tasks or a2aConnections
+  // Action agents might still have MCP dependencies and outputs, but not dependent agents.
+  // This needs clarification based on how "Action Agents" are used.
+  // For now, they inherit the full config.
 }
 
 export type Agent = TaskAgent | ActionAgent;
 
+export enum AgentStatus {
+  RUNNING = "RUNNING",
+  SCHEDULED = "SCHEDULED",
+  PENDING = "PENDING",
+  ERROR = "ERROR",
+  IDLE = "IDLE",
+  STOPPED = "STOPPED",
+}
 // Enums from Domain Model for reference, can be moved to a shared enum file if needed
 export enum AgentConnectionStatusEnum {
   PENDING_APPROVAL = "PENDING_APPROVAL",

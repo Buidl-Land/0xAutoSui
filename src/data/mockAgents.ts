@@ -1,7 +1,8 @@
 // src/data/mockAgents.ts
-import { Agent, TaskAgent, ActionAgent, AgentType, AgentConnection } from '../types/agent'; // Added AgentConnection
-import { TaskData, TaskTimeType as TaskTimeTypeImport } from '../types/task'; // Renamed to avoid conflict
-import { TriggerData, TriggerTimeType, MCPCondition } from '../types/trigger'; // Added MCPCondition
+import { Agent, TaskAgent, ActionAgent, AgentType, TriggerType, TriggerConfig, AgentConfig, MCPDependency, AgentDependency, OutputAction, AgentStatus, ScheduledTriggerFrequency, ScheduledTriggerConfig } from '../types/agent';
+import { TaskData, TaskTimeType as TaskTimeTypeImport } from '../types/task';
+// TriggerData, TriggerTimeType, MCPCondition are not directly used here anymore, but kept for potential future reference or if other parts of the app use them.
+import { TriggerData, TriggerTimeType, MCPCondition } from '../types/trigger';
 
 // Define a more specific Log type for our mock data, matching [agentId]/page.tsx
 export interface MockLog {
@@ -13,26 +14,25 @@ export interface MockLog {
   message?: string; // Optional summary
 }
 
-// Define MockTriggerConfig based on TriggerData, similar to [agentId]/page.tsx
-export interface MockTriggerConfig extends TriggerData {
-  type?: string; // Kept for compatibility if needed, but prefer using TriggerData fields
-  [key: string]: any; // Allow other properties for now
-}
-
-export interface MockMcpConfig {
-  name: string;
-  id: string;
-}
-
 // Extended Agent type for mock data to include all fields from both sources
-export type ExtendedAgent = Agent & {
-  status?: string;
+export type ExtendedAgent = Omit<Agent, 'triggerConfig' | 'config' | 'status' | 'agentType'> & {
+  agentType: AgentType; // Enforce strict AgentType
+  status?: AgentStatus | string; // Allow string for mock data flexibility, but prefer AgentStatus
   lastModified?: Date | number;
   creator?: string;
-  triggerConfig?: MockTriggerConfig[]; // From [agentId]/page.tsx
-  mcpConfig?: MockMcpConfig[]; // From [agentId]/page.tsx and agents/page.tsx
+  triggerType: TriggerType; // Ensure triggerType is always present
+  triggerConfig?: TriggerConfig; // Use the new TriggerConfig type
+  config: AgentConfig; // Use the new AgentConfig type, ensure it's always present
   logs?: MockLog[]; // Using the more detailed MockLog
-  // tasks?: TaskData[]; // Already in TaskAgent
+  tasks?: TaskData[];
+  associatedWalletId?: string | null;
+  autoRefillServiceCredits?: boolean;
+  serviceCreditsRefillThreshold?: number;
+  serviceCreditsRefillAmount?: number;
+  autoRefillSol?: boolean;
+  solRefillThreshold?: number;
+  solRefillAmount?: number;
+  solRefillSourceEoa?: string;
 };
 
 
@@ -111,55 +111,76 @@ const alphaTraderAgentLogs: MockLog[] = [
   }
 ];
 
-const alphaTraderAgent: ExtendedAgent & TaskAgent = {
+const alphaTraderAgent: ExtendedAgent = {
   id: 'alpha-trader-01',
   name: 'Alpha Trader',
   description: 'Follows the Wang Xiaoer KOL wallet to automatically capture Alpha opportunities.',
   iconUrl: '/logo.png',
   agentType: 'Task',
-  status: 'running',
+  status: AgentStatus.RUNNING,
   systemPrompt: alphaTraderSystemPrompt,
   tasks: [
     {
       id: 'alpha-trader-task-01',
       name: 'KOL Wallet Monitoring and Meme Trading',
       prompt: "Monitor KOL wallet 71CPXu3TvH3iUKaY1bNkAAow24k6tjH473SsKprQBABC for buy/sell activity. If a Meme token is purchased for >5 SOL: 1. Analyze token popularity on Twitter. 2. If positive sentiment, check GoPlus for security & top 10 holders (<20%). 3. If safe, buy 1 SOL via JupSwap.",
-      timeType: 'interval' as TaskTimeTypeImport, // This should ideally be an event-driven trigger
-      interval: '5min', // Placeholder for the "wait 5 minutes" part
+      timeType: 'interval' as TaskTimeTypeImport,
+      interval: '5min',
       status: 'Active',
       agentName: 'Alpha Trader'
     }
   ],
-  mcpConfig: [
-    { name: 'WalletAnalyze', id: 'WalletAnalyze' },
-    { name: 'TwitterCrawler', id: 'TwitterCrawler' },
-    { name: 'GoPlus', id: 'GoPlus' },
-    { name: 'JupSwap', id: 'JupSwap' }
-  ],
-  a2aConnections: [],
+  config: {
+    dependentMCPs: [
+      { mcpId: 'WalletAnalyze', mcpName: 'WalletAnalyze', order: 1, parameters: {} },
+      { mcpId: 'TwitterCrawler', mcpName: 'TwitterCrawler', order: 2, parameters: {} },
+      { mcpId: 'GoPlus', mcpName: 'GoPlus', order: 3, parameters: {} },
+      { mcpId: 'JupSwap', mcpName: 'JupSwap', order: 4, parameters: {} }
+    ],
+    dependentAgents: [],
+    outputActions: [],
+  },
   logs: alphaTraderAgentLogs,
   creator: 'System',
   lastModified: Date.now() - 510000,
   createdAt: new Date(Date.now() - 1000000),
   updatedAt: new Date(Date.now() - 510000),
   ownerId: 'user-default-01',
+  triggerType: TriggerType.SCHEDULED,
+  triggerConfig: {
+    frequency: ScheduledTriggerFrequency.DAILY,
+    timeValue: "09:00"
+  } as ScheduledTriggerConfig,
+  associatedWalletId: "wallet-main-alpha",
+  autoRefillServiceCredits: true,
+  serviceCreditsRefillThreshold: 100,
+  serviceCreditsRefillAmount: 500,
+  autoRefillSol: false,
 };
 
-const dcaSolAgent: ExtendedAgent & TaskAgent = {
+const dcaSolAgent: ExtendedAgent = {
   id: "1",
   name: "DCA SOL",
-  status: "Running",
+  status: AgentStatus.RUNNING,
   description: "Automatically buys SOL based on the AHR999 index, placing remaining funds in DeFi lending protocols.",
   lastModified: new Date(Date.now() - 86400000),
   creator: "AdminUser",
-  triggerConfig: [
-    { id: "t1", type: "Copy Trading", interval: "5min", name: "DCA Trigger", prompt: "Execute DCA", timeType: "interval" as TriggerTimeType },
-  ],
-  mcpConfig: [
-    { name: "AHR999 Info Fetch MCP", id: "mcp-ahr999" },
-    { name: "SOL/USDT Trading MCP", id: "mcp-SOL-trade" },
-    { name: "DeFi Lending MCP", id: "mcp-defi-lend" },
-  ],
+  triggerType: TriggerType.SCHEDULED,
+  triggerConfig: {
+    frequency: ScheduledTriggerFrequency.CUSTOM_CRON,
+    timeValue: "0 0 * * 1" // Example: Every Monday at midnight
+  } as ScheduledTriggerConfig,
+  config: {
+    dependentMCPs: [
+      { mcpId: "mcp-ahr999", mcpName: "AHR999 Info Fetch MCP", order: 1, parameters: {} },
+      { mcpId: "mcp-SOL-trade", mcpName: "SOL/USDT Trading MCP", order: 2, parameters: {} },
+      { mcpId: "mcp-defi-lend", mcpName: "DeFi Lending MCP", order: 3, parameters: {} },
+    ],
+    dependentAgents: [
+      { dependentAgentId: "2", dependentAgentName: "X Info Collector", interactionConfig: {} }
+    ],
+    outputActions: [],
+  },
   logs: [
     {
       id: "log1",
@@ -189,29 +210,34 @@ const dcaSolAgent: ExtendedAgent & TaskAgent = {
   iconUrl: "/logo.png",
   systemPrompt: "Act as a Dollar Cost Averaging bot for SOL.",
   agentType: 'Task',
-  a2aConnections: [
-    { connectedAgentId: "2", connectionType: "DATA_EXCHANGE" },
-  ],
   ownerId: "user-123",
   createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
   updatedAt: new Date(Date.now() - 86400000), // 1 day ago
   tasks: [],
+  associatedWalletId: "wallet-dca-sol",
 };
 
-const xInfoCollectorAgent: ExtendedAgent & TaskAgent = {
+const xInfoCollectorAgent: ExtendedAgent = {
   id: "2",
   name: "X Info Collector",
-  status: "Running",
+  status: AgentStatus.RUNNING,
   description: "Collects relevant tweets from specified Twitter accounts, filters out ads/gossip, summarizes valuable information, and sends to a TG Bot.",
   lastModified: new Date(Date.now() - 172800000), // 2 days ago
   creator: "TraderX",
-  triggerConfig: [
-    { id: "t2", type: "Event: Social", keyword: "#DegenToken", user: "@CryptoKOL", name: "X Social Trigger", prompt: "Monitor X for #DegenToken mentions by @CryptoKOL and summarize.", timeType: "interval" as TriggerTimeType, interval: "15min" },
-  ],
-  mcpConfig: [
-    { name: "X Info Fetch MCP", id: "mcp-x-info" },
-    { name: "TG Bot MCP", id: "mcp-tg-bot" },
-  ],
+  triggerType: TriggerType.SCHEDULED,
+  triggerConfig: {
+    frequency: ScheduledTriggerFrequency.CUSTOM_CRON,
+    timeValue: "*/15 * * * *" // Every 15 minutes
+  } as ScheduledTriggerConfig,
+  config: {
+    dependentMCPs: [
+      { mcpId: "mcp-x-info", mcpName: "X Info Fetch MCP", order: 1, parameters: { "targetAccount": "@CryptoKOL", "keywords": ["#DegenToken"] } },
+    ],
+    dependentAgents: [],
+    outputActions: [
+      { outputType: "TELEGRAM_NOTIFIER", outputProviderName: "TG Bot MCP", parameters: { "chatId": "@my_alerts", "messageTemplate": "X Info: {{summary}}" } }
+    ],
+  },
   logs: [
     {
       id: "log3",
@@ -242,31 +268,33 @@ const xInfoCollectorAgent: ExtendedAgent & TaskAgent = {
   iconUrl: null,
   systemPrompt: "Act as an information gatherer and summarizer from X (Twitter).",
   agentType: 'Task',
-  a2aConnections: [],
   ownerId: "user-456",
   createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
   updatedAt: new Date(Date.now() - 172800000), // 2 days ago
   tasks: [],
+  associatedWalletId: "wallet-x-info",
 };
 
-const marketAnalysisAgent: ExtendedAgent & ActionAgent = { // Changed to ActionAgent
+const marketAnalysisAgent: ExtendedAgent = {
   id: "3",
   name: "Market Analysis Agent",
-  status: "Stopped",
+  status: AgentStatus.STOPPED,
   description: "Analyzes market conditions using liquidation maps, funding rates, and whale holdings changes, providing analysis reports via TG Bot.",
   lastModified: new Date(),
   creator: "AdminUser",
-  // ActionAgents typically don't have triggerConfig, but if it's used for manual runs or as a callable service, it might be here.
-  // For this example, let's assume it can be triggered to generate a report.
-  triggerConfig: [
-     { id: "t3", type: "Manual or API Call", name: "Market Analysis Report Trigger", prompt: "Generate SOL market analysis report.", timeType: "cron" as TriggerTimeType, cronExpression: "0 0 * * *" } // Example: Daily at midnight
-  ],
-  mcpConfig: [
-    { name: "Liquidation Map MCP", id: "mcp-liq-map" },
-    { name: "Funding Rate MCP", id: "mcp-funding-rate" },
-    { name: "Whale Holdings MCP", id: "mcp-whale-holdings" },
-    { name: "TG Bot MCP", id: "mcp-tg-bot" }, // For sending reports
-  ],
+  triggerType: TriggerType.MANUAL, // Action agents are often manually triggered or via API
+  triggerConfig: null,
+  config: {
+    dependentMCPs: [
+      { mcpId: "mcp-liq-map", mcpName: "Liquidation Map MCP", order: 1, parameters: {} },
+      { mcpId: "mcp-funding-rate", mcpName: "Funding Rate MCP", order: 2, parameters: {} },
+      { mcpId: "mcp-whale-holdings", mcpName: "Whale Holdings MCP", order: 3, parameters: {} },
+    ],
+    dependentAgents: [], // Action agents typically don't depend on other agents in this manner
+    outputActions: [
+      { outputType: "TELEGRAM_NOTIFIER", outputProviderName: "TG Bot MCP", parameters: { "chatId": "@market_reports", "messageTemplate": "Market Analysis: {{reportContent}}" } }
+    ],
+  },
   logs: [
     {
       id: "log5",
@@ -297,10 +325,11 @@ const marketAnalysisAgent: ExtendedAgent & ActionAgent = { // Changed to ActionA
   ],
   iconUrl: null,
   systemPrompt: "Act as a market analyst providing reports based on various data sources.",
-  agentType: 'Action', // Corrected to Action
+  agentType: 'Action',
   ownerId: "user-123",
   createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
   updatedAt: new Date(),
+  associatedWalletId: "wallet-market-analysis",
 };
 
 

@@ -1,9 +1,14 @@
 // Path: src/types/user.ts
 
 export interface User {
-  id: string;
-  name: string;
+  userId: string; // Changed from id
+  username: string; // Changed from name
   email: string;
   avatarUrl?: string; // URL to the user's avatar
   // TODO: Add other existing user properties if any from existing user type definition
+  // As per docs/02_dashboard_domain_model.md
+  profilePictureUrl?: string;
+  notificationPreferences?: object;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

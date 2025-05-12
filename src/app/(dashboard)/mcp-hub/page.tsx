@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiChevronDown, FiAlertCircle, FiLoader } from 'react-icons/fi';
-import Link from 'next/link';
 import McpCard from '@/components/mcp-hub/McpCard';
 
 // Mock MCP Provider Data
@@ -203,57 +202,81 @@ const MCPHubPage = () => {
         <p className="text-base-content/70">Explore and access MCP Servers (Multi-Chain Processing) for the Solana ecosystem</p>
       </header>
 
-      {/* Filters and Search Section */}
-      <div className="mb-8 p-6 bg-base-200 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Search Input */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Search MCP Providers</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search by name or description..."
-                className="input input-bordered w-full pr-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <FiSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50" />
-            </div>
-          </div>
-
-          {/* Category Filter */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Category</span>
-            </label>
-            <div className="dropdown">
-              <label tabIndex={0} className="btn btn-outline w-full justify-between">
-                Filter by Category <FiChevronDown />
+      {/* Filters and Search Section - Updated for consistent styling */}
+      <div className="mb-8 p-5 bg-base-200 rounded-lg shadow-md">
+        <div className="flex flex-col space-y-4">
+          <h2 className="text-lg font-semibold text-base-content">Search & Filter</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Search Input */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Search MCP Providers</span>
               </label>
-              <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10 max-h-60 overflow-y-auto">
-                {uniqueCategories.map(category => (
-                  <li key={category}>
-                    <label className="label cursor-pointer">
-                      <span className="label-text">{category}</span>
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary checkbox-sm"
-                        checked={activeCategoryFilters.includes(category)}
-                        onChange={() => toggleCategoryFilter(category)}
-                      />
-                    </label>
-                  </li>
-                ))}
-              </ul>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search by name or description..."
+                  className="input input-bordered w-full pr-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <FiSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 h-5 w-5" />
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Category</span>
+              </label>
+              <div className="dropdown dropdown-bottom w-full">
+                <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
+                  <span>
+                    {activeCategoryFilters.length === 0 
+                      ? "All Categories" 
+                      : activeCategoryFilters.length === 1 
+                        ? activeCategoryFilters[0] 
+                        : `${activeCategoryFilters.length} categories selected`}
+                  </span>
+                  <FiChevronDown className="h-4 w-4" />
+                </div>
+                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
+                  {uniqueCategories.map(category => (
+                    <li key={category}>
+                      <label className="label cursor-pointer justify-start">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary checkbox-sm mr-2"
+                          checked={activeCategoryFilters.includes(category)}
+                          onChange={() => toggleCategoryFilter(category)}
+                        />
+                        <span className="label-text">{category}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            
+            {/* Rating Filter - Adding a new filter as an enhancement */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Sort By</span>
+              </label>
+              <select className="select select-bordered w-full">
+                <option value="userCount_desc">Most Popular</option>
+                <option value="rating_desc">Highest Rated</option>
+                <option value="mcpCount_desc">Most MCPs</option>
+                <option value="createdAt_desc">Recently Added</option>
+              </select>
             </div>
           </div>
         </div>
       </div>
 
       {/* MCP Provider List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {paginatedProviders.map(provider => (
           <McpCard key={provider.id} provider={provider} />
         ))}

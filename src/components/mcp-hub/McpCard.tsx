@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FiInfo, FiDownloadCloud } from 'react-icons/fi';
+import { FiInfo, FiDownloadCloud, FiStar } from 'react-icons/fi';
 
 interface MCPProvider {
   id: string;
@@ -23,29 +23,36 @@ interface McpCardProps {
 
 const McpCard: React.FC<McpCardProps> = ({ provider }) => {
   return (
-    <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
-      <div className="card-body p-6">
-        <div className="flex items-start justify-between">
-          <h2 className="card-title text-lg font-semibold mb-1">
+    <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out h-full flex flex-col">
+      <div className="card-body p-4 sm:p-6 flex flex-col flex-grow">
+        <div className="flex justify-between items-start">
+          <h2 className="card-title text-base sm:text-lg font-semibold mb-1 line-clamp-1">
             {provider.name}
           </h2>
-          <span className="badge badge-sm badge-outline">{provider.version || "1.0.0"}</span>
+          <div className="flex items-center gap-1">
+            <div className="badge badge-sm badge-primary flex items-center gap-1">
+              <FiStar size={12} /> {provider.rating.toFixed(1)}
+            </div>
+            <span className="badge badge-sm badge-outline">{provider.version || "1.0.0"}</span>
+          </div>
         </div>
         
         <p className="text-xs text-base-content/70 mb-2">
           Active users: <span className="font-medium">{provider.activeUsers}</span>
         </p>
         
-        <p className="text-sm text-base-content/90 mb-3 h-20 overflow-hidden text-ellipsis">
+        <p className="text-sm text-base-content/90 mb-3 line-clamp-4 min-h-[5rem]">
           {provider.description.length > 100 ? `${provider.description.substring(0, 100)}...` : provider.description}
         </p>
         
         <div className="mb-3">
-          {provider.categories.map((category) => (
-            <span key={category} className="badge badge-ghost badge-sm mr-1 mb-1">
-              {category}
-            </span>
-          ))}
+          <div className="flex flex-wrap gap-1">
+            {provider.categories.map((category) => (
+              <span key={category} className="badge badge-ghost badge-sm">
+                {category}
+              </span>
+            ))}
+          </div>
         </div>
         
         <div className="mb-4">
@@ -54,14 +61,14 @@ const McpCard: React.FC<McpCardProps> = ({ provider }) => {
           </p>
         </div>
 
-        <div className="card-actions justify-end space-x-2">
+        <div className="card-actions justify-end mt-auto space-x-2">
           <Link href={`/mcp-hub/${provider.id}`} className="btn btn-sm btn-outline btn-primary">
-            <FiInfo className="mr-1" /> Details
+            <FiInfo className="mr-1" /> <span className="hidden xs:inline">Details</span>
           </Link>
           <button
             className="btn btn-sm btn-primary"
           >
-            <FiDownloadCloud className="mr-1" /> Get Server
+            <FiDownloadCloud className="mr-1" /> <span className="hidden xs:inline">Get Server</span>
           </button>
         </div>
       </div>

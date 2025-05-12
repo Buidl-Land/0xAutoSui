@@ -3,9 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Agent, AgentStatus, TriggerType } from '@/types/agent';
 import { EyeIcon, PencilIcon, PlayIcon, PauseIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { ExtendedAgent } from '@/data/mockAgents';
 
 interface AgentCardProps {
-  agent: Agent;
+  agent: Agent | ExtendedAgent;
   onAction?: (action: 'details' | 'edit' | 'start' | 'pause' | 'delete', agentId: string) => void;
 }
 
@@ -37,12 +38,18 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onAction }) => {
     }
   };
 
+  // Helper function to check if status matches any of the specified statuses
+  const statusMatches = (statusToCheck: AgentStatus | string | undefined, ...validStatuses: AgentStatus[]): boolean => {
+    if (!statusToCheck) return false;
+    return validStatuses.some(valid => statusToCheck === valid);
+  };
+
   return (
-    <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
-      <div className="card-body p-5">
-        <div className="flex items-start space-x-4">
-          <div className="avatar">
-            <div className="w-16 h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+    <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out h-full flex flex-col">
+      <div className="card-body p-4 sm:p-5 flex flex-col flex-grow">
+        <div className="flex flex-col xs:flex-row gap-3">
+          <div className="avatar self-center xs:self-start">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
               {iconUrl ? (
                 <Image src={iconUrl} alt={`${name} icon`} width={64} height={64} className="rounded-full" />
               ) : (
@@ -52,9 +59,10 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onAction }) => {
               )}
             </div>
           </div>
+          
           <div className="flex-grow">
-            <div className="flex justify-between items-start">
-              <h2 className="card-title text-lg font-semibold mb-1">
+            <div className="flex justify-between items-start w-full">
+              <h2 className="card-title text-base sm:text-lg font-semibold mb-1 line-clamp-1">
                 <Link href={`/agents/${id}`} className="hover:underline">
                   {name}
                 </Link>
@@ -66,7 +74,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onAction }) => {
                 <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 z-10">
                   <li><button onClick={() => handleAction('details')} className="text-sm w-full text-left">View Details</button></li>
                   <li><button onClick={() => handleAction('edit')} className="text-sm w-full text-left">Edit Agent</button></li>
-                  {status === AgentStatus.RUNNING || status === AgentStatus.SCHEDULED ? (
+                  {statusMatches(status, AgentStatus.RUNNING, AgentStatus.SCHEDULED) ? (
                     <li><button onClick={() => handleAction('pause')} className="text-sm w-full text-left text-warning">Pause Agent</button></li>
                   ) : (
                     <li><button onClick={() => handleAction('start')} className="text-sm w-full text-left text-success">Start Agent</button></li>
@@ -78,31 +86,31 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onAction }) => {
             <p className="text-xs text-base-content opacity-70 mb-2 line-clamp-2" title={description}>
               {description || 'No description available.'}
             </p>
-            <div className="flex items-center space-x-2 mb-3">
-              <span className={`badge badge-sm ${getStatusColor(status)}`}>{status || 'UNKNOWN'}</span>
+            <div className="flex flex-wrap gap-1">
+              <span className={`badge badge-sm ${getStatusColor(status as AgentStatus)}`}>{status || 'UNKNOWN'}</span>
               <span className="badge badge-sm badge-outline">{triggerType || TriggerType.MANUAL}</span>
             </div>
           </div>
         </div>
 
-        <div className="card-actions justify-end mt-2 border-t border-base-300 pt-3">
+        <div className="card-actions justify-end mt-auto border-t border-base-300 pt-3">
           <Link href={`/agents/${id}`} className="btn btn-sm btn-ghost">
             <EyeIcon className="h-4 w-4 mr-1" />
-            Details
+            <span className="hidden xs:inline">Details</span>
           </Link>
           <Link href={`/agents/${id}/edit`} className="btn btn-sm btn-ghost">
             <PencilIcon className="h-4 w-4 mr-1" />
-            Edit
+            <span className="hidden xs:inline">Edit</span>
           </Link>
-          {status === AgentStatus.RUNNING || status === AgentStatus.SCHEDULED ? (
+          {statusMatches(status, AgentStatus.RUNNING, AgentStatus.SCHEDULED) ? (
             <button onClick={() => handleAction('pause')} className="btn btn-sm btn-warning btn-ghost">
               <PauseIcon className="h-4 w-4 mr-1" />
-              Pause
+              <span className="hidden xs:inline">Pause</span>
             </button>
           ) : (
             <button onClick={() => handleAction('start')} className="btn btn-sm btn-success btn-ghost">
               <PlayIcon className="h-4 w-4 mr-1" />
-              Start
+              <span className="hidden xs:inline">Start</span>
             </button>
           )}
         </div>

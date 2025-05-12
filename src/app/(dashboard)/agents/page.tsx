@@ -6,7 +6,7 @@ import { Agent, AgentStatus } from "@/types/agent"; // Keep Agent type
 import { mockAgents } from "@/data/mockAgents";
 // import AgentTable from "@/components/agents/AgentTable"; // Remove AgentTable import
 import AgentCard from "@/components/agents/AgentCard"; // Import AgentCard
-import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const AgentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,73 +49,94 @@ const AgentsPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">Agent Management</h1>
-        <Link href="/agents/create" className="btn btn-primary">
+        <Link href="/agents/create" className="btn btn-primary btn-md">
+          <PlusIcon className="h-5 w-5 mr-2" />
           Create New Agent
         </Link>
       </div>
 
-      {/* Search and Filter Controls */}
-      <div className="mb-6 p-4 bg-base-200 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          {/* Search Input */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Search Agents</span>
-            </label>
-            <div className="join">
-              <input
-                type="text"
-                placeholder="Search by name..."
-                className="input input-bordered join-item w-full"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1); // Reset to first page on search
-                }}
-              />
-              <button className="btn btn-ghost join-item" aria-label="Search">
-                <MagnifyingGlassIcon className="h-5 w-5" />
+      {/* Search and Filter Controls - Updated for consistent styling */}
+      <div className="mb-6 p-5 bg-base-200 rounded-lg shadow-md">
+        <div className="flex flex-col space-y-4">
+          <h2 className="text-lg font-semibold text-base-content">Search & Filter</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Search Input */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Search Agents</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search by name..."
+                  className="input input-bordered w-full pr-10"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset to first page on search
+                  }}
+                />
+                <MagnifyingGlassIcon className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 h-5 w-5" />
+              </div>
+            </div>
+
+            {/* Status Filter */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Filter by Status</span>
+              </label>
+              <div className="dropdown dropdown-bottom w-full">
+                <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
+                  <span className="flex items-center">
+                    {statusFilter !== "All" && (
+                      <span className={`w-3 h-3 rounded-full mr-2 ${
+                        statusFilter === AgentStatus.RUNNING ? 'bg-success' : 
+                        statusFilter === AgentStatus.ERROR ? 'bg-error' : 
+                        statusFilter === AgentStatus.PENDING ? 'bg-warning' : 
+                        statusFilter === AgentStatus.SCHEDULED ? 'bg-info' : 'bg-base-300'
+                      }`}></span>
+                    )}
+                    {statusFilter === "All" ? "All Statuses" : statusFilter}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-4 h-4 ml-1 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
+                  <li><button onClick={() => setStatusFilter("All")} className="w-full text-left">All Statuses</button></li>
+                  {Object.values(AgentStatus).map((status) => (
+                    <li key={status}>
+                      <button 
+                        onClick={() => setStatusFilter(status)}
+                        className="w-full text-left flex items-center"
+                      >
+                        <span className={`w-3 h-3 rounded-full mr-2 ${status === AgentStatus.RUNNING ? 'bg-success' : 
+                                                                  status === AgentStatus.ERROR ? 'bg-error' : 
+                                                                  status === AgentStatus.PENDING ? 'bg-warning' : 
+                                                                  status === AgentStatus.SCHEDULED ? 'bg-info' : 'bg-base-300'}`}></span>
+                        {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            
+            {/* Advanced Filters Button */}
+            <div className="form-control md:self-end">
+              <button className="btn btn-outline btn-neutral">
+                <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2"/>
+                Advanced Filters
               </button>
             </div>
           </div>
-
-          {/* Status Filter */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Filter by Status</span>
-            </label>
-            <select
-              className="select select-bordered w-full"
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value as AgentStatus | "All");
-                setCurrentPage(1); // Reset to first page on filter change
-              }}
-              aria-label="Filter by status"
-            >
-              <option value="All">All Statuses</option>
-              {Object.values(AgentStatus).map((status) => (
-                <option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-           {/* Placeholder for more filters */}
-           <div className="form-control md:pt-9">
-             <button className="btn btn-outline btn-neutral w-full md:w-auto">
-                <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2"/>
-                More Filters
-             </button>
-           </div>
         </div>
       </div>
 
       {/* Agent Cards Grid */}
       {paginatedAgents.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {paginatedAgents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} onAction={handleAgentAction} />
           ))}

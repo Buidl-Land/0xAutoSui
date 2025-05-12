@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -131,21 +129,32 @@ const AgentDetailPage = () => {
       </div>
 
       {/* Tabs */}
-      <div role="tablist" className="tabs tabs-lifted tabs-lg mb-8">
-        <a
-          role="tab"
-          className={`tab ${activeTab === "Logs" ? "tab-active [--tab-bg:hsl(var(--b2))] [--tab-border-color:hsl(var(--b2))]" : "hover:[--tab-bg:hsl(var(--b2)/0.4)]"}`}
-          onClick={() => setActiveTab("Logs")}
-        >
-          Logs
-        </a>
-        <a
-          role="tab"
-          className={`tab ${activeTab === "Chat" ? "tab-active [--tab-bg:hsl(var(--b2))] [--tab-border-color:hsl(var(--b2))]" : "hover:[--tab-bg:hsl(var(--b2)/0.4)]"}`}
-          onClick={() => setActiveTab("Chat")}
-        >
-          Chat
-        </a>
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-primary">Agent Activity</h2>
+        <div role="tablist" className="tabs tabs-bordered flex justify-start">
+          <a
+            role="tab"
+            className={`tab tab-lg mr-4 font-medium transition-all duration-200 ${
+              activeTab === "Logs" 
+                ? "tab-active border-b-2 border-primary text-primary" 
+                : "text-base-content/70 hover:text-primary"
+            }`}
+            onClick={() => setActiveTab("Logs")}
+          >
+            <DocumentTextIcon className="h-5 w-5 mr-2 inline" /> Logs
+          </a>
+          <a
+            role="tab"
+            className={`tab tab-lg mr-4 font-medium transition-all duration-200 ${
+              activeTab === "Chat" 
+                ? "tab-active border-b-2 border-primary text-primary" 
+                : "text-base-content/70 hover:text-primary"
+            }`}
+            onClick={() => setActiveTab("Chat")}
+          >
+            <ShareIcon className="h-5 w-5 mr-2 inline" /> Chat
+          </a>
+        </div>
       </div>
 
       {/* Tab Content */}

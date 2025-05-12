@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiArrowLeft, FiAlertCircle, FiLoader, FiStar, FiUsers, FiBox, FiCalendar, FiDownloadCloud } from 'react-icons/fi';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 // Mock MCP data
 interface MCPProvider {
@@ -141,7 +142,10 @@ const fetchMCPsByProviderAPI = async (providerId: string): Promise<MCP[]> => {
   });
 };
 
-const MCPProviderDetailPage = ({ params }: { params: { providerId: string } }) => {
+const MCPProviderDetailPage = () => {
+  const params = useParams();
+  const providerId = params.providerId as string;
+  
   const [provider, setProvider] = useState<MCPProvider | null>(null);
   const [mcps, setMcps] = useState<MCP[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,13 +156,13 @@ const MCPProviderDetailPage = ({ params }: { params: { providerId: string } }) =
       setIsLoading(true);
       setError(null);
       try {
-        const providerData = await fetchMCPProviderAPI(params.providerId);
+        const providerData = await fetchMCPProviderAPI(providerId);
         if (!providerData) {
           throw new Error('MCP provider not found');
         }
         setProvider(providerData);
         
-        const mcpsData = await fetchMCPsByProviderAPI(params.providerId);
+        const mcpsData = await fetchMCPsByProviderAPI(providerId);
         setMcps(mcpsData);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load data. Please try again later');
@@ -169,7 +173,7 @@ const MCPProviderDetailPage = ({ params }: { params: { providerId: string } }) =
     };
     
     loadData();
-  }, [params.providerId]);
+  }, [providerId]);
   
   if (isLoading) {
     return (
@@ -256,20 +260,19 @@ const MCPProviderDetailPage = ({ params }: { params: { providerId: string } }) =
             <p>No MCP tools available from this server</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {mcps.map(mcp => (
-              <div key={mcp.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-                <div className="card-body">
+              <div key={mcp.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+                <div className="card-body p-4 sm:p-6 flex flex-col flex-grow">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="card-title text-lg">
+                    <h3 className="card-title text-base sm:text-lg line-clamp-1">
                       {mcp.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <div className="badge badge-primary">{mcp.rating.toFixed(1)}</div>
                       <span className="badge badge-sm badge-outline">{mcp.version}</span>
                     </div>
                   </div>
-                  <p className="text-base-content/80">{mcp.description}</p>
+                  <p className="text-base-content/80 text-sm line-clamp-3 min-h-[4.5rem]">{mcp.description}</p>
                   
                   <div className="flex flex-wrap gap-1 mt-2">
                     {mcp.categories.map(category => (
@@ -281,9 +284,9 @@ const MCPProviderDetailPage = ({ params }: { params: { providerId: string } }) =
                     <span>Usage Count: {mcp.usageCount}</span>
                   </div>
                   
-                  <div className="card-actions justify-end mt-4">
-                    <button className="btn btn-primary">
-                      <FiDownloadCloud className="mr-1" /> Get Tool
+                  <div className="card-actions justify-end mt-auto pt-3">
+                    <button className="btn btn-primary btn-sm">
+                      <FiDownloadCloud className="mr-1" /> <span className="hidden xs:inline">Get Tool</span>
                     </button>
                   </div>
                 </div>

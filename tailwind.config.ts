@@ -14,6 +14,9 @@ const config: Config = {
         mono: ['var(--font-geist-mono)'], // Keep existing mono
         pixel: ['var(--font-pixel)', 'monospace'], // Add pixel font utility
       },
+      screens: {
+        'xs': '480px', // 添加xs断点，适用于小屏幕设备
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

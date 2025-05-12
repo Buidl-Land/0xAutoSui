@@ -189,7 +189,7 @@ const AgentStorePage = () => {
   return (
     <div className="container mx-auto p-4 md:p-6 lg:p-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Agent Store</h1>
+        <h1 className="text-3xl font-bold mb-2">Agents Store</h1>
         <p className="text-base-content/70">Discover and deploy pre-built Agents, focused on the Solana Ecosystem.</p>
       </header>
 

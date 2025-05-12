@@ -178,10 +178,6 @@ const DashboardPage: React.FC = () => {
     router.push(route);
   };
 
-  const handleCreateNewAgent = () => {
-    router.push('/agents/new'); // Or your specific route for creating new agents
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -210,8 +206,9 @@ const DashboardPage: React.FC = () => {
         <div className="flex flex-col space-y-6">
           <AgentOverviewCard stats={agentStats || undefined} onViewAllAgents={() => handleNavigate('/agents')} />
           <QuickActionsCard
-            onCreateNewAgent={handleCreateNewAgent}
-            onBrowseMCP={() => handleNavigate('/store')} // Corrected to /store as per QuickActionsCard
+            onCreateNewAgent={() => handleNavigate('/agents/create')}
+            onBrowseAgentStore={() => handleNavigate('/store')}
+            onBrowseMcpHub={() => handleNavigate('/mcp-hub')}
             onManageWallet={() => handleNavigate('/wallet')}
           />
         </div>

@@ -40,14 +40,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { path: "/dashboard", label: "Dashboard", icon: ChartBarIcon },
     { path: "/agents", label: "My Agents", icon: CpuChipIcon },
     { path: "/wallet", label: "Wallet", icon: WalletIcon },
-    { path: "/store", label: "Agent Store", icon: BuildingStorefrontIcon },
-    { path: "/store", label: "MCP Hub", icon: SquaresPlusIcon }, // Added MCP Hub
+    { path: "/store", label: "Agents Store", icon: BuildingStorefrontIcon },
+    { path: "/mcp-hub", label: "MCP Hub", icon: SquaresPlusIcon }, // Updated MCP Hub path
   ];
 
   const userProfileMenuItem = { path: "/setting", label: "User Profile", icon: UserCircleIcon };
   // Removed settingsMenuItem as /settings page is not implemented
 
   const userPoints = 1234; // Mock data
+
+  // Helper function to check if a path is active
+  const isActive = (path: string) => {
+    if (path === "/dashboard") {
+      return pathname === path;
+    }
+    return pathname?.startsWith(path);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -77,20 +85,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
               {mainNavItems.map((item) => (
-                <li key={item.path}>
+                <li key={item.path} className={isActive(item.path) ? "bg-primary bg-opacity-20 rounded-lg" : ""}>
                   <Link
                     href={item.path}
-                    className={`${pathname.startsWith(item.path) ? "active" : ""} flex gap-2`}
+                    className="flex gap-2"
                   >
                     <item.icon className="h-5 w-5" />
                     {item.label}
                   </Link>
                 </li>
               ))}
-              <li>
+              <li className={isActive(userProfileMenuItem.path) ? "bg-primary bg-opacity-20 rounded-lg" : ""}>
                 <Link
                   href={userProfileMenuItem.path}
-                  className={`${pathname.startsWith(userProfileMenuItem.path) ? "active" : ""} flex gap-2`}
+                  className="flex gap-2"
                 >
                   <userProfileMenuItem.icon className="h-5 w-5" />
                   {userProfileMenuItem.label}
@@ -114,12 +122,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             {mainNavItems.map((item) => (
-              <li key={item.path}>
+              <li key={item.path} className={isActive(item.path) ? "bg-primary bg-opacity-20 rounded-lg" : ""}>
                 <Link
                   href={item.path}
-                  className={`${
-                    pathname.startsWith(item.path) ? "active" : ""
-                  } flex gap-2 items-center`}
+                  className="flex gap-2 items-center"
                 >
                   <item.icon className="h-5 w-5" />
                   {item.label}
@@ -160,7 +166,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               tabIndex={0}
               className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
             >
-              <li>
+              <li className={isActive(userProfileMenuItem.path) ? "bg-primary bg-opacity-20 rounded-lg" : ""}>
                 <Link href={userProfileMenuItem.path} className="flex gap-2">
                   <userProfileMenuItem.icon className="h-5 w-5" />
                   {userProfileMenuItem.label}

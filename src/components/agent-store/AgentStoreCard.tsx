@@ -34,15 +34,9 @@ const formatPrice = (pricingModel: StoreAgentPricingModel): string => {
 const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, onGetOrDeploy }) => {
   return (
     <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
-      {agent.bannerImageUrl && (
-        <figure>
-          <img src={agent.bannerImageUrl} alt={`${agent.name} banner`} className="h-40 w-full object-cover" />
-        </figure>
-      )}
       <div className="card-body p-6">
         <div className="flex items-start justify-between">
           <h2 className="card-title text-lg font-semibold mb-1">
-            {agent.iconUrl && <img src={agent.iconUrl} alt="" className="w-6 h-6 mr-2 inline-block" />}
             {agent.name}
           </h2>
           <span className="badge badge-sm badge-outline">{agent.version}</span>

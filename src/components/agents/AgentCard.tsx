@@ -1,9 +1,10 @@
 import React from 'react';
-import Image from 'next/image';
+// import Image from 'next/image'; // No longer using next/image
 import Link from 'next/link';
 import { Agent, AgentStatus, TriggerType } from '@/types/agent';
 import { EyeIcon, PencilIcon, PlayIcon, PauseIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { ExtendedAgent } from '@/data/mockAgents';
+import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
 
 interface AgentCardProps {
   agent: Agent | ExtendedAgent;
@@ -49,17 +50,17 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onAction }) => {
       <div className="card-body p-4 sm:p-5 flex flex-col flex-grow">
         <div className="flex flex-col xs:flex-row gap-3">
           <div className="avatar self-center xs:self-start">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-              {iconUrl ? (
-                <Image src={iconUrl} alt={`${name} icon`} width={64} height={64} className="rounded-full" />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-base-300 rounded-full text-xl font-bold">
-                  {name.substring(0, 2).toUpperCase()}
-                </div>
-              )}
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 bg-base-300 overflow-hidden">
+              <img
+                src={iconUrl || getDiceBearAvatar(DICEBEAR_STYLES.AGENT, name || id, { backgroundColor: ['transparent'] })}
+                alt={`${name} icon`}
+                width={64}
+                height={64}
+                className="rounded-full w-full h-full object-cover"
+              />
             </div>
           </div>
-          
+
           <div className="flex-grow">
             <div className="flex justify-between items-start w-full">
               <h2 className="card-title text-base sm:text-lg font-semibold mb-1 line-clamp-1">

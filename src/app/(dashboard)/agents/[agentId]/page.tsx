@@ -18,6 +18,7 @@ import {
 import { Agent, AgentStatus, TaskAgent, ActionAgent, AgentType, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency } from "@/types/agent"; // Adjusted imports
 import { mockAgents, ExtendedAgent, MockLog } from "@/data/mockAgents"; // Using ExtendedAgent for mock data flexibility
 import AgentChat from "@/components/AgentChat"; // Import AgentChat
+import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
 
 const getMockAgentData = (agentId: string | string[] | undefined): ExtendedAgent | null => {
   if (!agentId || Array.isArray(agentId)) return null;
@@ -103,7 +104,12 @@ const AgentDetailPage = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold flex items-center">
-            {agent.iconUrl && <img src={agent.iconUrl} alt={`${agent.name} icon`} className="h-10 w-10 rounded-full mr-3 object-cover" />}
+            {/* Use DiceBear avatar if iconUrl is not present */}
+            <img
+              src={agent.iconUrl || getDiceBearAvatar(DICEBEAR_STYLES.AGENT, agent.name || agent.id, { backgroundColor: ['transparent', 'primary', 'secondary'] })}
+              alt={`${agent.name} icon`}
+              className="h-10 w-10 rounded-full mr-3 object-cover bg-base-300" // Added bg-base-300
+            />
             {agent.name}
           </h1>
           <div className="flex items-center space-x-3">
@@ -135,8 +141,8 @@ const AgentDetailPage = () => {
           <a
             role="tab"
             className={`tab tab-lg mr-4 font-medium transition-all duration-200 ${
-              activeTab === "Logs" 
-                ? "tab-active border-b-2 border-primary text-primary" 
+              activeTab === "Logs"
+                ? "tab-active border-b-2 border-primary text-primary"
                 : "text-base-content/70 hover:text-primary"
             }`}
             onClick={() => setActiveTab("Logs")}
@@ -146,8 +152,8 @@ const AgentDetailPage = () => {
           <a
             role="tab"
             className={`tab tab-lg mr-4 font-medium transition-all duration-200 ${
-              activeTab === "Chat" 
-                ? "tab-active border-b-2 border-primary text-primary" 
+              activeTab === "Chat"
+                ? "tab-active border-b-2 border-primary text-primary"
                 : "text-base-content/70 hover:text-primary"
             }`}
             onClick={() => setActiveTab("Chat")}

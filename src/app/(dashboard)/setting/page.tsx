@@ -3,17 +3,8 @@
 import React, { useState, useEffect, useRef, ChangeEvent, FormEvent } from 'react';
 import { PencilSquareIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { User } from '@/types/user'; // Import the User type
-
-// Mock function to get current user data - replace with actual data fetching
-const getMockCurrentUserData = (): User => {
-  // In a real app, this would fetch from an API or auth context
-  return {
-    id: "user-mock-123",
-    name: 'Trump', // Updated name
-    email: 'trump@example.com',
-    avatarUrl: '/logo.png', // Default or existing avatar
-  };
-};
+import { fetchMockCurrentUser } from '@/data/mocks/userMocks'; // Import the new mock function
+import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
 
 const SettingPage = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -29,13 +20,18 @@ const SettingPage = () => {
   const deleteModalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    const userData = getMockCurrentUserData();
-    setCurrentUser(userData);
-    setFormState({
-      name: userData.name,
-      avatarUrl: userData.avatarUrl || null,
-    });
-    setAvatarPreview(userData.avatarUrl || null);
+    const loadUser = async () => {
+      const userData = await fetchMockCurrentUser(); // Use the new mock function
+      setCurrentUser(userData);
+      if (userData) { // Check if userData is not null
+        setFormState({
+          name: userData.username,
+          avatarUrl: userData.avatarUrl || null,
+        });
+        setAvatarPreview(userData.avatarUrl || null);
+      }
+    };
+    loadUser();
   }, []);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -63,18 +59,25 @@ const SettingPage = () => {
 
   const handleSaveProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Saving Profile:", formState);
+    console.log("Saving Profile - Form State:", formState);
+    const profileDataToSave = {
+      username: formState.name,
+      avatarUrl: formState.avatarUrl,
+    };
+    console.log("Profile data to save to backend:", profileDataToSave);
+
     if (selectedAvatarFile) {
       console.log("Avatar to upload:", selectedAvatarFile.name);
       // Mock upload logic:
       // const uploadedAvatarUrl = `/path/to/uploaded/${selectedAvatarFile.name}`;
-      // setFormState(prev => ({...prev, avatarUrl: uploadedAvatarUrl}));
-      // setCurrentUser(prev => prev ? {...prev, name: formState.name, avatarUrl: uploadedAvatarUrl} : null);
+      // Update currentUser state correctly:
+      // setCurrentUser(prev => prev ? {...prev, username: profileDataToSave.username, avatarUrl: uploadedAvatarUrl} : null);
+      // setFormState(prev => ({...prev, avatarUrl: uploadedAvatarUrl})); // Update formState if needed
     } else {
-       // setCurrentUser(prev => prev ? {...prev, name: formState.name} : null);
+       // setCurrentUser(prev => prev ? {...prev, username: profileDataToSave.username} : null);
     }
     // In a real app, call API to update user:
-    // apiToUpdateUser({ name: formState.name, avatarUrl: formState.avatarUrl });
+    // apiToUpdateUser(profileDataToSave);
     alert("Profile saved (mock)!");
   };
 
@@ -94,14 +97,23 @@ const SettingPage = () => {
     return <div className="p-4">Loading user data...</div>; // Or a proper loading spinner
   }
 
+  // Determine the avatar source, falling back to DiceBear
+  const finalAvatarSrc = avatarPreview ||
+                       (currentUser?.avatarUrl && currentUser.avatarUrl !== '/default-avatar.svg' ? currentUser.avatarUrl : null) || // Prefer uploaded avatar if not default
+                       getDiceBearAvatar(DICEBEAR_STYLES.USER, currentUser.username || 'default-user-settings', { backgroundColor: ['transparent', 'primary'] });
+
   return (
     <div className="p-4 md:p-6">
-      <h1 className="text-3xl font-bold mb-8 text-primary">User Settings</h1>
+      <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-br from-primary via-accent to-secondary">
+        User Settings
+      </h1>
 
       {/* Profile Information Section */}
       <section className="mb-10 p-6 card bg-base-100 shadow-xl">
         <form onSubmit={handleSaveProfile}>
-          <h2 className="text-2xl font-semibold mb-6 text-secondary">Profile Information</h2>
+          <h2 className="text-2xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-secondary to-accent">
+            Profile Information
+          </h2>
 
           {/* Avatar Upload */}
           <div className="form-control mb-6">
@@ -111,15 +123,15 @@ const SettingPage = () => {
             <div className="flex items-center gap-4">
               <label htmlFor="user-avatar-upload" className="cursor-pointer group">
                 <div className="relative w-28 h-28 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary flex items-center justify-center overflow-hidden bg-base-200">
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
+                  {finalAvatarSrc ? (
+                    <img src={finalAvatarSrc} alt="Avatar Preview" className="w-full h-full object-cover" />
                   ) : (
                     <ArrowUpTrayIcon className="h-12 w-12 text-base-content/40 group-hover:text-primary" />
                   )}
                 </div>
               </label>
               <input id="user-avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
-              {avatarPreview && avatarPreview !== (currentUser.avatarUrl || '/logo.png') && (
+              {avatarPreview && avatarPreview !== (currentUser.avatarUrl || null) && (
                  <button
                     type="button"
                     className="btn btn-xs btn-ghost text-error"
@@ -158,9 +170,11 @@ const SettingPage = () => {
 
       {/* Billing Section - Kept as is from original, can be refactored if needed */}
       <section className="mb-10 p-6 card bg-base-100 shadow-xl">
-        <h2 className="text-2xl font-semibold mb-6 text-secondary">Billing</h2>
+        <h2 className="text-2xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-secondary to-accent">
+          Billing
+        </h2>
         <div className="flex items-center mb-4 gap-4 flex-wrap">
-           <p>Current Points: <span className="font-bold">{currentUser.id === "user-mock-123" ? 1234 : 0}</span></p> {/* Mock points */}
+           <p>Current Points: <span className="font-bold">{currentUser.userId === "user-mock-123" ? 8916 : 0}</span></p> {/* Mock points updated, changed currentUser.id to currentUser.userId */}
            <button className="btn btn-primary btn-sm" onClick={() => console.log('Mock Recharge Clicked')}>Recharge</button>
         </div>
         <div className="form-control">
@@ -177,7 +191,9 @@ const SettingPage = () => {
 
       {/* Account Management Section - Kept as is */}
       <section className="p-6 card bg-base-100 shadow-xl">
-        <h2 className="text-2xl font-semibold mb-6 text-secondary">Account Management</h2>
+        <h2 className="text-2xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-secondary to-accent">
+          Account Management
+        </h2>
         <button className="btn btn-error w-full max-w-md" onClick={handleOpenDeleteModal}>Delete Account</button>
       </section>
 

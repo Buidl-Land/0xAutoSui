@@ -1,9 +1,11 @@
 "use client"; // Required for hooks like usePathname
 
-import React, { useState, useEffect } from "react"; // Import useState, useEffect
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link"; // Import Link
-import { usePathname } from "next/navigation"; // Import usePathname
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import ThemeToggleButton from "./ThemeToggleButton"; // Import the new ThemeToggleButton
+import DynamicBackground from "./DynamicBackground"; // Import the DynamicBackground component
 import {
   CpuChipIcon,
   BuildingStorefrontIcon,
@@ -18,6 +20,9 @@ import {
   WalletIcon, // For Wallet
   SquaresPlusIcon, // For MCP Hub
 } from "@heroicons/react/24/outline"; // Import necessary icons
+import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
+import { fetchMockCurrentUser } from '@/data/mocks/userMocks'; // To get user info for avatar seed
+import { User } from '@/types/user';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,15 +30,15 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const pathname = usePathname();
-  const [currentTheme, setCurrentTheme] = useState("black-purple");
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", currentTheme);
-  }, [currentTheme]);
-
-  const toggleTheme = () => {
-    setCurrentTheme(currentTheme === "black-purple" ? "blue-white" : "black-purple");
-  };
+    const loadUser = async () => {
+      const user = await fetchMockCurrentUser();
+      setCurrentUser(user);
+    };
+    loadUser();
+  }, []);
 
   // Define menu items with icons - Filtered for implemented pages
   const mainNavItems = [
@@ -47,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const userProfileMenuItem = { path: "/setting", label: "User Profile", icon: UserCircleIcon };
   // Removed settingsMenuItem as /settings page is not implemented
 
-  const userPoints = 1234; // Mock data
+  const userPoints = 8916; // Updated mock data
 
   // Helper function to check if a path is active
   const isActive = (path: string) => {
@@ -59,6 +64,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <DynamicBackground />
       {/* Top Navigation Bar */}
       <div className="navbar bg-base-200 sticky top-0 z-30 shadow-md px-4">
         {/* Navbar Start: Logo and Mobile Menu Toggle */}
@@ -144,22 +150,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           {/* Theme Toggle */}
-          <label className="swap swap-rotate btn btn-ghost btn-circle">
-            <input
-              type="checkbox"
-              onChange={toggleTheme}
-              checked={currentTheme === "blue-white"}
-              aria-label="Toggle theme"
-            />
-            <SunIcon className="swap-on h-5 w-5" />
-            <MoonIcon className="swap-off h-5 w-5" />
-          </label>
+          <ThemeToggleButton />
 
           {/* User Avatar Dropdown */}
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
-                <UserCircleIcon className="w-full h-full text-base-content opacity-60" />
+              <div className="w-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1 overflow-hidden bg-base-300">
+                <img
+                  src={currentUser?.avatarUrl || getDiceBearAvatar(DICEBEAR_STYLES.USER, currentUser?.username || 'default-user', {backgroundColor:['transparent']})}
+                  alt="User Avatar"
+                  width={32}
+                  height={32}
+                  className="object-cover w-full h-full"
+                />
               </div>
             </label>
             <ul
@@ -185,7 +188,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Page content */}
-      <main className="p-4 w-full flex-grow">{children}</main>
+      <main className="p-4 w-full flex-grow bg-base-100">{children}</main>
     </div>
   );
 };

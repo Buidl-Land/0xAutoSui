@@ -11,6 +11,7 @@ import DependentMCPsForm from './DependentMCPsForm'; // Import DependentMCPsForm
 import DependentAgentsForm from './DependentAgentsForm'; // Import DependentAgentsForm
 import OutputActionsForm from './OutputActionsForm'; // Import OutputActionsForm
 import ResourcesWalletForm from './ResourcesWalletForm'; // Import ResourcesWalletForm
+import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
 
 interface AgentFormProps {
   agent?: ExtendedAgent | null; // Optional for create, required for edit
@@ -48,7 +49,10 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
   });
 
   const [selectedIconFile, setSelectedIconFile] = useState<File | null>(null);
-  const [iconPreview, setIconPreview] = useState<string | null>(agent?.iconUrl || "/logo.png");
+  const [iconPreview, setIconPreview] = useState<string | null>(
+    agent?.iconUrl ||
+    getDiceBearAvatar(DICEBEAR_STYLES.AGENT, agent?.name || formState?.name || 'new-agent', { backgroundColor: ['transparent'] })
+  );
 
   useEffect(() => {
     if (agent) {
@@ -72,9 +76,11 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
         solRefillSourceEoa: agent.solRefillSourceEoa || "",
         tasks: agent.tasks || [],
       });
-      setIconPreview(agent.iconUrl || "/logo.png");
+      setIconPreview(agent.iconUrl || getDiceBearAvatar(DICEBEAR_STYLES.AGENT, agent.name || 'existing-agent', { backgroundColor: ['transparent'] }));
+    } else {
+      setIconPreview(getDiceBearAvatar(DICEBEAR_STYLES.AGENT, formState.name || 'new-agent-effect', { backgroundColor: ['transparent'] }));
     }
-  }, [agent]);
+  }, [agent, formState.name]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -96,13 +102,12 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
       reader.onloadend = () => {
         const result = reader.result as string;
         setIconPreview(result);
-        setFormState(prev => ({ ...prev, iconUrl: result })); // Store base64 for preview, actual upload handled on submit
+        setFormState(prev => ({ ...prev, iconUrl: result }));
       };
       reader.readAsDataURL(file);
     } else {
       setSelectedIconFile(null);
-      // Revert to original or default if file selection is cancelled
-      setIconPreview(agent?.iconUrl || "/logo.png");
+      setIconPreview(agent?.iconUrl || getDiceBearAvatar(DICEBEAR_STYLES.AGENT, formState.name || agent?.name || 'fallback-agent', { backgroundColor: ['transparent'] }));
       setFormState(prev => ({ ...prev, iconUrl: agent?.iconUrl || null}));
     }
   };
@@ -268,7 +273,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
             </label>
             <div className="flex items-center gap-4">
               <label htmlFor="agent-icon-upload" className="cursor-pointer group">
-                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary flex items-center justify-center overflow-hidden">
+                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-base-content/30 group-hover:border-primary flex items-center justify-center overflow-hidden bg-base-200">
                   {iconPreview ? (
                     <img src={iconPreview} alt="Icon Preview" className="w-full h-full object-cover" />
                   ) : (
@@ -277,9 +282,20 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
                 </div>
               </label>
               <input id="agent-icon-upload" type="file" className="hidden" accept="image/*" onChange={handleIconChange} />
-              {iconPreview && iconPreview !== "/logo.png" && (
-                <button type="button" className="btn btn-xs btn-ghost text-error" onClick={() => { setSelectedIconFile(null); setIconPreview(agent?.iconUrl || "/logo.png"); setFormState(prev => ({...prev, iconUrl: agent?.iconUrl || null})) }}>
-                  Remove
+              {(selectedIconFile || (agent?.iconUrl && iconPreview !== getDiceBearAvatar(DICEBEAR_STYLES.AGENT, formState.name || agent?.name || 'check-agent', { backgroundColor: ['transparent'] }))) && (
+                <button
+                  type="button"
+                  className="btn btn-xs btn-ghost text-error"
+                  onClick={() => {
+                    setSelectedIconFile(null);
+                    const defaultDiceBear = getDiceBearAvatar(DICEBEAR_STYLES.AGENT, formState.name || agent?.name || 'removed-agent', { backgroundColor: ['transparent'] });
+                    setIconPreview(defaultDiceBear);
+                    setFormState(prev => ({...prev, iconUrl: null}));
+                    const fileInput = document.getElementById('agent-icon-upload') as HTMLInputElement;
+                    if (fileInput) fileInput.value = '';
+                  }}
+                >
+                  Remove Icon
                 </button>
               )}
             </div>

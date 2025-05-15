@@ -62,6 +62,16 @@ export interface AgentConfig {
   outputActions: OutputAction[];
 }
 
+// Define Task interface
+export interface Task {
+  id: string;
+  description: string;
+  order: number;
+  tags?: string[]; // Added for displaying tags with tasks
+  // Future: type: string (e.g., 'ExecuteInstruction', 'CallAPI', 'HumanInput')
+  // Future: parameters: Record<string, any>;
+}
+
 interface BaseAgent {
   id: string;
   name: string;
@@ -100,7 +110,7 @@ interface BaseAgent {
 
 export interface TaskAgent extends BaseAgent {
   agentType: 'Task';
-  tasks?: any[]; // Define more specific type if known
+  tasks?: Task[]; // Updated to use the new Task interface
   // a2aConnections?: AgentConnection[]; // This is now part of AgentConfig.dependentAgents
 }
 

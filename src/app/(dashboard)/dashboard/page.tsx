@@ -3,144 +3,24 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
-import AgentOverviewCard from '@/components/dashboard/AgentOverviewCard';
-import RecentActivityCard from '@/components/dashboard/RecentActivityCard';
-import QuickActionsCard from '@/components/dashboard/QuickActionsCard';
-import WalletBalanceCard from '@/components/dashboard/WalletBalanceCard';
-import WatchedFeedsSection from '@/components/dashboard/WatchedFeedsSection';
 import { User } from '@/types/user';
-import { AgentStatus, Agent } from '@/types/agent';
+import { fetchMockCurrentUser } from '@/data/mocks/userMocks'; // Import the new mock function
+import { ExtendedAgent, mockAgents } from '@/data/mockAgents'; // Changed to import all mockAgents
 
-// Mock data types - replace with actual types from domain model
-interface AgentStats {
-  total: number;
-  running: number;
-  scheduled: number;
-  pendingError: number;
-}
+// Import new dashboard components
+import ExploreSection from '@/components/dashboard/ExploreSection'; // New Explore Section
+import TokenBalancesCard from '@/components/dashboard/TokenBalancesCard';
+import ActiveAgentsList from '@/components/dashboard/ActiveTasksList'; // Imports ActiveAgentsList component from ActiveTasksList.tsx
+import AgentLogsView from '@/components/dashboard/AgentLogsView';
+import { Cog6ToothIcon, PlusCircleIcon } from '@heroicons/react/24/outline'; // For button icons
 
-interface AgentActivityLog {
-  logId: string;
-  agentId: string;
-  timestamp: string;
-  activityType: string;
-  description: string;
-  details?: any;
-  status: 'SUCCESS' | 'FAILURE' | 'INFO' | 'WARNING';
-}
-
-interface WalletBalance {
-  solBalance: number;
-  usdtBalance: number;
-  serviceCredits: number;
-}
-
-interface WatchedFeed {
-  feedId: string;
-  agentId: string;
-  agentName?: string;
-  feedName: string;
-  lastSummary: string;
-  lastUpdatedAt: string;
-  isActive: boolean;
-}
-
-// Mock API call functions - replace with actual API calls
-const fetchCurrentUser = async (): Promise<User> => {
-  // Simulate API call
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ userId: 'user123', username: 'Ricky', email: 'ricky@example.com' }), 500)
-  );
-};
-
-const fetchAgentStats = async (userId: string): Promise<AgentStats> => {
-  console.log(`Fetching agent stats for ${userId}`);
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ total: 10, running: 3, scheduled: 2, pendingError: 1 }), 500)
-  );
-};
-
-const fetchRecentLogs = async (userId: string, limit: number): Promise<AgentActivityLog[]> => {
-  console.log(`Fetching ${limit} recent logs for ${userId}`);
-  return new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve([
-          {
-            logId: 'log1',
-            agentId: 'agentA',
-            timestamp: new Date().toISOString(),
-            activityType: 'TASK_COMPLETED',
-            description: 'Agent A completed daily Solana news scraping',
-            status: 'SUCCESS',
-          },
-          {
-            logId: 'log2',
-            agentId: 'agentB',
-            timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-            activityType: 'TRADE_EXECUTED',
-            description: 'Agent B executed Jupiter aggregation trade',
-            status: 'SUCCESS',
-          },
-          {
-            logId: 'log3',
-            agentId: 'agentC',
-            timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-            activityType: 'ERROR_OCCURRED',
-            description: 'Agent C failed to trigger SOL price alert',
-            status: 'FAILURE',
-          },
-        ]),
-      500
-    )
-  );
-};
-
-const fetchWalletBalance = async (userId: string): Promise<WalletBalance> => {
-  console.log(`Fetching wallet balance for ${userId}`);
-  return new Promise((resolve) =>
-    setTimeout(() => resolve({ solBalance: 1.5, usdtBalance: 200, serviceCredits: 8000 }), 500)
-  );
-};
-
-const fetchWatchedFeeds = async (userId: string): Promise<WatchedFeed[]> => {
-  console.log(`Fetching watched feeds for ${userId}`);
-  return new Promise((resolve) =>
-    setTimeout(
-      () =>
-        resolve([
-          {
-            feedId: 'feed1',
-            agentId: 'SolanaNewsAggregator',
-            agentName: 'SolanaNewsAggregator',
-            feedName: 'Daily Solana Ecosystem News Summary',
-            lastSummary: 'Solana price hits new ATH, several new projects launched on the ecosystem.',
-            lastUpdatedAt: new Date().toISOString(),
-            isActive: true,
-          },
-          {
-            feedId: 'feed2',
-            agentId: 'SOLWhaleWatcher',
-            agentName: 'SOLWhaleWatcher',
-            feedName: 'Tracking SOL Whale Address Activity',
-            lastSummary: 'Whale address 0xABC... moved 1M SOL to an exchange.',
-            lastUpdatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            isActive: true,
-          },
-        ]),
-      500
-    )
-  );
-};
-
+// Mock API call functions - REMOVED
+// const fetchCurrentUser = async (): Promise<User> => { ... };
 
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [agentStats, setAgentStats] = useState<AgentStats | null>(null);
-  const [recentLogs, setRecentLogs] = useState<AgentActivityLog[] | null>(null);
-  const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
-  const [watchedFeeds, setWatchedFeeds] = useState<WatchedFeed[] | null>(null);
+  const [allAgents, setAllAgents] = useState<ExtendedAgent[]>([]); // For ExploreSection
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,20 +29,9 @@ const DashboardPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const user = await fetchCurrentUser();
+        const user = await fetchMockCurrentUser(); // Use the new mock function
         setCurrentUser(user);
-        if (user) {
-          const [stats, logs, balance, feeds] = await Promise.all([
-            fetchAgentStats(user.userId),
-            fetchRecentLogs(user.userId, 5),
-            fetchWalletBalance(user.userId),
-            fetchWatchedFeeds(user.userId),
-          ]);
-          setAgentStats(stats);
-          setRecentLogs(logs);
-          setWalletBalance(balance);
-          setWatchedFeeds(feeds);
-        }
+        setAllAgents(mockAgents); // Pass all mock agents to ExploreSection
       } catch (err) {
         setError('Failed to load dashboard data. Please try again.');
         console.error(err);
@@ -180,7 +49,7 @@ const DashboardPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center min-h-[calc(100vh-theme(spacing.24))]"> {/* Adjusted min-height */}
         <span className="loading loading-lg loading-spinner text-primary"></span>
       </div>
     );
@@ -200,24 +69,40 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <WelcomeMessage username={currentUser?.username} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col space-y-6">
-          <AgentOverviewCard stats={agentStats || undefined} onViewAllAgents={() => handleNavigate('/agents')} />
-          <QuickActionsCard
-            onCreateNewAgent={() => handleNavigate('/agents/create')}
-            onBrowseAgentStore={() => handleNavigate('/store')}
-            onBrowseMcpHub={() => handleNavigate('/mcp-hub')}
-            onManageWallet={() => handleNavigate('/wallet')}
-          />
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      {currentUser && <WelcomeMessage username={currentUser.username} />}
+
+      {/* Main Dashboard Grid - Adjusted Layout */}
+      {/* Row 1: Active Agents & Token Portfolio (with P/L) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1"> {/* Active Agents takes 1/3 width on large screens */}
+          <ActiveAgentsList />
         </div>
-        <div className="flex flex-col space-y-6">
-          <RecentActivityCard logs={recentLogs || undefined} onViewFullLogs={() => handleNavigate('/logs')} />
-          <WalletBalanceCard balance={walletBalance || undefined} />
+        <div className="lg:col-span-2"> {/* Token Portfolio takes 2/3 width on large screens */}
+          <TokenBalancesCard />
         </div>
       </div>
-      <WatchedFeedsSection feeds={watchedFeeds || undefined} />
+
+      {/* Row 2: Agent Logs View - Full width */}
+      <div className="mt-6"> {/* Added margin-top for spacing */}
+        <AgentLogsView />
+      </div>
+
+      {/* Row 3: Explore Section - Full width */}
+      <div className="mt-6"> {/* Added margin-top for spacing */}
+        <ExploreSection agents={allAgents} /> {/* Pass all agents */}
+      </div>
+
+      {/* Quick Create Agent Button - Remains at the bottom */}
+      <div className="flex justify-center items-center py-4 md:py-6">
+        <button
+          className="btn btn-primary btn-lg w-full max-w-md flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow duration-300"
+          onClick={() => handleNavigate('/agents/create')}
+        >
+          <PlusCircleIcon className="w-7 h-7" />
+          Create New Agent
+        </button>
+      </div>
     </div>
   );
 };

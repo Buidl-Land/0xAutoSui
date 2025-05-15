@@ -1,84 +1,78 @@
-import { MCP } from '@/types/mcp';
+import { MCP, MCPCategory, MCPCost, MCPProvider, MCPType } from '@/types/mcp';
 
 export const mockMcps: MCP[] = [
   {
-    id: 'mcp-sol-news',
-    name: 'Web2_SolanaNewsFetcher',
-    provider: 'Official',
-    description: 'Fetches the latest Solana news from various web2 sources.',
-    type: 'Data Source',
-    cost: 'Free',
-    categories: ['Data Source', 'Web2', 'Official', 'News'],
-    details: 'This MCP aggregates news articles, blog posts, and social media mentions related to Solana from a curated list of popular crypto news websites and platforms. It provides structured data including title, source, publication date, and a short summary.'
-  },
-  {
-    id: 'mcp-text-summ',
-    name: 'TextSummarizer_LatestModel',
+    id: 'mcp-goplus-security',
+    name: 'GoPlus Security API',
     provider: 'Third-Party',
-    description: 'Summarizes long text using the latest AI models.',
+    description: 'Comprehensive risk analysis for tokens, NFTs, and addresses on Solana and other chains.',
     type: 'Analysis',
     cost: 'Points/call',
-    categories: ['Analysis', 'Third-Party', 'AI'],
-    details: 'Utilizes advanced natural language processing models to generate concise summaries of text documents. Ideal for quick insights from articles, research papers, or reports. Cost is based on the length of the text processed.'
+    categories: ['Analysis', 'Solana', 'Third-Party'] as MCPCategory[],
+    details: 'Provides detailed security assessments including contract audits, rugpull detection, and malicious address identification. Essential for secure token interactions.'
   },
   {
-    id: 'mcp-dex-swap',
-    name: 'DEXSwap_Jupiter',
-    provider: 'Official',
-    description: 'Executes token swaps on Solana via Jupiter aggregator.',
+    id: 'mcp-jup-swap',
+    name: 'Jupiter Swap API',
+    provider: 'Third-Party',
+    description: "Access Solana's leading liquidity aggregator for optimal token swaps.",
     type: 'Solana Execution',
     cost: 'SOL Gas + Points/transaction',
-    categories: ['Solana Execution', 'DeFi', 'Official'],
-    details: 'Integrates with the Jupiter aggregator to find the best swap rates across multiple Solana DEXs. Users pay standard Solana network fees plus a small service fee in points per transaction.'
+    categories: ['Solana Execution', 'DeFi', 'Solana', 'Third-Party'] as MCPCategory[],
+    details: "Integrates with Jupiter's routing engine to find the best price across multiple DEXs for any given token pair on Solana."
   },
   {
-    id: 'mcp-price-feed',
-    name: 'PriceFeed_Pyth',
+    id: 'mcp-twitter-crawler',
+    name: 'X/Twitter Crawler',
     provider: 'Official',
-    description: 'Provides real-time asset prices from Pyth Network.',
-    type: 'Data Source',
-    cost: 'Free',
-    categories: ['Data Source', 'Solana', 'Official', 'Price Data'],
-    details: 'Accesses high-fidelity, real-time price feeds for a wide range of assets on the Solana blockchain, powered by the Pyth Network.'
-  },
-  {
-    id: 'mcp-sentiment',
-    name: 'SocialSentiment_CryptoTwitter',
-    provider: 'Third-Party',
-    description: 'Analyzes sentiment of crypto-related Twitter discussions.',
-    type: 'Analysis',
-    cost: 'USDT',
-    categories: ['Analysis', 'Web2', 'Third-Party', 'Social'],
-    details: 'Monitors Twitter for discussions around specified cryptocurrencies or topics and provides sentiment analysis (positive, negative, neutral). Priced in USDT per 1000 tweets analyzed.'
-  },
-  {
-    id: 'mcp-nft-floor',
-    name: 'NFTFloorPrice_MagicEden',
-    provider: 'Third-Party',
-    description: 'Gets NFT collection floor prices from Magic Eden.',
+    description: 'Fetch tweets, user profiles, and engagement data from X (Twitter).',
     type: 'Data Source',
     cost: 'Points/call',
-    categories: ['Data Source', 'Solana', 'NFT', 'Third-Party'],
-    details: 'Retrieves the current floor price for specified NFT collections listed on Magic Eden. Useful for tracking market trends and identifying buying opportunities.'
-  },
-   {
-    id: 'mcp-wallet-tracker',
-    name: 'SolanaWalletActivity_Monitor',
-    provider: 'Official',
-    description: 'Tracks and alerts on specific Solana wallet activities.',
-    type: 'Data Source',
-    cost: 'Points/call',
-    categories: ['Data Source', 'Solana', 'Official', 'Monitoring'],
-    details: 'Monitor specific Solana wallet addresses for incoming/outgoing transactions, token transfers, or interactions with certain dApps. Alerts can be configured.'
+    categories: ['Data Source', 'Social', 'Web2', 'Official'] as MCPCategory[],
+    details: 'Allows agents to monitor Twitter for specific keywords, hashtags, or user activity to gather real-time social sentiment and news.'
   },
   {
-    id: 'mcp-playwright-automation',
-    name: 'WebAutomation_Playwright',
+    id: 'mcp-wallet-analyzer',
+    name: 'Wallet Analyzer',
     provider: 'Official',
-    description: 'Automates web browser interactions using Playwright.',
+    description: 'Analyze on-chain transaction history and holdings for any Solana wallet.',
+    type: 'Data Source',
+    cost: 'Points/call',
+    categories: ['Data Source', 'Analysis', 'Solana', 'Official'] as MCPCategory[],
+    details: 'Provides insights into wallet activities, token balances, P&L, and interaction patterns with DeFi protocols and NFTs.'
+  },
+  {
+    id: 'mcp-telegram-notifier',
+    name: 'Telegram Notifier',
+    provider: 'Official',
+    description: 'Send notifications and messages to specified Telegram chats or channels.',
     type: 'Utility',
+    cost: 'Points/call',
+    categories: ['Utility', 'Web2', 'Official'] as MCPCategory[],
+    details: 'Enables agents to send alerts, reports, or custom messages via Telegram, facilitating real-time communication.'
+  },
+  {
+    id: 'mcp-ahr999-fetch',
+    name: 'AHR999 Index Fetch',
+    provider: 'Third-Party',
+    description: 'Retrieves the current AHR999 Bitcoin indicator value.',
+    type: 'Data Source',
     cost: 'Free',
-    categories: ['Utility', 'Web2', 'Official', 'Automation'],
-    details: 'Enables scripting of browser actions like navigating to pages, filling forms, clicking buttons, and extracting data from websites. Runs in a sandboxed environment.'
+    categories: ['Data Source', 'Analysis', 'Price Data', 'Third-Party'] as MCPCategory[],
+    details: 'The AHR999 index is a popular indicator used by some to gauge Bitcoin market cycles. This MCP provides easy access to its latest value.'
+  },
+  {
+    id: 'mcp-dex-screener-pools',
+    name: 'DexScreener Pool Watcher',
+    provider: 'Third-Party',
+    description: 'Monitor new liquidity pools and token pairs on Solana via DexScreener.',
+    type: 'Data Source',
+    cost: 'Points/call',
+    categories: ['Data Source', 'DeFi', 'Solana', 'Third-Party', 'Monitoring'] as MCPCategory[],
+    details: 'Tracks DexScreener for newly listed pairs and pools, enabling agents to discover early opportunities or track liquidity movements.'
   }
 ];
+
+export const getMockMcpById = (id: string): MCP | undefined => {
+  return mockMcps.find(mcp => mcp.id === id);
+};

@@ -3,10 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { StoreAgent, PricingModelType, StoreAgentPricingModel } from '@/types/storeAgent';
-import { FiShoppingCart, FiInfo, FiDownloadCloud } from 'react-icons/fi'; // Example icons
+import { FiShoppingCart, FiInfo, FiDownloadCloud, FiCheck } from 'react-icons/fi'; // Added FiCheck icon
 
 interface AgentStoreCardProps {
   agent: StoreAgent;
+  isOwned: boolean;
   onGetOrDeploy: (agent: StoreAgent) => void;
 }
 
@@ -31,49 +32,65 @@ const formatPrice = (pricingModel: StoreAgentPricingModel): string => {
   }
 };
 
-const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, onGetOrDeploy }) => {
+const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, isOwned, onGetOrDeploy }) => {
   return (
-    <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
-      <div className="card-body p-6">
-        <div className="flex items-start justify-between">
-          <h2 className="card-title text-lg font-semibold mb-1">
+    <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out h-full flex flex-col">
+      <div className="card-body p-4 sm:p-5 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-2">
+          <h2 className="card-title text-lg font-semibold line-clamp-1">
             {agent.name}
           </h2>
           <span className="badge badge-sm badge-outline">{agent.version}</span>
         </div>
+        
         <p className="text-xs text-base-content/70 mb-2">
           Provider: <span className="font-medium">{agent.provider}</span>
         </p>
-        <p className="text-sm text-base-content/90 mb-3 h-20 overflow-hidden text-ellipsis">
-          {agent.description.length > 100 ? `${agent.description.substring(0, 100)}...` : agent.description}
+        
+        <p className="text-sm text-base-content/90 mb-3 line-clamp-3 min-h-[4.5rem]">
+          {agent.description}
         </p>
-        <div className="mb-3">
+        
+        <div className="mb-3 flex flex-wrap gap-1">
           {agent.categories.map((category) => (
-            <span key={category} className="badge badge-ghost badge-sm mr-1 mb-1">
+            <span key={category} className="badge badge-sm badge-ghost">
               {category}
             </span>
           ))}
         </div>
-        <div className="mb-4">
-          <p className="text-sm font-medium">
-            Price: <span className="text-primary">{formatPrice(agent.pricingModel)}</span>
+        
+        <div className="mb-4 p-2 bg-base-300/30 rounded-lg">
+          <p className="text-sm font-medium flex items-center justify-between">
+            <span>Price:</span> <span className="text-primary">{formatPrice(agent.pricingModel)}</span>
           </p>
           {agent.pricingModel.notes && (
             <p className="text-xs text-base-content/70 mt-1">{agent.pricingModel.notes}</p>
           )}
         </div>
 
-        <div className="card-actions justify-end space-x-2">
-          <Link href={`/store/${agent.storeAgentId}`} className="btn btn-sm btn-outline btn-primary">
-            <FiInfo className="mr-1" /> Details
+        <div className="card-actions justify-end mt-auto border-t border-base-300 pt-3">
+          <Link href={`/store/${agent.storeAgentId}`} className="btn btn-sm btn-outline">
+            <FiInfo className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Details</span>
           </Link>
-          <button
-            onClick={() => onGetOrDeploy(agent)}
-            className="btn btn-sm btn-primary"
-          >
-            {agent.pricingModel.type === PricingModelType.FREE ? <FiDownloadCloud className="mr-1" /> : <FiShoppingCart className="mr-1" />}
-            {agent.pricingModel.type === PricingModelType.FREE ? 'Get Agent' : 'Acquire Agent'}
-          </button>
+          
+          {isOwned ? (
+            <button
+              onClick={() => onGetOrDeploy(agent)}
+              className="btn btn-sm btn-success"
+            >
+              <FiCheck className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Deploy</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onGetOrDeploy(agent)}
+              className="btn btn-sm btn-primary"
+            >
+              {agent.pricingModel.type === PricingModelType.FREE ? 
+                <><FiDownloadCloud className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Get</span></> : 
+                <><FiShoppingCart className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Purchase</span></>
+              }
+            </button>
+          )}
         </div>
       </div>
     </div>

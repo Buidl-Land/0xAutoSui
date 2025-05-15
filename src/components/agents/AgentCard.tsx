@@ -95,21 +95,21 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onAction }) => {
         </div>
 
         <div className="card-actions justify-end mt-auto border-t border-base-300 pt-3">
-          <Link href={`/agents/${id}`} className="btn btn-sm btn-ghost">
+          <Link href={`/agents/${id}`} className="btn btn-sm btn-outline">
             <EyeIcon className="h-4 w-4 mr-1" />
             <span className="hidden xs:inline">Details</span>
           </Link>
-          <Link href={`/agents/${id}/edit`} className="btn btn-sm btn-ghost">
+          <Link href={`/agents/${id}/edit`} className="btn btn-sm btn-outline">
             <PencilIcon className="h-4 w-4 mr-1" />
             <span className="hidden xs:inline">Edit</span>
           </Link>
           {statusMatches(status, AgentStatus.RUNNING, AgentStatus.SCHEDULED) ? (
-            <button onClick={() => handleAction('pause')} className="btn btn-sm btn-warning btn-ghost">
+            <button onClick={() => handleAction('pause')} className="btn btn-sm btn-warning">
               <PauseIcon className="h-4 w-4 mr-1" />
               <span className="hidden xs:inline">Pause</span>
             </button>
           ) : (
-            <button onClick={() => handleAction('start')} className="btn btn-sm btn-success btn-ghost">
+            <button onClick={() => handleAction('start')} className="btn btn-sm btn-success">
               <PlayIcon className="h-4 w-4 mr-1" />
               <span className="hidden xs:inline">Start</span>
             </button>

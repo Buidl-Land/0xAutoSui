@@ -1,115 +1,182 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiSearch, FiFilter, FiChevronDown, FiAlertCircle, FiLoader } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiChevronDown, FiAlertCircle, FiLoader, FiSettings, FiShoppingBag } from 'react-icons/fi';
 import McpCard from '@/components/mcp-hub/McpCard';
+import { MCPProvider, fetchMCPProvidersAPI } from '@/data/mockMcpServers';
 
-// Mock MCP Provider Data
-interface MCPProvider {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  rating: number;
-  totalMCPs: number;
-  activeUsers: number;
-  categories: string[];
-  createdAt: string;
-  version: string;
+// 定义筛选区域组件
+interface FilterSectionProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  activeCategoryFilters: string[];
+  setActiveCategoryFilters: (filters: string[]) => void;
+  uniqueCategories: string[];
+  toggleCategoryFilter: (category: string) => void;
 }
 
-const mockMCPProviders: MCPProvider[] = [
-  {
-    id: 'mcp1',
-    name: 'Solana MCP Server',
-    description: 'Offers MCP services for the Solana ecosystem, focusing on DeFi and gaming applications',
-    imageUrl: 'https://via.placeholder.com/150',
-    rating: 4.8,
-    totalMCPs: 45,
-    activeUsers: 1260,
-    categories: ['DeFi', 'Gaming', 'Smart Contracts'],
-    createdAt: '2023-04-15',
-    version: '2.3.1'
-  },
-  {
-    id: 'mcp2',
-    name: 'Jupiter MCP Server',
-    description: 'Aggregated trading MCP provider based on Jupiter protocol',
-    imageUrl: 'https://via.placeholder.com/150',
-    rating: 4.6,
-    totalMCPs: 32,
-    activeUsers: 980,
-    categories: ['DeFi', 'Trading', 'Aggregator'],
-    createdAt: '2023-06-10',
-    version: '1.8.0'
-  },
-  {
-    id: 'mcp3',
-    name: 'NFT Marketplace MCP Server',
-    description: 'MCP server for NFT marketplace trading and creation',
-    imageUrl: 'https://via.placeholder.com/150',
-    rating: 4.5,
-    totalMCPs: 28,
-    activeUsers: 750,
-    categories: ['NFT', 'Art', 'Marketplace'],
-    createdAt: '2023-07-22',
-    version: '3.1.2'
-  },
-  {
-    id: 'mcp4',
-    name: 'Staking MCP Server',
-    description: 'Provides multi-chain staking and yield optimization MCP solutions',
-    imageUrl: 'https://via.placeholder.com/150',
-    rating: 4.7,
-    totalMCPs: 36,
-    activeUsers: 1420,
-    categories: ['Staking', 'DeFi', 'Yield'],
-    createdAt: '2023-05-18',
-    version: '2.0.4'
-  },
-  {
-    id: 'mcp5',
-    name: 'Data Analytics MCP Server',
-    description: 'Blockchain data analytics and visualization MCP provider',
-    imageUrl: 'https://via.placeholder.com/150',
-    rating: 4.4,
-    totalMCPs: 24,
-    activeUsers: 680,
-    categories: ['Data', 'Analytics', 'Insights'],
-    createdAt: '2023-08-05',
-    version: '1.5.7'
-  },
-  {
-    id: 'mcp6',
-    name: 'Governance MCP Server',
-    description: 'DAO governance and voting system MCP services',
-    imageUrl: 'https://via.placeholder.com/150',
-    rating: 4.3,
-    totalMCPs: 19,
-    activeUsers: 520,
-    categories: ['Governance', 'DAO', 'Voting'],
-    createdAt: '2023-09-12',
-    version: '0.9.3'
-  },
-];
+const FilterSection: React.FC<FilterSectionProps> = ({
+  searchTerm,
+  setSearchTerm,
+  activeCategoryFilters,
+  uniqueCategories,
+  toggleCategoryFilter
+}) => {
+  return (
+    <div className="bg-base-200/30 rounded-lg mb-6 p-5 border border-base-300">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Search Input */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-medium">Search</span>
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name or description..."
+              className="input input-bordered w-full pr-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FiSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 h-5 w-5" />
+          </div>
+        </div>
 
-// Mock API function
-const fetchMCPProvidersAPI = async (): Promise<MCPProvider[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockMCPProviders);
-    }, 500);
-  });
+        {/* Category Filter */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-medium">Category</span>
+          </label>
+          <div className="dropdown dropdown-bottom w-full">
+            <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
+              <span>
+                {activeCategoryFilters.length === 0 
+                  ? "All Categories" 
+                  : activeCategoryFilters.length === 1 
+                    ? activeCategoryFilters[0] 
+                    : `${activeCategoryFilters.length} categories selected`}
+              </span>
+              <FiChevronDown className="h-4 w-4" />
+            </div>
+            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
+              {uniqueCategories.map(category => (
+                <li key={category}>
+                  <label className="label cursor-pointer justify-start">
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-primary checkbox-sm mr-2"
+                      checked={activeCategoryFilters.includes(category)}
+                      onChange={() => toggleCategoryFilter(category)}
+                    />
+                    <span className="label-text">{category}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        
+        {/* Sort By */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-medium">Sort By</span>
+          </label>
+          <select className="select select-bordered w-full">
+            <option value="userCount_desc">Most Popular</option>
+            <option value="rating_desc">Highest Rated</option>
+            <option value="mcpCount_desc">Most Tools</option>
+            <option value="createdAt_desc">Recently Added</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 定义MCP卡片列表组件
+interface McpListProps {
+  providers: MCPProvider[];
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  emptyMessage: string;
+}
+
+const McpList: React.FC<McpListProps> = ({ 
+  providers, 
+  currentPage, 
+  setCurrentPage, 
+  totalPages, 
+  emptyMessage
+}) => {
+  return (
+    <div>
+      {providers.length === 0 ? (
+        <div className="bg-base-200/30 p-8 rounded-lg text-center border border-base-300">
+          <p className="text-base-content/70">{emptyMessage}</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {providers.map(provider => (
+              <McpCard key={provider.id} provider={provider} isInstalled={provider.installed} />
+            ))}
+          </div>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8 mb-2">
+              <div className="join shadow-sm">
+                <button
+                  className="join-item btn btn-sm btn-outline"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  «
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    className={`join-item btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  className="join-item btn btn-sm btn-outline"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 };
 
 const MCPHubPage = () => {
   const [allMCPProviders, setAllMCPProviders] = useState<MCPProvider[]>([]);
-  const [filteredMCPProviders, setFilteredMCPProviders] = useState<MCPProvider[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategoryFilters, setActiveCategoryFilters] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // 已安装MCP状态
+  const [installedProviders, setInstalledProviders] = useState<MCPProvider[]>([]);
+  const [filteredInstalledProviders, setFilteredInstalledProviders] = useState<MCPProvider[]>([]);
+  const [installedSearchTerm, setInstalledSearchTerm] = useState('');
+  const [installedCategoryFilters, setInstalledCategoryFilters] = useState<string[]>([]);
+  const [installedCurrentPage, setInstalledCurrentPage] = useState(1);
+  
+  // 市场MCP状态
+  const [marketProviders, setMarketProviders] = useState<MCPProvider[]>([]);
+  const [filteredMarketProviders, setFilteredMarketProviders] = useState<MCPProvider[]>([]);
+  const [marketSearchTerm, setMarketSearchTerm] = useState('');
+  const [marketCategoryFilters, setMarketCategoryFilters] = useState<string[]>([]);
+  const [marketCurrentPage, setMarketCurrentPage] = useState(1);
   
   const itemsPerPage = 6; // 2x3 grid
 
@@ -120,7 +187,16 @@ const MCPHubPage = () => {
       try {
         const providers = await fetchMCPProvidersAPI();
         setAllMCPProviders(providers);
-        setFilteredMCPProviders(providers); // Show all initially
+        
+        // 分离已安装和市场MCP
+        const installed = providers.filter(p => p.installed);
+        const market = providers.filter(p => !p.installed);
+        
+        setInstalledProviders(installed);
+        setFilteredInstalledProviders(installed);
+        
+        setMarketProviders(market);
+        setFilteredMarketProviders(market);
       } catch (e) {
         setError('Failed to load MCP Hub. Please try again later.');
         console.error(e);
@@ -131,50 +207,90 @@ const MCPHubPage = () => {
     loadInitialData();
   }, []);
 
-  // Get all unique categories
+  // 获取所有唯一分类
   const uniqueCategories = React.useMemo(() => {
     const categories = new Set<string>();
     allMCPProviders.forEach(provider => provider.categories.forEach(cat => categories.add(cat)));
     return Array.from(categories).sort();
   }, [allMCPProviders]);
 
-  // Apply filters
-  useEffect(() => {
-    let tempProviders = [...allMCPProviders];
-
-    // Apply category filters
-    if (activeCategoryFilters.length > 0) {
-      tempProviders = tempProviders.filter(provider =>
-        activeCategoryFilters.some(filterCat => provider.categories.includes(filterCat))
-      );
-    }
-
-    // Apply search term
-    if (searchTerm) {
-      tempProviders = tempProviders.filter(provider =>
-        provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        provider.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredMCPProviders(tempProviders);
-    setCurrentPage(1); // Reset to first page
-  }, [searchTerm, activeCategoryFilters, allMCPProviders]);
-
-  // Pagination handling
-  const paginatedProviders = React.useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredMCPProviders.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredMCPProviders, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(filteredMCPProviders.length / itemsPerPage);
-
-  // Toggle filter
-  const toggleCategoryFilter = (category: string) => {
-    setActiveCategoryFilters(prev => 
+  // 切换分类筛选 - 已安装
+  const toggleInstalledCategoryFilter = (category: string) => {
+    setInstalledCategoryFilters(prev => 
       prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
     );
   };
+  
+  // 切换分类筛选 - 市场
+  const toggleMarketCategoryFilter = (category: string) => {
+    setMarketCategoryFilters(prev => 
+      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
+    );
+  };
+
+  // 应用筛选 - 已安装
+  useEffect(() => {
+    let filtered = [...installedProviders];
+
+    // 应用分类筛选
+    if (installedCategoryFilters.length > 0) {
+      filtered = filtered.filter(provider =>
+        installedCategoryFilters.some(filterCat => provider.categories.includes(filterCat))
+      );
+    }
+
+    // 应用搜索词
+    if (installedSearchTerm) {
+      filtered = filtered.filter(provider =>
+        provider.name.toLowerCase().includes(installedSearchTerm.toLowerCase()) ||
+        provider.description.toLowerCase().includes(installedSearchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredInstalledProviders(filtered);
+    setInstalledCurrentPage(1); // 重置为第一页
+  }, [installedSearchTerm, installedCategoryFilters, installedProviders]);
+
+  // 应用筛选 - 市场
+  useEffect(() => {
+    let filtered = [...marketProviders];
+    
+    // 应用分类筛选
+    if (marketCategoryFilters.length > 0) {
+      filtered = filtered.filter(provider =>
+        marketCategoryFilters.some(filterCat => provider.categories.includes(filterCat))
+      );
+    }
+    
+    // 应用搜索词
+    if (marketSearchTerm) {
+      filtered = filtered.filter(provider =>
+        provider.name.toLowerCase().includes(marketSearchTerm.toLowerCase()) ||
+        provider.description.toLowerCase().includes(marketSearchTerm.toLowerCase())
+      );
+    }
+    
+    setFilteredMarketProviders(filtered);
+    setMarketCurrentPage(1); // 重置为第一页
+  }, [marketSearchTerm, marketCategoryFilters, marketProviders]);
+
+  // 计算分页 - 已安装
+  const paginatedInstalledProviders = React.useMemo(() => {
+    const startIndex = (installedCurrentPage - 1) * itemsPerPage;
+    return filteredInstalledProviders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredInstalledProviders, installedCurrentPage]);
+  
+  // 计算分页 - 市场
+  const paginatedMarketProviders = React.useMemo(() => {
+    const startIndex = (marketCurrentPage - 1) * itemsPerPage;
+    return filteredMarketProviders.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredMarketProviders, marketCurrentPage]);
+  
+  // 计算总页数 - 已安装
+  const installedTotalPages = Math.ceil(filteredInstalledProviders.length / itemsPerPage);
+  
+  // 计算总页数 - 市场
+  const marketTotalPages = Math.ceil(filteredMarketProviders.length / itemsPerPage);
 
   if (isLoading) {
     return (
@@ -196,122 +312,59 @@ const MCPHubPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">MCP Hub</h1>
-        <p className="text-base-content/70">Explore and access MCP Servers (Multi-Chain Processing) for the Solana ecosystem</p>
+    <div className="p-4 md:p-6 space-y-6 bg-base-200 min-h-screen">
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold mb-2 text-base-content">MCP Hub</h1>
+        <p className="text-base-content/70">Discover and install MCP servers for your agent integration needs.</p>
       </header>
 
-      {/* Filters and Search Section - Updated for consistent styling */}
-      <div className="mb-8 p-5 bg-base-200 rounded-lg shadow-md">
-        <div className="flex flex-col space-y-4">
-          <h2 className="text-lg font-semibold text-base-content">Search & Filter</h2>
+      {/* 已安装的MCP服务器 */}
+      <div className="card bg-base-100 shadow-xl mb-6">
+        <div className="card-body">
+          <h2 className="card-title text-xl mb-4">Installed Servers</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Search Input */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Search MCP Providers</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search by name or description..."
-                  className="input input-bordered w-full pr-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <FiSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 h-5 w-5" />
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Category</span>
-              </label>
-              <div className="dropdown dropdown-bottom w-full">
-                <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
-                  <span>
-                    {activeCategoryFilters.length === 0 
-                      ? "All Categories" 
-                      : activeCategoryFilters.length === 1 
-                        ? activeCategoryFilters[0] 
-                        : `${activeCategoryFilters.length} categories selected`}
-                  </span>
-                  <FiChevronDown className="h-4 w-4" />
-                </div>
-                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
-                  {uniqueCategories.map(category => (
-                    <li key={category}>
-                      <label className="label cursor-pointer justify-start">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-primary checkbox-sm mr-2"
-                          checked={activeCategoryFilters.includes(category)}
-                          onChange={() => toggleCategoryFilter(category)}
-                        />
-                        <span className="label-text">{category}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            
-            {/* Rating Filter - Adding a new filter as an enhancement */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Sort By</span>
-              </label>
-              <select className="select select-bordered w-full">
-                <option value="userCount_desc">Most Popular</option>
-                <option value="rating_desc">Highest Rated</option>
-                <option value="mcpCount_desc">Most MCPs</option>
-                <option value="createdAt_desc">Recently Added</option>
-              </select>
-            </div>
-          </div>
+          <FilterSection
+            searchTerm={installedSearchTerm}
+            setSearchTerm={setInstalledSearchTerm}
+            activeCategoryFilters={installedCategoryFilters}
+            setActiveCategoryFilters={setInstalledCategoryFilters}
+            uniqueCategories={uniqueCategories}
+            toggleCategoryFilter={toggleInstalledCategoryFilter}
+          />
+          
+          <McpList
+            providers={paginatedInstalledProviders}
+            currentPage={installedCurrentPage}
+            setCurrentPage={setInstalledCurrentPage}
+            totalPages={installedTotalPages}
+            emptyMessage="No installed MCP servers found. Install some from the marketplace below."
+          />
         </div>
       </div>
-
-      {/* MCP Provider List */}
-      <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {paginatedProviders.map(provider => (
-          <McpCard key={provider.id} provider={provider} />
-        ))}
-      </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-12">
-          <div className="join">
-            <button
-              className="join-item btn btn-outline"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              «
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i + 1}
-                className={`join-item btn ${currentPage === i + 1 ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              className="join-item btn btn-outline"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              »
-            </button>
-          </div>
+      
+      {/* MCP市场 */}
+      <div className="card bg-base-100 shadow-xl mb-6">
+        <div className="card-body">
+          <h2 className="card-title text-xl mb-4">Marketplace Servers</h2>
+          
+          <FilterSection
+            searchTerm={marketSearchTerm}
+            setSearchTerm={setMarketSearchTerm}
+            activeCategoryFilters={marketCategoryFilters}
+            setActiveCategoryFilters={setMarketCategoryFilters}
+            uniqueCategories={uniqueCategories}
+            toggleCategoryFilter={toggleMarketCategoryFilter}
+          />
+          
+          <McpList
+            providers={paginatedMarketProviders}
+            currentPage={marketCurrentPage}
+            setCurrentPage={setMarketCurrentPage}
+            totalPages={marketTotalPages}
+            emptyMessage="No marketplace MCP servers found. Try changing your filters."
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 };

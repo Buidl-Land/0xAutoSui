@@ -187,177 +187,197 @@ const AgentStorePage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 lg:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Agents Store</h1>
+    <div className="p-4 md:p-6 space-y-6 bg-base-200 min-h-screen">
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold mb-2 text-base-content">Agents Store</h1>
         <p className="text-base-content/70">Discover and deploy pre-built Agents, focused on the Solana Ecosystem.</p>
       </header>
 
       {/* Filters and Search Section - Updated for consistent styling */}
-      <div className="mb-8 p-5 bg-base-200 rounded-lg shadow-md">
-        <div className="flex flex-col space-y-4">
-          <h2 className="text-lg font-semibold text-base-content">Search & Filter</h2>
+      <div className="card bg-base-100 shadow-xl mb-6">
+        <div className="card-body">
+          <h2 className="card-title text-xl mb-4">Search & Filter</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {/* Search Input */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Search Agents</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search by name or description..."
-                  className="input input-bordered w-full pr-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <FiSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 h-5 w-5" />
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Category</span>
-              </label>
-              <div className="dropdown dropdown-bottom w-full">
-                <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
-                  <span>
-                    {activeCategoryFilters.length === 0 
-                      ? "All Categories" 
-                      : activeCategoryFilters.length === 1 
-                        ? activeCategoryFilters[0] 
-                        : `${activeCategoryFilters.length} categories selected`}
-                  </span>
-                  <FiChevronDown className="h-4 w-4" />
+          <div className="bg-base-200/30 rounded-lg border border-base-300 p-5 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {/* Search Input */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">Search Agents</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by name or description..."
+                    className="input input-bordered w-full pr-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <FiSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-base-content/50 h-5 w-5" />
                 </div>
-                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
-                  {uniqueCategories.map(category => (
-                    <li key={category}>
-                      <label className="label cursor-pointer justify-start">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-primary checkbox-sm mr-2"
-                          checked={activeCategoryFilters.includes(category)}
-                          onChange={() => toggleFilter(activeCategoryFilters, setActiveCategoryFilters, category)}
-                        />
-                        <span className="label-text">{category}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
               </div>
-            </div>
 
-            {/* Provider Filter */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Provider</span>
-              </label>
-              <div className="dropdown dropdown-bottom w-full">
-                <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
-                  <span>
-                    {activeProviderFilters.length === 0 
-                      ? "All Providers" 
-                      : activeProviderFilters.length === 1 
-                        ? activeProviderFilters[0] 
-                        : `${activeProviderFilters.length} providers selected`}
-                  </span>
-                  <FiChevronDown className="h-4 w-4" />
+              {/* Category Filter */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">Category</span>
+                </label>
+                <div className="dropdown dropdown-bottom w-full">
+                  <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
+                    <span>
+                      {activeCategoryFilters.length === 0 
+                        ? "All Categories" 
+                        : activeCategoryFilters.length === 1 
+                          ? activeCategoryFilters[0] 
+                          : `${activeCategoryFilters.length} categories selected`}
+                    </span>
+                    <FiChevronDown className="h-4 w-4" />
+                  </div>
+                  <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
+                    {uniqueCategories.map(category => (
+                      <li key={category}>
+                        <label className="label cursor-pointer justify-start">
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-primary checkbox-sm mr-2"
+                            checked={activeCategoryFilters.includes(category)}
+                            onChange={() => toggleFilter(activeCategoryFilters, setActiveCategoryFilters, category)}
+                          />
+                          <span className="label-text">{category}</span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
-                  {uniqueProviders.map(provider => (
-                    <li key={provider}>
-                      <label className="label cursor-pointer justify-start">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-primary checkbox-sm mr-2"
-                          checked={activeProviderFilters.includes(provider)}
-                          onChange={() => toggleFilter(activeProviderFilters, setActiveProviderFilters, provider)}
-                        />
-                        <span className="label-text">{provider}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
               </div>
-            </div>
 
-            {/* Price Filter */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Price</span>
-              </label>
-              <div className="dropdown dropdown-bottom w-full">
-                <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
-                  <span>
-                    {activePriceFilters.length === 0 
-                      ? "All Prices" 
-                      : activePriceFilters.length === 1 
-                        ? activePriceFilters[0] 
-                        : `${activePriceFilters.length} price options selected`}
-                  </span>
-                  <FiChevronDown className="h-4 w-4" />
+              {/* Provider Filter */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">Provider</span>
+                </label>
+                <div className="dropdown dropdown-bottom w-full">
+                  <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
+                    <span>
+                      {activeProviderFilters.length === 0 
+                        ? "All Providers" 
+                        : activeProviderFilters.length === 1 
+                          ? activeProviderFilters[0] 
+                          : `${activeProviderFilters.length} providers selected`}
+                    </span>
+                    <FiChevronDown className="h-4 w-4" />
+                  </div>
+                  <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
+                    {uniqueProviders.map(provider => (
+                      <li key={provider}>
+                        <label className="label cursor-pointer justify-start">
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-primary checkbox-sm mr-2"
+                            checked={activeProviderFilters.includes(provider)}
+                            onChange={() => toggleFilter(activeProviderFilters, setActiveProviderFilters, provider)}
+                          />
+                          <span className="label-text">{provider}</span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
-                  {priceFilterOptions.map(priceOpt => (
-                    <li key={priceOpt}>
-                      <label className="label cursor-pointer justify-start">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-primary checkbox-sm mr-2"
-                          checked={activePriceFilters.includes(priceOpt)}
-                          onChange={() => toggleFilter(activePriceFilters, setActivePriceFilters, priceOpt)}
-                        />
-                        <span className="label-text">{priceOpt}</span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
+              </div>
+
+              {/* Price Filter */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">Price</span>
+                </label>
+                <div className="dropdown dropdown-bottom w-full">
+                  <div tabIndex={0} role="button" className="select select-bordered w-full text-left flex justify-between items-center">
+                    <span>
+                      {activePriceFilters.length === 0 || activePriceFilters.includes('All')
+                        ? "All Prices" 
+                        : activePriceFilters.join(" & ")}
+                    </span>
+                    <FiChevronDown className="h-4 w-4" />
+                  </div>
+                  <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-lg w-full z-10 max-h-60 overflow-y-auto mt-1">
+                    {priceFilterOptions.map(price => (
+                      <li key={price}>
+                        <label className="label cursor-pointer justify-start">
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-primary checkbox-sm mr-2"
+                            checked={activePriceFilters.includes(price) || (price === 'All' && activePriceFilters.length === 0)}
+                            onChange={() => {
+                              if (price === 'All') {
+                                setActivePriceFilters([]);
+                              } else {
+                                toggleFilter(activePriceFilters.filter(p => p !== 'All'), setActivePriceFilters, price);
+                              }
+                            }}
+                          />
+                          <span className="label-text">{price}</span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Sort Options */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Sort By</span>
-              </label>
-              <select
-                className="select select-bordered w-full"
+          {/* Sort Controls */}
+          <div className="flex flex-wrap justify-between items-center">
+            <div className="mb-2 sm:mb-0">
+              <span className="text-sm text-base-content/70">Found {filteredStoreAgents.length} agents</span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm mr-2 whitespace-nowrap">Sort by:</span>
+              <select 
+                className="select select-sm select-bordered"
                 value={activeSortOption}
                 onChange={(e) => setActiveSortOption(e.target.value)}
-                aria-label="Sort Agents By"
               >
-                <option value="popularityScore_desc">Popularity (High to Low)</option>
-                <option value="popularityScore_asc">Popularity (Low to High)</option>
+                <option value="popularityScore_desc">Most Popular</option>
                 <option value="name_asc">Name (A-Z)</option>
                 <option value="name_desc">Name (Z-A)</option>
                 <option value="price_asc">Price (Low to High)</option>
                 <option value="price_desc">Price (High to Low)</option>
-                <option value="publishedAt_desc">Recently Added</option>
+                <option value="createdAt_desc">Newest First</option>
               </select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Agent Cards Grid */}
-      {paginatedAgents.length > 0 ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedAgents.map(agent => (
-              <AgentStoreCard key={agent.storeAgentId} agent={agent} onGetOrDeploy={handleGetOrDeploy} />
-            ))}
-          </div>
-
+      {/* Agent Grid Section */}
+      <div className="card bg-base-100 shadow-xl mb-6">
+        <div className="card-body">
+          <h2 className="card-title text-xl mb-4">Available Agents</h2>
+          
+          {paginatedAgents.length === 0 ? (
+            <div className="bg-base-200/30 p-8 rounded-lg text-center border border-base-300">
+              <p className="text-base-content/70">No agents found matching your criteria. Try adjusting your filters.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {paginatedAgents.map(agent => (
+                <AgentStoreCard 
+                  key={agent.storeAgentId} 
+                  agent={agent} 
+                  isOwned={userHasAcquiredAgent(mockCurrentUser.userId, agent.storeAgentId)}
+                  onGetOrDeploy={handleGetOrDeploy}
+                />
+              ))}
+            </div>
+          )}
+          
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex justify-center mt-12">
-              <div className="join">
+            <div className="flex justify-center mt-8">
+              <div className="join shadow-sm">
                 <button
-                  className="join-item btn btn-outline"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  className="join-item btn btn-sm btn-outline"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
                 >
                   «
@@ -365,15 +385,15 @@ const AgentStorePage = () => {
                 {[...Array(totalPages)].map((_, i) => (
                   <button
                     key={i + 1}
-                    className={`join-item btn ${currentPage === i + 1 ? 'btn-primary' : 'btn-outline'}`}
+                    className={`join-item btn btn-sm ${currentPage === i + 1 ? 'btn-primary' : 'btn-outline'}`}
                     onClick={() => setCurrentPage(i + 1)}
                   >
                     {i + 1}
                   </button>
                 ))}
                 <button
-                  className="join-item btn btn-outline"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  className="join-item btn btn-sm btn-outline"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
                 >
                   »
@@ -381,14 +401,10 @@ const AgentStorePage = () => {
               </div>
             </div>
           )}
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <FiAlertCircle className="text-4xl text-base-content/50 mx-auto mb-4" />
-          <p className="text-xl">No Agents Found</p>
-          <p className="text-base-content/70">Try adjusting your search or filter criteria.</p>
         </div>
-      )}
+      </div>
+      
+      {/* FAQ Section or other content could go here */}
     </div>
   );
 };

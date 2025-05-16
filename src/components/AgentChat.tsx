@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useChat, Message } from "@ai-sdk/react"; // Import Message type
 import { PaperClipIcon, PlusCircleIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline"; // Using Heroicon
-import markdownit from "markdown-it";
+import ReactMarkdown from "react-markdown";
 import { nanoid } from 'nanoid'; // Import nanoid for unique IDs
 
 // Import TriggerModal (assuming path)
@@ -19,16 +19,7 @@ interface AgentChatProps {
   // Add any other props needed, e.g., API endpoint for the agent
 }
 
-// Initialize Markdown renderer with custom options
-const md = markdownit({
-  html: true,
-  breaks: true,
-  linkify: true,
-  typographer: true,
-  highlight: function (str, lang) {
-    return `<pre class="bg-base-300/50 p-2 rounded text-xs font-mono"><code>${str}</code></pre>`;
-  }
-});
+// Markdown-it initialization removed
 
 // Add custom styles for markdown content
 const markdownStyles = `
@@ -126,15 +117,87 @@ const AgentChat: React.FC<AgentChatProps> = ({
   agentDescription,
 }) => {
   // Select the appropriate initial messages based on agentId
-  const initialMessages = mockChatHistories[agentId] || mockChatHistories['default'];
+  const [stagedInitialMessages, setStagedInitialMessages] = useState<Message[]>(mockChatHistories[agentId] || mockChatHistories['default']);
+  const [isStreamingHistory, setIsStreamingHistory] = useState(false);
+  const [isStreamingReply, setIsStreamingReply] = useState(false); // Added for new reply streaming
+  const [isLoadingSimulation, setIsLoadingSimulation] = useState(false); // Added for simulated loading
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, append } = useChat({ // Get append function
-    api: '/api/chat', // Assuming your chat API endpoint
-    initialMessages: initialMessages, // <-- Set initial messages here
+  const { messages, input, handleInputChange, handleSubmit, isLoading, append, setMessages } = useChat({ // Get append and setMessages function
+    api: '/api/chat', // Assuming your chat API endpoint - will be bypassed for mock replies
+    initialMessages: [], // Start with no messages, will be streamed
     maxSteps: 5, // Example: Limit steps if needed
     // Add error handling if desired
-    // onError: (error) => { console.error("Chat error:", error); },
+    onError: (error) => { console.error("Chat error:", error); },
   });
+
+  useEffect(() => {
+    if (input.toLowerCase() === 'show history' && !isStreamingHistory && stagedInitialMessages.length > 0) {
+      setIsStreamingHistory(true);
+
+      // Separate user and assistant messages from stagedInitialMessages
+      const userHistoryMessages = stagedInitialMessages.filter(msg => msg.role === 'user');
+      const assistantHistoryMessagesToStream = stagedInitialMessages.filter(msg => msg.role === 'assistant');
+
+      // Add all user messages from history instantly
+      setMessages(userHistoryMessages);
+
+      let currentAssistantMessageIndex = 0;
+      let currentCharIndex = 0;
+      let currentMessageContent = '';
+      const streamingSpeed = 50; // Milliseconds per character
+
+      const streamNextCharacter = () => {
+        if (currentAssistantMessageIndex < assistantHistoryMessagesToStream.length) {
+          const messageToStream = assistantHistoryMessagesToStream[currentAssistantMessageIndex];
+          if (currentCharIndex < messageToStream.content.length) {
+            currentMessageContent += messageToStream.content[currentCharIndex];
+            setMessages(prevMessages => {
+              const newMessages = [...prevMessages];
+              // Check if the current assistant message is already being streamed
+              const existingMessageIndex = newMessages.findIndex(msg => msg.id === messageToStream.id);
+              if (existingMessageIndex !== -1) {
+                newMessages[existingMessageIndex] = { ...messageToStream, content: currentMessageContent };
+              } else {
+                // This is a new assistant message to start streaming
+                newMessages.push({ ...messageToStream, content: currentMessageContent });
+              }
+              return newMessages;
+            });
+            currentCharIndex++;
+            setTimeout(streamNextCharacter, streamingSpeed);
+          } else {
+            // Move to the next assistant message
+            currentAssistantMessageIndex++;
+            currentCharIndex = 0;
+            currentMessageContent = '';
+            // Add a small delay before starting the next message
+            if (currentAssistantMessageIndex < assistantHistoryMessagesToStream.length) {
+              setTimeout(streamNextCharacter, streamingSpeed * 5);
+            } else {
+              // All assistant messages streamed
+              setIsStreamingHistory(false);
+              handleInputChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
+            }
+          }
+        } else {
+          // Fallback if no assistant messages or something went wrong
+          setIsStreamingHistory(false);
+          if (assistantHistoryMessagesToStream.length === 0) { // If only user messages were there
+            handleInputChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
+          }
+        }
+      };
+
+      // Start streaming only if there are assistant messages
+      if (assistantHistoryMessagesToStream.length > 0) {
+        streamNextCharacter();
+      } else {
+        // If no assistant messages, just clear input and set streaming to false
+        setIsStreamingHistory(false);
+        handleInputChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
+      }
+    }
+  }, [input, stagedInitialMessages, isStreamingHistory, setMessages, handleInputChange]);
 
   // State for TaskConfig Modal
   const [isTaskConfigModalOpen, setIsTaskConfigModalOpen] = useState(false);
@@ -231,11 +294,161 @@ const AgentChat: React.FC<AgentChatProps> = ({
     }));
   };
 
+  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isLoadingSimulation || isStreamingHistory || isStreamingReply || !input.trim()) {
+      return;
+    }
+
+    const userInput = input;
+    const userMessage: Message = { id: nanoid(), role: 'user', content: userInput };
+    // Add user message to the state immediately
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    handleInputChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>); // Clear input
+
+    setIsLoadingSimulation(true);
+    setIsStreamingReply(true);
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const agentSpecificHistory = mockChatHistories[agentId] || mockChatHistories['default'];
+    let messagesToStream: Message[] = [];
+
+    // Find the index of the current user's message (userMessage) in the mock history
+    // Determine the corresponding message index in the mock history
+    let currentUserMessageInMockIndex = -1;
+    // 'messages' from useChat hook reflects state from *before* this handler's setMessages call took effect for the next render.
+    // We need to count user messages *currently in the display* to know if the incoming `userMessage` is the first one.
+    const previousUserMessagesCount = messages.filter(msg => msg.role === 'user').length;
+
+    if (previousUserMessagesCount === 0) {
+      // This is the first user message of the session.
+      // Find the index of the *first* user message in the agent's scripted history to initiate the sequence.
+      currentUserMessageInMockIndex = agentSpecificHistory.findIndex(mockMsg => mockMsg.role === 'user');
+    } else {
+      // This is a subsequent user message.
+      // Match its content against user messages in the agent's scripted history.
+      currentUserMessageInMockIndex = agentSpecificHistory.findIndex(
+        mockMsg => {
+          if (mockMsg.role === 'user') {
+            const mockContentParts = mockMsg.content.split("\n\nTrigger Info:");
+            const mainMockContent = mockContentParts[0].trim();
+            const userInputTrimmed = userMessage.content.trim();
+            return mainMockContent.toLowerCase() === userInputTrimmed.toLowerCase();
+          }
+          return false;
+        }
+      );
+    }
+
+    if (currentUserMessageInMockIndex !== -1) {
+      // Found the user message in mock history. Collect subsequent non-user messages.
+      for (let i = currentUserMessageInMockIndex + 1; i < agentSpecificHistory.length; i++) {
+        if (agentSpecificHistory[i].role !== 'user') {
+          messagesToStream.push(agentSpecificHistory[i]);
+        } else {
+          // Found the next user message, so stop collecting.
+          break;
+        }
+      }
+    }
+
+    if (messagesToStream.length === 0 && currentUserMessageInMockIndex === -1) {
+      // If user input didn't match any script, or if it matched but there were no subsequent non-user messages
+      messagesToStream.push({
+        id: nanoid(),
+        role: 'assistant',
+        content: "I'm not sure how to respond to that based on my script, or we've reached the end of this part of the conversation."
+      });
+    } else if (messagesToStream.length === 0 && currentUserMessageInMockIndex !== -1) {
+      // User input matched, but no more non-user messages follow (end of sequence)
+       messagesToStream.push({
+        id: nanoid(),
+        role: 'assistant',
+        content: "We've reached the end of this scripted sequence."
+      });
+    }
+
+
+    // Stream the collected messages one by one
+    let currentMessageStreamIndex = 0;
+    const streamingSpeed = 30; // Milliseconds per character
+
+    const streamNextMessageInSequence = async () => {
+      if (currentMessageStreamIndex < messagesToStream.length) {
+        const messageToRelay = messagesToStream[currentMessageStreamIndex];
+        const replyMessageId = messageToRelay.id; // Use the ID from mockChatHistories
+        let currentCharIndex = 0;
+        let currentStreamedContent = '';
+
+        // Ensure the message shell is in the messages state before streaming characters
+        // This helps if the message wasn't previously displayed by 'show history'
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const existingMsgIndex = newMessages.findIndex(m => m.id === replyMessageId);
+          if (existingMsgIndex === -1) {
+            // Add new message shell if it doesn't exist
+            newMessages.push({ ...messageToRelay, content: '' });
+          } else {
+            // If it exists (e.g. from 'show history'), ensure its content is reset for streaming this segment
+            newMessages[existingMsgIndex] = { ...newMessages[existingMsgIndex], content: '', role: messageToRelay.role };
+          }
+          return newMessages;
+        });
+
+        // Small delay to ensure state update before character streaming
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+
+        const streamCharacter = () => {
+          if (currentCharIndex < messageToRelay.content.length) {
+            currentStreamedContent += messageToRelay.content[currentCharIndex];
+            setMessages(prevMessages => {
+              const newMessages = [...prevMessages];
+              const existingReplyIndex = newMessages.findIndex(msg => msg.id === replyMessageId);
+              if (existingReplyIndex !== -1) {
+                newMessages[existingReplyIndex] = { ...newMessages[existingReplyIndex], content: currentStreamedContent, role: messageToRelay.role };
+              }
+              // No 'else' needed here as the shell should have been added already
+              return newMessages;
+            });
+            currentCharIndex++;
+            setTimeout(streamCharacter, streamingSpeed);
+          } else {
+            // Current message finished streaming, move to the next
+            currentMessageStreamIndex++;
+            if (currentMessageStreamIndex < messagesToStream.length) {
+              setTimeout(streamNextMessageInSequence, streamingSpeed * 10); // Delay between messages
+            } else {
+              // All messages in sequence streamed
+              setIsLoadingSimulation(false);
+              setIsStreamingReply(false);
+            }
+          }
+        };
+        streamCharacter();
+      } else {
+        // Fallback if messagesToStream was empty (should be handled by the push above)
+        setIsLoadingSimulation(false);
+        setIsStreamingReply(false);
+      }
+    };
+
+    if (messagesToStream.length > 0) {
+      streamNextMessageInSequence();
+    } else {
+      // This case should ideally be covered by the fallback logic, but as a safeguard:
+      setIsLoadingSimulation(false);
+      setIsStreamingReply(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-base-100">
       <style>{markdownStyles}</style>
       {/* Message List Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-4">
+      <div className="flex-grow min-h-0 overflow-y-auto px-4 py-6 space-y-4">
         {messages.map((message) => {
           // Determine chat alignment based on role
           const chatAlignment = message.role === "user" ? "chat-end" : "chat-start";
@@ -255,7 +468,7 @@ const AgentChat: React.FC<AgentChatProps> = ({
           } else if (message.role === "data") {
             // Different avatars for tool calls and agent calls
             const toolCallData = parseToolCallData(message.content);
-            avatar = toolCallData?.type === 'agent_call' 
+            avatar = toolCallData?.type === 'agent_call'
               ? <span className="text-xl flex items-center justify-center w-full h-full">🤖</span>
               : <span className="text-xl flex items-center justify-center w-full h-full">🛠️</span>;
           }
@@ -273,11 +486,17 @@ const AgentChat: React.FC<AgentChatProps> = ({
                   {avatar}
                 </div>
               </div>
-              <div className={`chat-bubble ${bubbleStyle}`}>
+              <div className={`chat-bubble ${bubbleStyle} max-w-xl shadow-md rounded-lg`}>
+                <div className="chat-header text-xs opacity-70 mb-1">
+                  {message.role === 'user' && "User"}
+                  {message.role === 'assistant' && "Assistant"}
+                  {message.role === 'data' && toolCallData?.type === 'tool_call' && "Tool Output"}
+                  {message.role === 'data' && toolCallData?.type === 'agent_call' && "Agent Invocation"}
+                </div>
                 {message.role === 'data' && toolCallData ? (
                   <div className="w-full space-y-2">
                     {/* Header with type and name */}
-                    <div 
+                    <div
                       className="flex items-center justify-between cursor-pointer hover:bg-base-300/30 rounded px-2 py-1"
                       onClick={() => toggleSection(message.id)}
                     >
@@ -321,28 +540,21 @@ const AgentChat: React.FC<AgentChatProps> = ({
                   </div>
                 ) : message.content && (message.role === 'user' || message.role === 'assistant') && (
                   <div>
-                    <div 
-                      className="markdown-content"
-                      dangerouslySetInnerHTML={{ 
-                        __html: md.render(message.role === 'user' 
+                    <div className="markdown-content">
+                      <ReactMarkdown>
+                        {message.role === 'user'
                           ? message.content.split('\n\nTrigger Info:')[0]
-                          : message.content) 
-                      }} 
-                    />
+                          : message.content}
+                      </ReactMarkdown>
+                    </div>
                     {triggerInfo && (
-                      <div className="mt-2">
-                        <div 
-                          className="flex items-center justify-between cursor-pointer hover:bg-base-300/30 rounded px-2 py-1"
+                      <div className="mt-1"> {/* Changed from mt-2 to mt-1 */}
+                        <div
+                          className="flex items-center justify-between cursor-pointer hover:bg-base-300/30 rounded px-2 py-1 mt-1 border-t border-base-300/50 pt-1"
                           onClick={() => toggleTriggerInfo(message.id)}
                         >
-                          <span className="text-xs font-semibold px-2 py-1 rounded bg-base-300/50">
-                            Trigger Info
-                          </span>
-                          {isTriggerInfoCollapsed ? (
-                            <ChevronDownIcon className="h-3 w-3" />
-                          ) : (
-                            <ChevronUpIcon className="h-3 w-3" />
-                          )}
+                          <span className="text-xs font-semibold">Attached Trigger Info</span>
+                          {isTriggerInfoCollapsed ? <ChevronDownIcon className="h-3 w-3" /> : <ChevronUpIcon className="h-3 w-3" />}
                         </div>
                         {!isTriggerInfoCollapsed && (
                           <pre className="text-xs font-mono bg-base-300/50 p-2 rounded mt-1 whitespace-pre-wrap break-all">
@@ -371,23 +583,23 @@ const AgentChat: React.FC<AgentChatProps> = ({
           );
         })}
          {/* Optional: Show loading indicator */}
-         {isLoading && (
-            <div className="chat chat-start">
-                <div className="chat-image avatar">
-                    <div className="w-10 rounded-full bg-base-300 flex items-center justify-center">
-                        <span className="text-xl">🤖</span>
-                    </div>
-                </div>
-                <div className="chat-bubble chat-bubble-secondary">
-                    <span className="loading loading-dots loading-md"></span>
-                </div>
-            </div>
+         {isLoadingSimulation && (
+           <div className="chat chat-start">
+               <div className="chat-image avatar">
+                   <div className="w-10 rounded-full bg-base-300 flex items-center justify-center">
+                       <span className="text-xl">🤖</span>
+                   </div>
+               </div>
+               <div className="chat-bubble chat-bubble-secondary">
+                   <span className="loading loading-dots loading-md"></span>
+               </div>
+           </div>
          )}
       </div>
 
       {/* Input Area */}
       <div className="p-4 border-t border-base-300 bg-base-200">
-        <form onSubmit={handleSubmit} className="flex items-center space-x-2">
+        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
           {attachmentsNode}
           <input
             type="text"
@@ -395,12 +607,12 @@ const AgentChat: React.FC<AgentChatProps> = ({
             value={input}
             onChange={handleInputChange}
             placeholder={`Chat with ${agentName}...`}
-            disabled={isLoading} // Disable input while loading
+            disabled={isLoadingSimulation || isStreamingHistory || isStreamingReply} // Disable input while loading or streaming
           />
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={isLoading || !input.trim()} // Disable if loading or input is empty
+            disabled={isLoadingSimulation || isStreamingHistory || isStreamingReply || !input.trim()} // Disable if loading, streaming or input is empty
           >
             Send
           </button>

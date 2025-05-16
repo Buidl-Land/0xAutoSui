@@ -16,7 +16,7 @@ import {
   TagIcon,
 } from "@heroicons/react/24/outline";
 import { Agent, AgentStatus, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency, ScheduledTriggerFrequency, TriggerConfig } from "@/types/agent"; // Added TriggerConfig
-import { mockAgents } from "@/data/mockAgents";
+import { allMockAgents } from '@/data/mockAgents';
 import { ExtendedAgent, MockLog } from "@/data/mockAgents/types";
 import AgentChat from "@/components/AgentChat"; // Import AgentChat
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
@@ -24,7 +24,7 @@ import TriggerConfigForm from "@/components/agents/TriggerConfigForm"; // Update
 
 const getMockAgentData = (agentId: string | string[] | undefined): ExtendedAgent | null => {
   if (!agentId || Array.isArray(agentId)) return null;
-  return mockAgents.find((agent) => agent.id === agentId) || null;
+  return allMockAgents.find((agent: ExtendedAgent) => agent.id === agentId) || null;
 };
 
 const getStatusBadgeClass = (status?: AgentStatus | string) => {
@@ -69,13 +69,13 @@ const AgentDetailPage = () => {
 
   const handleTriggerTypeChange = (newType: TriggerType) => {
     if (!agent) return;
-    
+
     setAgent(prev => {
       if (!prev) return null;
       return {
         ...prev,
         triggerType: newType,
-        triggerConfig: newType === TriggerType.SCHEDULED 
+        triggerConfig: newType === TriggerType.SCHEDULED
           ? prev.triggerConfig || { frequency: ScheduledTriggerFrequency.DAILY, timeValue: '09:00' }
           : null
       };
@@ -84,7 +84,7 @@ const AgentDetailPage = () => {
 
   const handleTriggerConfigChange = (newConfig: TriggerConfig | null) => {
     if (!agent) return;
-    
+
     setAgent(prev => {
       if (!prev) return null;
       return {
@@ -122,7 +122,7 @@ const AgentDetailPage = () => {
     : 'N/A';
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 flex flex-col h-full">
       {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
@@ -198,6 +198,8 @@ const AgentDetailPage = () => {
       </div>
 
       {/* Tab Content */}
+      {/* Tab Content Wrapper - Allows content to grow and manage overflow */}
+      <div className="flex-grow flex flex-col min-h-0">
       {activeTab === "Logs" && (
         <>
           {/* Configuration Overview */}
@@ -352,6 +354,7 @@ const AgentDetailPage = () => {
           />
         </div>
       )}
+      </div> {/* End Tab Content Wrapper */}
     </div>
   );
 };

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { StoreAgent, PricingModelType, StoreAgentPricingModel } from '@/types/storeAgent';
+import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear'; // Import DiceBear utility
 import { FiShoppingCart, FiInfo, FiDownloadCloud, FiCheck } from 'react-icons/fi'; // Added FiCheck icon
 
 interface AgentStoreCardProps {
@@ -36,21 +37,28 @@ const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, isOwned, onGetOr
   return (
     <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out h-full flex flex-col">
       <div className="card-body p-4 sm:p-5 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h2 className="card-title text-lg font-semibold line-clamp-1">
-            {agent.name}
+        <div className="flex items-start mb-2">
+          <img
+            src={getDiceBearAvatar(DICEBEAR_STYLES.AGENT, agent.name)}
+            alt={`${agent.name} avatar`}
+            className="w-10 h-10 rounded-full mr-3" // Added avatar image
+          />
+          <div className="flex-grow flex justify-between items-start">
+            <h2 className="card-title text-lg font-semibold line-clamp-1">
+              {agent.name}
           </h2>
-          <span className="badge badge-sm badge-outline">{agent.version}</span>
+            <span className="badge badge-sm badge-outline">{agent.version}</span>
+          </div>
         </div>
-        
+
         <p className="text-xs text-base-content/70 mb-2">
           Provider: <span className="font-medium">{agent.provider}</span>
         </p>
-        
+
         <p className="text-sm text-base-content/90 mb-3 line-clamp-3 min-h-[4.5rem]">
           {agent.description}
         </p>
-        
+
         <div className="mb-3 flex flex-wrap gap-1">
           {agent.categories.map((category) => (
             <span key={category} className="badge badge-sm badge-ghost">
@@ -58,7 +66,7 @@ const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, isOwned, onGetOr
             </span>
           ))}
         </div>
-        
+
         <div className="mb-4 p-2 bg-base-300/30 rounded-lg">
           <p className="text-sm font-medium flex items-center justify-between">
             <span>Price:</span> <span className="text-primary">{formatPrice(agent.pricingModel)}</span>
@@ -72,7 +80,7 @@ const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, isOwned, onGetOr
           <Link href={`/store/${agent.storeAgentId}`} className="btn btn-sm btn-outline">
             <FiInfo className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Details</span>
           </Link>
-          
+
           {isOwned ? (
             <button
               onClick={() => onGetOrDeploy(agent)}
@@ -85,8 +93,8 @@ const AgentStoreCard: React.FC<AgentStoreCardProps> = ({ agent, isOwned, onGetOr
               onClick={() => onGetOrDeploy(agent)}
               className="btn btn-sm btn-primary"
             >
-              {agent.pricingModel.type === PricingModelType.FREE ? 
-                <><FiDownloadCloud className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Get</span></> : 
+              {agent.pricingModel.type === PricingModelType.FREE ?
+                <><FiDownloadCloud className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Get</span></> :
                 <><FiShoppingCart className="h-4 w-4 mr-1" /> <span className="hidden xs:inline">Purchase</span></>
               }
             </button>

@@ -1,4 +1,4 @@
-import { AgentStatus, TriggerType, ScheduledTriggerFrequency } from '../../types/agent';
+import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel } from '../../types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
@@ -7,9 +7,9 @@ export const featuredPerpTradingAgent: ExtendedAgent = {
   name: "Perp Futures Trader",
   description: "Executes automated perpetual futures trading strategies based on K-line patterns and volume analysis.",
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "Perp Futures Trader", { size: 128, backgroundColor: ['f9d4d4'] }),
-  agentType: 'Task',
   status: AgentStatus.RUNNING,
   systemPrompt: "Analyze market data (K-lines, volume) to identify high-probability perp trading setups. Execute trades with defined TP/SL.",
+  model: AIModel.Claude37Sonnet,
   tasks: [
     { id: 'perp-task-01', description: "Fetch hourly K-lines for BTC-PERP.", order: 1, tags: ['Data Fetch', 'Perps', 'BTC'] },
     { id: 'perp-task-02', description: "Analyze K-line patterns (e.g., breakouts, reversals).", order: 2, tags: ['Technical Analysis', 'Pattern Recognition'] },

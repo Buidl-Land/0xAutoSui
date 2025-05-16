@@ -14,7 +14,7 @@ import AgentConfigStep from "@/components/agents/create/AgentConfigStep";
 // import AgentReviewStep from "@/components/agents/create/AgentReviewStep";
 
 import { ExtendedAgent } from "@/data/mockAgents";
-import { AgentType, TriggerType, AgentConfig, TriggerConfig, Task } from "@/types/agent";
+import { TriggerType, AgentConfig, TriggerConfig, Task, AIModel } from "@/types/agent";
 
 export type AgentCreationMethod = 'prompt' | 'template' | 'manual';
 
@@ -39,7 +39,7 @@ const CreateAgentPage = () => {
     description: '',
     iconUrl: null,
     systemPrompt: 'You are a helpful AI assistant. Be concise and friendly.', // Default system prompt
-    agentType: 'Task',
+    model: AIModel.Claude37Sonnet,
     triggerType: TriggerType.MANUAL,
     triggerConfig: null, // Explicitly null
     config: { dependentMCPs: [], dependentAgents: [], outputActions: [] },
@@ -64,7 +64,6 @@ const CreateAgentPage = () => {
     setAgentData(prev => ({
       ...prev,
       systemPrompt: initialSystemPrompt,
-      agentType: method === 'prompt' ? 'Task' : prev.agentType, // Default to Task for prompt for now
     }));
     setCurrentStep(2);
   };
@@ -75,8 +74,8 @@ const CreateAgentPage = () => {
   };
 
   const handleConfigNext = (data: {
-    agentType: AgentType;
     systemPrompt: string;
+    model: AIModel;
     triggerType: TriggerType;
     triggerConfig: TriggerConfig | null;
     config: AgentConfig;
@@ -88,16 +87,14 @@ const CreateAgentPage = () => {
     solRefillThreshold?: number;
     solRefillAmount?: number;
     solRefillSourceEoa?: string;
-    tasks?: Task[];
   }) => {
     setAgentData(prev => ({
       ...prev,
-      agentType: data.agentType,
       systemPrompt: data.systemPrompt,
+      model: data.model,
       triggerType: data.triggerType,
       triggerConfig: data.triggerConfig,
-      config: data.config, // This is the nested config object (MCPs, A2A, Outputs)
-      // Wallet fields are at the root of 'data' and directly update agentData
+      config: data.config,
       associatedWalletId: data.associatedWalletId,
       autoRefillServiceCredits: data.autoRefillServiceCredits,
       serviceCreditsRefillThreshold: data.serviceCreditsRefillThreshold,
@@ -106,9 +103,8 @@ const CreateAgentPage = () => {
       solRefillThreshold: data.solRefillThreshold,
       solRefillAmount: data.solRefillAmount,
       solRefillSourceEoa: data.solRefillSourceEoa,
-      tasks: data.tasks, // Set tasks
     }));
-    setCurrentStep(4); // Move to Test Step
+    setCurrentStep(4);
   };
 
   const handleFinalSubmit = () => {
@@ -142,10 +138,10 @@ const CreateAgentPage = () => {
         return (
           <AgentConfigStep
             initialData={{
-              agentType: agentData.agentType!,
               systemPrompt: agentData.systemPrompt!,
+              model: agentData.model!,
               triggerType: agentData.triggerType!,
-              triggerConfig: agentData.triggerConfig || null, // Ensure null if undefined
+              triggerConfig: agentData.triggerConfig || null,
               config: agentData.config!,
               associatedWalletId: agentData.associatedWalletId,
               autoRefillServiceCredits: agentData.autoRefillServiceCredits,
@@ -155,7 +151,6 @@ const CreateAgentPage = () => {
               solRefillThreshold: agentData.solRefillThreshold,
               solRefillAmount: agentData.solRefillAmount,
               solRefillSourceEoa: agentData.solRefillSourceEoa,
-              tasks: agentData.tasks, // Pass tasks
             }}
             onNext={handleConfigNext}
             onBack={prevStep}

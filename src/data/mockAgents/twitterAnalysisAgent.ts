@@ -1,5 +1,5 @@
 import { ExtendedAgent } from './types';
-import { AgentStatus, TriggerType, ScheduledTriggerFrequency } from '@/types/agent';
+import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel } from '@/types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear';
 
 export const twitterAnalysisAgent: ExtendedAgent = {
@@ -7,8 +7,8 @@ export const twitterAnalysisAgent: ExtendedAgent = {
   name: 'Twitter Analysis',
   description: 'Analyzes token-related Twitter content to provide sentiment analysis, key insights, and popularity metrics',
   status: AgentStatus.RUNNING,
-  agentType: 'Task',
   systemPrompt: 'Analyze Twitter content for token-related discussions, perform sentiment analysis, and extract key insights and popularity metrics.',
+  model: AIModel.Claude37Sonnet,
   triggerType: TriggerType.SCHEDULED,
   triggerConfig: {
     frequency: ScheduledTriggerFrequency.DAILY,

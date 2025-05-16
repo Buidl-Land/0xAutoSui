@@ -1,4 +1,4 @@
-import { AgentStatus, TriggerType, ScheduledTriggerFrequency } from '../../types/agent';
+import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel } from '../../types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
@@ -7,9 +7,9 @@ export const dcaSolAgent: ExtendedAgent = {
   name: "DCA SOL Agent",
   description: "Automatically buys SOL based on the AHR999 index, placing remaining funds in DeFi lending protocols.",
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "DCA SOL Agent", { size: 128, backgroundColor: ['b6e3f4'] }),
-  agentType: 'Task',
   status: AgentStatus.RUNNING,
   systemPrompt: "Act as a Dollar Cost Averaging bot for SOL, optimizing entries based on AHR999 and managing capital in DeFi.",
+  model: AIModel.GPT4,
   tasks: [
     { id: 'dca-task-01', description: 'Check AHR999 index daily.', order: 1, tags: ['Data Fetch', 'Condition Check'] },
     { id: 'dca-task-02', description: 'If AHR999 < 0.45, buy 0.5 SOL.', order: 2, tags: ['Trading', 'SOL'] },

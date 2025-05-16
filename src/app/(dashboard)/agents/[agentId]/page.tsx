@@ -15,7 +15,7 @@ import {
   ClockIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
-import { Agent, AgentStatus, TaskAgent, ActionAgent, AgentType, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency } from "@/types/agent"; // Adjusted imports
+import { Agent, AgentStatus, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency, ScheduledTriggerFrequency } from "@/types/agent"; // Adjusted imports
 import { mockAgents } from "@/data/mockAgents";
 import { ExtendedAgent, MockLog } from "@/data/mockAgents/types";
 import AgentChat from "@/components/AgentChat"; // Import AgentChat
@@ -54,18 +54,14 @@ const AgentDetailPage = () => {
   const [agent, setAgent] = useState<ExtendedAgent | null>(null);
   const [logFilterLevel, setLogFilterLevel] = useState<string>("All");
   const [logFilterTime, setLogFilterTime] = useState<string>("All");
-  const [activeTab, setActiveTab] = useState<"Logs" | "Chat">("Logs");
+  const [activeTab, setActiveTab] = useState<"Logs" | "Chat" | "Trigger">("Logs");
 
   useEffect(() => {
     const currentAgent = getMockAgentData(agentId);
     setAgent(currentAgent);
     // Default to Chat tab for Chat agents, otherwise Logs
     if (currentAgent) {
-      if (currentAgent.agentType === 'Chat') {
-        setActiveTab("Chat");
-      } else {
-        setActiveTab("Logs");
-      }
+      setActiveTab("Chat");
     } else {
       // Fallback if agent is null (though typically handled by early return)
       setActiveTab("Logs");
@@ -161,6 +157,17 @@ const AgentDetailPage = () => {
           >
             <ShareIcon className="h-5 w-5 mr-2 inline" /> Chat
           </a>
+          <a
+            role="tab"
+            className={`tab tab-lg mr-4 font-medium transition-all duration-200 ${
+              activeTab === "Trigger"
+                ? "tab-active border-b-2 border-primary text-primary"
+                : "text-base-content/70 hover:text-primary"
+            }`}
+            onClick={() => setActiveTab("Trigger")}
+          >
+            <ClockIcon className="h-5 w-5 mr-2 inline" /> Trigger
+          </a>
         </div>
       </div>
 
@@ -196,7 +203,7 @@ const AgentDetailPage = () => {
                   </ul>
                 ) : <p className="text-base-content/80">None</p>}
               </div>
-              {agent.agentType === 'Task' && agent.config?.dependentAgents && (
+              {agent.config?.dependentAgents && (
                 <div>
                   <h3 className="text-lg font-medium mb-1">Dependent Agents (A2A)</h3>
                   {agent.config.dependentAgents.length > 0 ? (
@@ -297,16 +304,87 @@ const AgentDetailPage = () => {
       )}
 
       {activeTab === "Chat" && (
-        <>
-          <AgentChat
-            agentId={agent.id}
-            agentName={agent.name}
-            agentTitle={agent.name} // Using name as title for now
-            agentDescription={agent.description}
-            // Pass agentType to AgentChat for conditional logic there
-            agentType={agent.agentType as AgentType}
-          />
-        </>
+        <AgentChat
+          agentId={agent.id}
+          agentName={agent.name}
+          agentTitle={agent.name}
+          agentDescription={agent.description}
+        />
+      )}
+
+      {activeTab === "Trigger" && (
+        <div className="p-6 bg-base-200 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold mb-6 flex items-center">
+            <ClockIcon className="h-7 w-7 mr-3 text-primary" />
+            Trigger Configuration
+          </h2>
+          <div className="grid grid-cols-1 gap-6">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base">Trigger Type</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={agent.triggerType}
+                disabled
+              >
+                <option value={TriggerType.MANUAL}>Manual</option>
+                <option value={TriggerType.SCHEDULED}>Scheduled</option>
+                <option value={TriggerType.EVENT_DRIVEN}>Event Driven</option>
+              </select>
+            </div>
+
+            {agent.triggerType === TriggerType.SCHEDULED && agent.triggerConfig && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-base">Schedule</span>
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <select
+                    className="select select-bordered w-full"
+                    value={(agent.triggerConfig as ScheduledTriggerConfig).frequency}
+                    disabled
+                  >
+                    <option value={ScheduledTriggerFrequency.HOURLY}>Hourly</option>
+                    <option value={ScheduledTriggerFrequency.DAILY}>Daily</option>
+                    <option value={ScheduledTriggerFrequency.WEEKLY}>Weekly</option>
+                    <option value={ScheduledTriggerFrequency.CUSTOM_CRON}>Custom Cron</option>
+                  </select>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    value={(agent.triggerConfig as ScheduledTriggerConfig).timeValue}
+                    disabled
+                  />
+                </div>
+              </div>
+            )}
+
+            {agent.triggerType === TriggerType.EVENT_DRIVEN && agent.triggerConfig && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text text-base">Event Configuration</span>
+                </label>
+                <div className="grid grid-cols-1 gap-4">
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    value={(agent.triggerConfig as EventDrivenTriggerConfig).eventType}
+                    disabled
+                    placeholder="Event Type"
+                  />
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    value={(agent.triggerConfig as EventDrivenTriggerConfig).eventSource}
+                    disabled
+                    placeholder="Event Source"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

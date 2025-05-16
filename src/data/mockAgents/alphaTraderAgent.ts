@@ -1,4 +1,4 @@
-import { AgentStatus, TriggerType } from '../../types/agent';
+import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel } from '../../types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
@@ -92,9 +92,9 @@ export const alphaTraderAgent: ExtendedAgent = {
   name: 'Alpha Smart Trader',
   description: 'Follows KOL wallets to automatically capture Alpha opportunities by analyzing Meme tokens and executing trades.',
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "Alpha Smart Trader", { size: 128, backgroundColor: ['f9d4d4'] }),
-  agentType: 'Task',
   status: AgentStatus.RUNNING,
   systemPrompt: alphaTraderSystemPrompt,
+  model: AIModel.Claude37Sonnet,
   tasks: [
     {
       id: 'alpha-trader-task-01',

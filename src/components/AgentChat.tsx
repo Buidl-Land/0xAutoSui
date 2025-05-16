@@ -9,14 +9,12 @@ import { nanoid } from 'nanoid'; // Import nanoid for unique IDs
 // Import TriggerModal (assuming path)
 import TaskConfigModal from './TaskConfigModal';
 import { TaskData } from '@/types/task'; // MODIFIED: Added import for TaskData
-import { AgentType } from '@/types/agent'; // Added import for AgentType
 
 interface AgentChatProps {
   agentName: string; // Used for placeholder text
   agentId: string;
   agentTitle: string; // Added for TriggerModal
   agentDescription: string; // Added for TriggerModal
-  agentType: AgentType; // Added agentType prop
   // Add any other props needed, e.g., API endpoint for the agent
 }
 
@@ -99,7 +97,6 @@ const AgentChat: React.FC<AgentChatProps> = ({
   agentId,
   agentTitle,
   agentDescription,
-  agentType, // Destructure agentType
 }) => {
   // Select the appropriate initial messages based on agentId
   const initialMessages = mockChatHistories[agentId] || mockChatHistories['default'];
@@ -228,7 +225,7 @@ const AgentChat: React.FC<AgentChatProps> = ({
               </div>
 
               {/* Add Trigger Button for User messages */}
-              {message.role === 'user' && agentType === 'Task' && (
+              {message.role === 'user' && (
                 <div className="chat-footer opacity-50 mt-1 flex justify-end">
                   <button
                     onClick={() => handleOpenTriggerModal(message.content)}
@@ -238,18 +235,6 @@ const AgentChat: React.FC<AgentChatProps> = ({
                     <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Trigger
                   </button>
                 </div>
-              )}
-              {/* Retain "Add Task" button for non-Task agents or if needed universally, adjust logic as per final requirements */}
-              {message.role === 'user' && agentType !== 'Task' && (
-                 <div className="chat-footer opacity-50 mt-1 flex justify-end">
-                   <button
-                    onClick={() => handleOpenTaskConfigModalForAdd(message.content)}
-                    className="btn btn-xs btn-ghost text-primary hover:bg-primary hover:text-primary-content"
-                    aria-label="Add Task"
-                  >
-                    <PlusCircleIcon className="h-4 w-4 mr-1" /> Add Task
-                  </button>
-                 </div>
               )}
             </div>
           );

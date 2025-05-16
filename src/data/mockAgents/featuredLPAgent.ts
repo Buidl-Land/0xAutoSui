@@ -1,4 +1,4 @@
-import { AgentStatus, TriggerType } from '../../types/agent';
+import { AgentStatus, TriggerType, AIModel } from '../../types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
@@ -7,9 +7,9 @@ export const featuredLPAgent: ExtendedAgent = {
   name: "Liquidity Provision Optimizer",
   description: "Discovers and manages LP positions based on APR, volume, and risk assessment.",
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "Liquidity Provision Optimizer", { size: 128, backgroundColor: ['d1d4f9'] }),
-  agentType: 'Task',
   status: AgentStatus.IDLE,
   systemPrompt: "Identify high-yield, relatively safe liquidity pools. Manage LP entries and exits based on market conditions and risk parameters.",
+  model: AIModel.Claude37Sonnet,
   tasks: [
     { id: 'lp-task-01', description: "Scan for new pools or track smart money LP movements.", order: 1, tags: ['Discovery', 'Monitoring', 'LP'] },
     { id: 'lp-task-02', description: "For promising pools, find Pool Address / Token CA.", order: 2, tags: ['Data Fetch'] },

@@ -7,7 +7,16 @@ export interface AgentConnection {
   // For now, keeping it simple as per pseudocode for initial A2A tab structure
 }
 
-export type AgentType = 'Task' | 'Action' | 'Chat';
+export enum AIModel {
+  GPT4oMini = "gpt-4o-mini",
+  GPT4o = "gpt-4o",
+  GPT41 = "gpt-4.1",
+  Claude35Sonnet = "claude-3.5-sonnet",
+  Claude37Sonnet = "claude-3.7-sonnet",
+  DeepSeekV3 = "deepseek-v3",
+  DeepSeekR1 = "deepseek-r1",
+  Qwen3 = "qwen-3"
+}
 
 export enum TriggerType {
   MANUAL = "MANUAL",
@@ -34,7 +43,6 @@ export interface EventDrivenTriggerConfig { // Future use
 }
 
 export type TriggerConfig = ScheduledTriggerConfig | EventDrivenTriggerConfig | null;
-
 
 export interface MCPDependency {
   mcpId: string;
@@ -72,13 +80,13 @@ export interface Task {
   // Future: parameters: Record<string, any>;
 }
 
-interface BaseAgent {
+export interface Agent {
   id: string;
   name: string;
   description: string;
   iconUrl?: string | null; // URL to the uploaded circular icon, can be null
   systemPrompt: string;
-  agentType: AgentType;
+  model: AIModel;
   ownerId?: string; // As per domain model
   createdAt?: Date; // As per domain model
   updatedAt?: Date; // As per domain model
@@ -95,39 +103,14 @@ interface BaseAgent {
   solRefillAmount?: number; // Using number for decimal
   solRefillSourceEoa?: string;
 
-
   // Optional properties from mock data / existing fields
   status?: AgentStatus; // Changed to use Enum
   lastModified?: Date | number;
   creator?: string;
-  // triggerType?: string; // Deprecated by new triggerType ENUM
-  // triggerConfig?: any[]; // Deprecated by new triggerConfig Typed Object
   mcpConfig?: { name: string; id: string }[]; // This seems to be a simpler version of dependentMCPs, review if it should be merged/removed
   logs?: { id: string; timestamp: number; message?: string }[]; // Made message optional
-  // TODO: Review if these optional fields should be part of the core Agent type
-  // or handled differently, e.g. via a richer internal type for mock data.
-}
-
-export interface TaskAgent extends BaseAgent {
-  agentType: 'Task';
   tasks?: Task[]; // Updated to use the new Task interface
-  // a2aConnections?: AgentConnection[]; // This is now part of AgentConfig.dependentAgents
 }
-
-export interface ActionAgent extends BaseAgent {
-  agentType: 'Action';
-  // Action-specific properties, but no tasks or a2aConnections
-  // Action agents might still have MCP dependencies and outputs, but not dependent agents.
-  // This needs clarification based on how "Action Agents" are used.
-  // For now, they inherit the full config.
-}
-
-export interface ChatAgent extends BaseAgent {
-  agentType: 'Chat';
-  // Chat-specific properties can be added here later
-}
-
-export type Agent = TaskAgent | ActionAgent | ChatAgent;
 
 export enum AgentStatus {
   RUNNING = "RUNNING",
@@ -137,6 +120,7 @@ export enum AgentStatus {
   IDLE = "IDLE",
   STOPPED = "STOPPED",
 }
+
 // Enums from Domain Model for reference, can be moved to a shared enum file if needed
 export enum AgentConnectionStatusEnum {
   PENDING_APPROVAL = "PENDING_APPROVAL",

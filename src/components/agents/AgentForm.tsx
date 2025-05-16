@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { Agent, AgentType, TaskAgent, ActionAgent, AgentStatus, TriggerType, AgentConfig, TriggerConfig, ScheduledTriggerConfig, ScheduledTriggerFrequency, MCPDependency, AgentDependency, OutputAction } from "@/types/agent";
+import { Agent, AgentStatus, TriggerType, AgentConfig, TriggerConfig, ScheduledTriggerConfig, ScheduledTriggerFrequency, MCPDependency, AgentDependency, OutputAction, AIModel } from "@/types/agent";
 import { mockAgents, ExtendedAgent } from "@/data/mockAgents"; // Using ExtendedAgent for mock data flexibility
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,11 @@ interface AgentFormProps {
   isEditMode?: boolean;
 }
 
+const AVAILABLE_MODELS = Object.entries(AIModel).map(([key, value]) => ({
+  id: value,
+  name: value,
+}));
+
 const initialAgentConfig: AgentConfig = {
   dependentMCPs: [],
   dependentAgents: [],
@@ -32,11 +37,10 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
     description: agent?.description || "",
     iconUrl: agent?.iconUrl || null,
     systemPrompt: agent?.systemPrompt || "You are a helpful AI assistant.",
-    agentType: agent?.agentType || "Task",
-    triggerType: agent?.triggerType || TriggerType.MANUAL,
-    triggerConfig: agent?.triggerConfig || null,
+    model: agent?.model || AIModel.Claude37Sonnet,
     config: agent?.config || initialAgentConfig,
     ownerId: agent?.ownerId,
+    triggerType: agent?.triggerType || TriggerType.MANUAL,
     associatedWalletId: agent?.associatedWalletId || null,
     autoRefillServiceCredits: agent?.autoRefillServiceCredits || false,
     serviceCreditsRefillThreshold: agent?.serviceCreditsRefillThreshold || 0,
@@ -45,7 +49,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
     solRefillThreshold: agent?.solRefillThreshold || 0,
     solRefillAmount: agent?.solRefillAmount || 0,
     solRefillSourceEoa: agent?.solRefillSourceEoa || "",
-    tasks: agent?.tasks || [], // Initialize tasks
+    tasks: agent?.tasks || [],
   });
 
   const [selectedIconFile, setSelectedIconFile] = useState<File | null>(null);
@@ -61,11 +65,10 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
         description: agent.description,
         iconUrl: agent.iconUrl || null,
         systemPrompt: agent.systemPrompt,
-        agentType: agent.agentType as AgentType, // Ensure it's AgentType
-        triggerType: agent.triggerType,
-        triggerConfig: agent.triggerConfig || null,
+        model: agent.model || AIModel.Claude37Sonnet,
         config: agent.config || initialAgentConfig,
         ownerId: agent.ownerId,
+        triggerType: agent.triggerType,
         associatedWalletId: agent.associatedWalletId || null,
         autoRefillServiceCredits: agent.autoRefillServiceCredits || false,
         serviceCreditsRefillThreshold: agent.serviceCreditsRefillThreshold || 0,
@@ -88,7 +91,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
       ...prevState,
       [name]: value,
     }));
-    if (name === "agentType" && value === "Action") {
+    if (name === "model" && value === "gpt-4") {
       // Reset task-specific fields if type changes to Action
       // This logic might need to be more sophisticated depending on how you want to handle type changes
     }
@@ -119,26 +122,15 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
     const submittedAgentData: ExtendedAgent = {
       id: agent?.id || `agent-${Date.now()}`, // Generate ID if new
       ...formState,
-      agentType: formState.agentType as AgentType, // Ensure agentType is correctly typed
       iconUrl: iconPreview, // Use preview, actual upload logic needed
       status: agent?.status || AgentStatus.IDLE, // Default status for new agents
       lastModified: Date.now(),
       createdAt: agent?.createdAt || new Date(),
       updatedAt: new Date(),
       creator: agent?.creator || "current_user_id",
-      triggerType: formState.triggerType, // Ensure triggerType is included
       triggerConfig: formState.triggerConfig,
-      config: formState.config,
       logs: agent?.logs || [],
-      tasks: formState.agentType === 'Task' ? formState.tasks || [] : undefined,
-      associatedWalletId: formState.associatedWalletId,
-      autoRefillServiceCredits: formState.autoRefillServiceCredits,
-      serviceCreditsRefillThreshold: formState.serviceCreditsRefillThreshold,
-      serviceCreditsRefillAmount: formState.serviceCreditsRefillAmount,
-      autoRefillSol: formState.autoRefillSol,
-      solRefillThreshold: formState.solRefillThreshold,
-      solRefillAmount: formState.solRefillAmount,
-      solRefillSourceEoa: formState.solRefillSourceEoa,
+      tasks: formState.tasks || [],
     };
     onSubmit(submittedAgentData);
   };
@@ -252,9 +244,11 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
 
   // Mock available wallets
   const availableWallets = [
-    { id: 'wallet-main', name: 'Main Wallet' },
-    { id: 'wallet-trading-a', name: 'Trading Wallet A' },
-    { id: 'wallet-test-01', name: 'Test Wallet 01' },
+    { id: 'wallet-main-alpha', name: 'Alpha Trader Wallet' },
+    { id: 'wallet-dca-sol', name: 'DCA SOL Wallet' },
+    { id: 'wallet-lp-provider', name: 'LP Provider Wallet' },
+    { id: 'wallet-perp-trader', name: 'Perp Trader Wallet' },
+    { id: 'wallet-x-info', name: 'X Info Wallet' },
   ];
 
   return (
@@ -317,71 +311,36 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
         {/* Agent Behavior Section */}
         <div className="mb-8 p-6 bg-base-100 rounded-lg shadow">
           <h3 className="text-xl font-medium mb-4">Agent Behavior</h3>
-          <div className="form-control mb-4">
-            <label className="label">
-              <span className="label-text text-base">Agent Type</span>
+          <div className="form-control mb-6">
+            <label className="label" htmlFor="model">
+              <span className="label-text text-base">AI Model</span>
             </label>
-            <div className="flex gap-4">
-              <label className="label cursor-pointer">
-                <input
-                  type="radio"
-                  name="agentType"
-                  className="radio radio-primary"
-                  value="Task"
-                  checked={formState.agentType === "Task"}
-                  onChange={handleInputChange}
-                />
-                <span className="label-text ml-2">Task Agent</span>
-              </label>
-              <label className="label cursor-pointer">
-                <input
-                  type="radio"
-                  name="agentType"
-                  className="radio radio-primary"
-                  value="Action"
-                  checked={formState.agentType === "Action"}
-                  onChange={handleInputChange}
-                />
-                <span className="label-text ml-2">Action Agent</span>
-              </label>
-              <label className="label cursor-pointer">
-                <input
-                  type="radio"
-                  name="agentType"
-                  className="radio radio-primary"
-                  value="Chat"
-                  checked={formState.agentType === "Chat"}
-                  onChange={handleInputChange}
-                />
-                <span className="label-text ml-2">Chat Agent</span>
-              </label>
-            </div>
-            {formState.agentType === 'Action' && (
-              <p className="text-xs text-base-content/70 mt-1">
-                Action Agents can be used by Task Agents but do not have their own task execution or A2A configurations.
-              </p>
-            )}
-            {formState.agentType === 'Chat' && (
-              <p className="text-xs text-base-content/70 mt-1">
-                Chat Agents provide a conversational interface.
-              </p>
-            )}
+            <select
+              id="model"
+              name="model"
+              className="select select-bordered w-full"
+              value={formState.model}
+              onChange={handleInputChange}
+            >
+              {AVAILABLE_MODELS.map(model => (
+                <option key={model.id} value={model.id}>{model.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form-control">
-            <label className="label" htmlFor="agent-systemPrompt">
+            <label className="label" htmlFor="systemPrompt">
               <span className="label-text text-base">System Prompt</span>
             </label>
-            <textarea id="agent-systemPrompt" name="systemPrompt" className="textarea textarea-bordered h-32 w-full" placeholder="Define the agent's core instructions, personality, and capabilities." value={formState.systemPrompt} onChange={handleInputChange} required></textarea>
+            <textarea
+              id="systemPrompt"
+              name="systemPrompt"
+              className="textarea textarea-bordered h-32 w-full"
+              value={formState.systemPrompt}
+              onChange={handleInputChange}
+              placeholder="Enter the system prompt for the agent..."
+            />
           </div>
         </div>
-
-        {/* Trigger Configuration Section */}
-        <TriggerConfigForm
-          triggerType={formState.triggerType}
-          triggerConfig={formState.triggerConfig || null}
-          onTriggerTypeChange={(newType: TriggerType) => setFormState(prev => ({ ...prev, triggerType: newType, triggerConfig: newType === TriggerType.SCHEDULED ? prev.triggerConfig || { frequency: ScheduledTriggerFrequency.DAILY, timeValue: '09:00' } : null }))}
-          onTriggerConfigChange={(newConfig: TriggerConfig | null) => setFormState(prev => ({ ...prev, triggerConfig: newConfig }))}
-        />
 
         {/* Dependent MCPs Configuration Section */}
         <DependentMCPsForm
@@ -410,10 +369,10 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
         {/* Resources & Wallet Section */}
         <ResourcesWalletForm
           associatedWalletId={formState.associatedWalletId}
-          autoRefillServiceCredits={formState.autoRefillServiceCredits}
+          autoRefillServiceCredits={formState.associatedWalletId ? formState.autoRefillServiceCredits : false}
           serviceCreditsRefillThreshold={formState.serviceCreditsRefillThreshold}
           serviceCreditsRefillAmount={formState.serviceCreditsRefillAmount}
-          autoRefillSol={formState.autoRefillSol}
+          autoRefillSol={formState.associatedWalletId ? formState.autoRefillSol : false}
           solRefillThreshold={formState.solRefillThreshold}
           solRefillAmount={formState.solRefillAmount}
           solRefillSourceEoa={formState.solRefillSourceEoa}

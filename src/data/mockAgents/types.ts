@@ -1,4 +1,4 @@
-import { Agent, TaskAgent, ActionAgent, AgentType, TriggerType, TriggerConfig, AgentConfig, MCPDependency, AgentDependency, OutputAction, AgentStatus, ScheduledTriggerFrequency, ScheduledTriggerConfig, Task } from '../../types/agent';
+import { Agent, TriggerType, TriggerConfig, AgentConfig, MCPDependency, AgentDependency, OutputAction, AgentStatus, ScheduledTriggerFrequency, ScheduledTriggerConfig, Task } from '../../types/agent';
 import { TriggerData, TriggerTimeType, MCPCondition } from '../../types/trigger';
 
 // Define a more specific Log type for our mock data, matching [agentId]/page.tsx
@@ -13,8 +13,7 @@ export interface MockLog {
 }
 
 // Extended Agent type for mock data to include all fields from both sources
-export type ExtendedAgent = Omit<Agent, 'triggerConfig' | 'config' | 'status' | 'agentType'> & {
-  agentType: AgentType; // Enforce strict AgentType
+export type ExtendedAgent = Omit<Agent, 'triggerConfig' | 'config' | 'status'> & {
   status?: AgentStatus | string; // Allow string for mock data flexibility, but prefer AgentStatus
   lastModified?: Date | number;
   creator?: string;
@@ -23,6 +22,7 @@ export type ExtendedAgent = Omit<Agent, 'triggerConfig' | 'config' | 'status' | 
   config: AgentConfig; // Use the new AgentConfig type, ensure it's always present
   logs?: MockLog[]; // Using the more detailed MockLog
   tasks?: Task[]; // Updated to use Task[] from agent.ts
+  model: string; // AI model to use
   associatedWalletId?: string | null;
   autoRefillServiceCredits?: boolean;
   serviceCreditsRefillThreshold?: number;

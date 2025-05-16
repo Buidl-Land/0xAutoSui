@@ -3,31 +3,26 @@ import {
   ExtendedAgent,
 } from '@/data/mockAgents';
 import {
-  AgentType,
   TriggerType,
   TriggerConfig,
   AgentConfig,
   MCPDependency,
   AgentDependency,
   OutputAction,
+  AIModel,
 } from '@/types/agent';
-import TriggerConfigForm from '../TriggerConfigForm';
 import DependentMCPsForm from '../DependentMCPsForm';
 import DependentAgentsForm from '../DependentAgentsForm';
 import OutputActionsForm from '../OutputActionsForm';
 import ResourcesWalletForm from '../ResourcesWalletForm';
-import TasksForm from './TasksForm';
-import { Task } from '@/types/agent';
-// import TasksForm from './TasksForm';
 
 // Define the shape of the data this step outputs
 interface ConfigStepOutputData {
-    agentType: AgentType;
     systemPrompt: string;
+    model: AIModel;
     triggerType: TriggerType;
     triggerConfig: TriggerConfig | null;
-    config: AgentConfig; // Contains MCPs, A2A, Outputs
-    // Wallet and Resource fields directly, as they are part of BaseAgent
+    config: AgentConfig;
     associatedWalletId?: string | null;
     autoRefillServiceCredits?: boolean;
     serviceCreditsRefillThreshold?: number;
@@ -36,17 +31,15 @@ interface ConfigStepOutputData {
     solRefillThreshold?: number;
     solRefillAmount?: number;
     solRefillSourceEoa?: string;
-    tasks?: Task[];
 }
 
 interface AgentConfigStepProps {
   initialData: {
-    agentType: AgentType;
     systemPrompt: string;
+    model: AIModel;
     triggerType: TriggerType;
     triggerConfig: TriggerConfig | null;
-    config: Partial<AgentConfig>; // For MCPs, A2A, Outputs
-    // Wallet and Resource fields directly from initial agent data
+    config: Partial<AgentConfig>;
     associatedWalletId?: string | null;
     autoRefillServiceCredits?: boolean;
     serviceCreditsRefillThreshold?: number;
@@ -55,7 +48,6 @@ interface AgentConfigStepProps {
     solRefillThreshold?: number;
     solRefillAmount?: number;
     solRefillSourceEoa?: string;
-    tasks?: Task[];
   };
   onNext: (data: ConfigStepOutputData) => void;
   onBack: () => void;
@@ -67,11 +59,14 @@ interface MockWallet {
   name: string;
 }
 
+const AVAILABLE_MODELS = Object.entries(AIModel).map(([key, value]) => ({
+  id: value,
+  name: value,
+}));
+
 const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, onBack }) => {
-  const [agentType, setAgentType] = useState<AgentType>(initialData.agentType);
   const [systemPrompt, setSystemPrompt] = useState<string>(initialData.systemPrompt);
-  const [currentTriggerType, setCurrentTriggerType] = useState<TriggerType>(initialData.triggerType);
-  const [currentTriggerConfig, setCurrentTriggerConfig] = useState<TriggerConfig | null>(initialData.triggerConfig);
+  const [model, setModel] = useState<AIModel>(initialData.model);
   const [mcpDependencies, setMcpDependencies] = useState<MCPDependency[]>(initialData.config.dependentMCPs || []);
   const [agentDependencies, setAgentDependencies] = useState<AgentDependency[]>(initialData.config.dependentAgents || []);
   const [outputActions, setOutputActions] = useState<OutputAction[]>(initialData.config.outputActions || []);
@@ -85,24 +80,22 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
   const [solRefillThreshold, setSolRefillThreshold] = useState<number | undefined>(initialData.solRefillThreshold);
   const [solRefillAmount, setSolRefillAmount] = useState<number | undefined>(initialData.solRefillAmount);
   const [solRefillSourceEoa, setSolRefillSourceEoa] = useState<string | undefined>(initialData.solRefillSourceEoa);
-  const [tasks, setTasks] = useState<Task[]>(initialData.tasks || []);
 
   // Mock available wallets for the ResourcesWalletForm
   const mockAvailableWallets: MockWallet[] = [
-    { id: 'wallet1', name: 'Primary Mock Wallet' },
-    { id: 'wallet2', name: 'Secondary Mock Wallet' },
-    { id: 'wallet-sol-funds', name: 'SOL Refill Source EOA (example)'}
+    { id: 'wallet-main-alpha', name: 'Alpha Trader Wallet' },
+    { id: 'wallet-dca-sol', name: 'DCA SOL Wallet' },
+    { id: 'wallet-lp-provider', name: 'LP Provider Wallet' },
+    { id: 'wallet-perp-trader', name: 'Perp Trader Wallet' },
+    { id: 'wallet-x-info', name: 'X Info Wallet' },
   ];
 
   useEffect(() => {
-    setAgentType(initialData.agentType);
     setSystemPrompt(initialData.systemPrompt);
-    setCurrentTriggerType(initialData.triggerType);
-    setCurrentTriggerConfig(initialData.triggerConfig);
+    setModel(initialData.model);
     setMcpDependencies(initialData.config.dependentMCPs || []);
     setAgentDependencies(initialData.config.dependentAgents || []);
     setOutputActions(initialData.config.outputActions || []);
-    // Set wallet config from initialData (now directly accessible)
     setAssociatedWalletId(initialData.associatedWalletId);
     setAutoRefillServiceCredits(initialData.autoRefillServiceCredits);
     setServiceCreditsRefillThreshold(initialData.serviceCreditsRefillThreshold);
@@ -111,12 +104,10 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
     setSolRefillThreshold(initialData.solRefillThreshold);
     setSolRefillAmount(initialData.solRefillAmount);
     setSolRefillSourceEoa(initialData.solRefillSourceEoa);
-    setTasks(initialData.tasks || []);
   }, [initialData]);
 
   // MCP Handlers
   const handleAddMCP = () => {
-    // Placeholder: In reality, this would open a modal to select/configure an MCP
     const newMcp: MCPDependency = {
       mcpId: `mcp-mock-${Date.now()}`,
       mcpName: `Mock MCP ${mcpDependencies.length + 1}`,
@@ -131,7 +122,6 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
   };
 
   const handleConfigureMCP = (index: number) => {
-    // Placeholder: Open a modal to configure parameters for mcpDependencies[index]
     console.log("Configure MCP at index:", index, mcpDependencies[index]);
     alert(`Configure MCP: ${mcpDependencies[index].mcpName} (parameters: ${JSON.stringify(mcpDependencies[index].parameters)}) - Placeholder`);
   };
@@ -141,7 +131,7 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
     const newAgentDep: AgentDependency = {
       dependentAgentId: `agent-mock-${Date.now()}`,
       dependentAgentName: `Mock Dependent Agent ${agentDependencies.length + 1}`,
-      interactionConfig: { dataToShare: 'all' }, // Placeholder config
+      interactionConfig: { dataToShare: 'all' },
     };
     setAgentDependencies(prev => [...prev, newAgentDep]);
   };
@@ -158,9 +148,9 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
   // Output Action Handlers
   const handleAddOutputAction = () => {
     const newAction: OutputAction = {
-      outputType: 'TELEGRAM_NOTIFIER', // Mock default
+      outputType: 'TELEGRAM_NOTIFIER',
       outputProviderName: `Mock Notifier ${outputActions.length + 1}`,
-      parameters: { chatId: '@mockChannel' }, // Placeholder config
+      parameters: { chatId: '@mockChannel' },
     };
     setOutputActions(prev => [...prev, newAction]);
   };
@@ -206,33 +196,12 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
     }
   };
 
-  // Task Handlers
-  const handleAddTask = () => {
-    setTasks(prevTasks => [...prevTasks, {
-      id: `task-${Date.now()}`,
-      description: 'New task - please describe',
-      order: prevTasks.length > 0 ? Math.max(...prevTasks.map(t => t.order)) + 1 : 1
-    }]);
-  };
-
-  const handleRemoveTask = (taskId: string) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
-  };
-
-  const handleUpdateTask = (taskId: string, newDescription: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, description: newDescription } : task
-      )
-    );
-  };
-
   const handleSubmit = () => {
     const stepOutput: ConfigStepOutputData = {
-      agentType,
       systemPrompt,
-      triggerType: currentTriggerType,
-      triggerConfig: currentTriggerConfig,
+      model,
+      triggerType: TriggerType.MANUAL,
+      triggerConfig: null,
       config: {
         dependentMCPs: mcpDependencies,
         dependentAgents: agentDependencies,
@@ -246,7 +215,6 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
       solRefillThreshold: solRefillThreshold,
       solRefillAmount: solRefillAmount,
       solRefillSourceEoa: solRefillSourceEoa,
-      tasks: tasks,
     };
     onNext(stepOutput);
   };
@@ -254,25 +222,29 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
   return (
     <div className="p-6 card bg-base-100 shadow-xl space-y-8">
       <h2 className="text-2xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-        Step 3: Configure Agent Logic & Triggers
+        Step 3: Configure Agent Logic
       </h2>
 
       <div className="form-control">
-        <label className="label" id="agent-type-label"><span className="label-text text-base">Agent Type</span></label>
+        <label className="label" htmlFor="model">
+          <span className="label-text text-base">AI Model</span>
+        </label>
         <select
+          id="model"
           className="select select-bordered w-full"
-          value={agentType}
-          onChange={(e) => setAgentType(e.target.value as AgentType)}
-          aria-labelledby="agent-type-label"
+          value={model}
+          onChange={(e) => setModel(e.target.value as AIModel)}
         >
-          <option value="Task">Task Agent</option>
-          <option value="Action">Action Agent</option>
-          <option value="Chat">Chat Agent</option>
+          {AVAILABLE_MODELS.map(model => (
+            <option key={model.id} value={model.id}>{model.name}</option>
+          ))}
         </select>
       </div>
 
       <div className="form-control">
-        <label className="label" htmlFor="agent-system-prompt-cfg"><span className="label-text text-base">System Prompt</span></label>
+        <label className="label" htmlFor="agent-system-prompt-cfg">
+          <span className="label-text text-base">System Prompt</span>
+        </label>
         <textarea
           id="agent-system-prompt-cfg"
           className="textarea textarea-bordered w-full font-mono text-sm"
@@ -281,13 +253,6 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
           onChange={(e) => setSystemPrompt(e.target.value)}
         ></textarea>
       </div>
-
-      <TriggerConfigForm
-        triggerType={currentTriggerType}
-        triggerConfig={currentTriggerConfig}
-        onTriggerTypeChange={setCurrentTriggerType}
-        onTriggerConfigChange={setCurrentTriggerConfig}
-      />
 
       <div className="divider"></div>
 
@@ -330,23 +295,6 @@ const AgentConfigStep: React.FC<AgentConfigStepProps> = ({ initialData, onNext, 
         availableWallets={mockAvailableWallets}
         onInputChange={handleWalletInputChange}
       />
-
-      {/* Conditionally render TasksForm if agentType is 'Task' */}
-      {agentType === 'Task' && (
-        <>
-          <div className="divider"></div>
-          <TasksForm
-            tasks={tasks}
-            onAddTask={handleAddTask}
-            onRemoveTask={handleRemoveTask}
-            onUpdateTask={handleUpdateTask}
-          />
-        </>
-      )}
-
-      <div className="text-center p-4 border border-dashed border-base-300 rounded-md">
-        <p className="text-base-content/70">Further configurations (Tasks, Wallet) will appear here.</p>
-      </div>
 
       <div className="mt-8 flex justify-between">
         <button className="btn btn-ghost" onClick={onBack}>Back</button>

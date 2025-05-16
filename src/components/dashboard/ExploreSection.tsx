@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ExtendedAgent } from '@/data/mockAgents';
+import { ExtendedAgent, getMockAgents } from '@/data/mockAgents';
 import { MCPProvider, mockMCPProviders } from '@/data/mockMcpServers'; // 修改导入
 import { ArrowRightIcon, CpuChipIcon } from '@heroicons/react/24/outline';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear';
@@ -78,7 +78,12 @@ const ExploreSection: React.FC<ExploreSectionProps> = ({ agents }) => {
 
       {displayAgents.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-base-content/90">Featured Agents</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-base-content/90">Featured Agents</h3>
+            <Link href="/agent-store" className="text-sm text-primary hover:underline">
+              View All <ArrowRightIcon className="w-3 h-3 inline-block ml-0.5" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayAgents.map((agent) => (
               <ExploreAgentCard key={`agent-${agent.id}`} agent={agent} />
@@ -89,7 +94,12 @@ const ExploreSection: React.FC<ExploreSectionProps> = ({ agents }) => {
 
       {displayMcps.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content/90">Available MCPs</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-base-content/90">Available MCPs</h3>
+            <Link href="/agent-store" className="text-sm text-secondary hover:underline">
+              View All <ArrowRightIcon className="w-3 h-3 inline-block ml-0.5" />
+            </Link>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayMcps.map((provider) => (
               <McpCard key={`mcp-${provider.id}`} provider={provider} />

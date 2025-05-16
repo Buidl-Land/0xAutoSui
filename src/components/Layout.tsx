@@ -19,6 +19,7 @@ import {
   BellIcon, // For Notifications
   WalletIcon, // For Wallet
   SquaresPlusIcon, // For MCP Hub
+  ArrowLeftOnRectangleIcon, // For Logout
 } from "@heroicons/react/24/outline"; // Import necessary icons
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
 import { fetchMockCurrentUser } from '@/data/mocks/userMocks'; // To get user info for avatar seed
@@ -64,7 +65,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <DynamicBackground />
+      {/* <DynamicBackground /> */}
       {/* Top Navigation Bar */}
       <div className="navbar bg-base-200 sticky top-0 z-30 shadow-md px-4">
         {/* Navbar Start: Logo and Mobile Menu Toggle */}
@@ -149,9 +150,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <span>{userPoints}</span>
           </div>
 
-          {/* Theme Toggle */}
-          <ThemeToggleButton />
-
+          {/* Theme Toggle will be moved to user menu */}
           {/* User Avatar Dropdown */}
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
@@ -167,18 +166,41 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </label>
             <ul
               tabIndex={0}
-              className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+              className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-56" // Increased width for better spacing
             >
-              <li className={isActive(userProfileMenuItem.path) ? "bg-primary bg-opacity-20 rounded-lg" : ""}>
-                <Link href={userProfileMenuItem.path} className="flex gap-2">
+              {/* User Profile */}
+              <li className={`my-1 ${isActive(userProfileMenuItem.path) ? "bg-primary bg-opacity-20 rounded-lg" : ""}`}>
+                <Link href={userProfileMenuItem.path} className="flex items-center gap-3 p-2 whitespace-nowrap hover:bg-base-200 rounded-md">
                   <userProfileMenuItem.icon className="h-5 w-5" />
-                  {userProfileMenuItem.label}
+                  Profile
                 </Link>
               </li>
-              {/* Add other user-specific links here if needed, e.g., Settings (if re-implemented) */}
-              <li>
-                <a className="flex gap-2">
-                  {/* Placeholder for Logout Icon if available */}
+              {/* Subscription Service */}
+              <li className={`my-1 ${isActive("/subscription") ? "bg-primary bg-opacity-20 rounded-lg" : ""}`}>
+                <Link href="/subscription" className="flex items-center gap-3 p-2 whitespace-nowrap hover:bg-base-200 rounded-md">
+                  <StarIcon className="h-5 w-5" />
+                  Subscription
+                </Link>
+              </li>
+              {/* Divider */}
+              <div className="divider my-0"></div>
+              {/* Switch Theme */}
+              <li className="my-1">
+                <div className="flex items-center justify-between w-full p-2 whitespace-nowrap hover:bg-base-200 rounded-md group">
+                  <span className="flex items-center gap-3">
+                    {/* ThemeToggleButton will show the correct icon (Sun or Moon) */}
+                    <ThemeToggleButton iconOnly={true} />
+                    Theme
+                  </span>
+                  <ThemeToggleButton showIcon={false} /> {/* Toggle switch without its own icon */}
+                </div>
+              </li>
+              {/* Divider */}
+              <div className="divider my-0"></div>
+              {/* Logout */}
+              <li className="my-1">
+                <a className="flex items-center gap-3 p-2 whitespace-nowrap text-error hover:bg-error hover:text-error-content rounded-md">
+                  <ArrowLeftOnRectangleIcon className="h-5 w-5" />
                   Logout
                 </a>
               </li>

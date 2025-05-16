@@ -15,6 +15,7 @@ import AgentConfigStep from "@/components/agents/create/AgentConfigStep";
 
 import { ExtendedAgent } from "@/data/mockAgents";
 import { TriggerType, AgentConfig, TriggerConfig, Task, AIModel } from "@/types/agent";
+import { mockAgentTemplates, AgentTemplate } from "@/data/mockAgentTemplates";
 
 export type AgentCreationMethod = 'prompt' | 'template' | 'manual';
 
@@ -39,7 +40,7 @@ const CreateAgentPage = () => {
     description: '',
     iconUrl: null,
     systemPrompt: 'You are a helpful AI assistant. Be concise and friendly.', // Default system prompt
-    model: AIModel.Claude37Sonnet,
+    model: AIModel.Claude37Sonnet, // Default model
     triggerType: TriggerType.MANUAL,
     triggerConfig: null, // Explicitly null
     config: { dependentMCPs: [], dependentAgents: [], outputActions: [] },
@@ -54,18 +55,59 @@ const CreateAgentPage = () => {
     solRefillAmount: 0.5,
     solRefillSourceEoa: '',
   });
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+
+  const [quickCreatePrompt, setQuickCreatePrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showFullFormAfterPrompt, setShowFullFormAfterPrompt] = useState(false);
 
   const handleMethodSelect = (method: AgentCreationMethod) => {
     setCreationMethod(method);
-    let initialSystemPrompt = agentData.systemPrompt || '';
+    let initialSystemPrompt = agentData.systemPrompt || 'You are a helpful AI assistant. Be concise and friendly.';
     if (method === 'prompt') {
       initialSystemPrompt = 'The user will provide a prompt to define my goal. I will do my best to fulfill it.';
+      setShowFullFormAfterPrompt(false);
+      setSelectedTemplateId(null);
+    } else if (method === 'template') {
+      // For template, we'll show template selection first, then the form.
+      setShowFullFormAfterPrompt(false); // Don't show full form immediately, show templates first
+      setSelectedTemplateId(null); // Reset selected template
+    } else { // manual
+      setShowFullFormAfterPrompt(true);
+      setSelectedTemplateId(null);
     }
     setAgentData(prev => ({
       ...prev,
-      systemPrompt: initialSystemPrompt,
+      systemPrompt: initialSystemPrompt, // Reset or set initial prompt based on method
     }));
     setCurrentStep(2);
+  };
+
+  const handleTemplateSelect = (template: AgentTemplate) => {
+    setAgentData(prev => ({
+      ...prev,
+      name: template.name,
+      description: template.description,
+      iconUrl: template.iconUrl,
+      systemPrompt: template.systemPrompt,
+      model: template.model,
+      triggerType: template.triggerType,
+      triggerConfig: template.triggerConfig,
+      config: template.config,
+      tasks: template.tasks || [],
+      // Reset wallet fields unless template provides them (which it doesn't currently)
+      associatedWalletId: null,
+      autoRefillServiceCredits: false,
+      serviceCreditsRefillThreshold: 50,
+      serviceCreditsRefillAmount: 200,
+      autoRefillSol: false,
+      solRefillThreshold: 0.1,
+      solRefillAmount: 0.5,
+      solRefillSourceEoa: '',
+    }));
+    setSelectedTemplateId(template.id);
+    setShowFullFormAfterPrompt(true); // Now show the basic info form, pre-filled
+    // currentStep remains 2, AgentBasicInfoStep will be rendered with pre-filled data
   };
 
   const handleBasicInfoNext = (data: BasicInfoData) => {
@@ -107,6 +149,26 @@ const CreateAgentPage = () => {
     setCurrentStep(4);
   };
 
+  const handleGenerateFromPrompt = async () => {
+    if (!quickCreatePrompt.trim()) return;
+    setIsGenerating(true);
+    // Placeholder for actual generation logic (e.g., API call)
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate async work
+
+    // Populate agentData based on the prompt (example)
+    setAgentData(prev => ({
+      ...prev,
+      name: quickCreatePrompt.substring(0, 30) + (quickCreatePrompt.length > 30 ? "..." : ""),
+      description: `Agent generated from prompt: "${quickCreatePrompt}"`,
+      systemPrompt: `Based on the user prompt: "${quickCreatePrompt}", your primary goal is to [elaborate based on prompt]. Be helpful and efficient.`,
+      // Potentially set other fields like model, initial tasks, etc.
+    }));
+
+    setIsGenerating(false);
+    setShowFullFormAfterPrompt(true); // Trigger display of the full form (AgentBasicInfoStep)
+    // currentStep is already 2, so AgentBasicInfoStep will render with new agentData
+  };
+
   const handleFinalSubmit = () => {
     console.log("Creating new agent (final data):", agentData as ExtendedAgent);
     alert(`Agent "${agentData.name}" to be created (mock)!`);
@@ -121,6 +183,89 @@ const CreateAgentPage = () => {
       case 1:
         return <AgentCreationMethodStep onSelectMethod={handleMethodSelect} />;
       case 2:
+        if (creationMethod === 'prompt' && !showFullFormAfterPrompt) {
+          // Render Quick Create Prompt Input UI
+          return (
+            <div className="p-6 card bg-base-100 shadow-xl">
+              <h2 className="text-2xl font-semibold mb-4">Quick Create: Describe Your Agent</h2>
+              <p className="mb-1 text-sm text-base-content/70">
+                Enter a prompt describing what you want your agent to do.
+              </p>
+              <p className="mb-4 text-xs text-base-content/50">
+                Example: "An agent that checks my favorite crypto news sites every morning and DMs me a summary on Telegram."
+              </p>
+              <textarea
+                className="textarea textarea-bordered w-full h-32 mb-4"
+                placeholder="e.g., Create an agent that summarizes daily news about AI and posts it to a Discord channel."
+                value={quickCreatePrompt}
+                onChange={(e) => setQuickCreatePrompt(e.target.value)}
+                disabled={isGenerating}
+              />
+              <div className="mt-6 flex justify-between">
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => {
+                    setCurrentStep(1);
+                    setCreationMethod(null);
+                    setShowFullFormAfterPrompt(false);
+                    setQuickCreatePrompt("");
+                    setSelectedTemplateId(null);
+                  }}
+                  disabled={isGenerating}
+                >
+                  <ArrowLeftIcon className="h-5 w-5 mr-1" /> Back to Method
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleGenerateFromPrompt}
+                  disabled={isGenerating || !quickCreatePrompt.trim()}
+                >
+                  {isGenerating && <span className="loading loading-spinner mr-2"></span>}
+                  {isGenerating ? "Generating..." : "Generate Agent"}
+                </button>
+              </div>
+            </div>
+          );
+        } else if (creationMethod === 'template' && !showFullFormAfterPrompt) {
+          // Render Template Selection UI
+          return (
+            <div className="p-6 card bg-base-100 shadow-xl">
+              <h2 className="text-2xl font-semibold mb-6">Select an Agent Template</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {mockAgentTemplates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="card bordered cursor-pointer hover:shadow-lg transition-shadow bg-base-200 hover:bg-base-300"
+                    onClick={() => handleTemplateSelect(template)}
+                  >
+                    <div className="card-body p-4">
+                      <h3 className="card-title text-lg">{template.name}</h3>
+                      <p className="text-xs text-base-content/70 h-12 overflow-hidden">
+                        {template.description}
+                      </p>
+                      {template.category && (
+                        <div className="badge badge-sm badge-outline mt-2">{template.category}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 flex justify-start">
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => {
+                    setCurrentStep(1);
+                    setCreationMethod(null);
+                    setSelectedTemplateId(null);
+                  }}
+                >
+                  <ArrowLeftIcon className="h-5 w-5 mr-1" /> Back to Method
+                </button>
+              </div>
+            </div>
+          );
+        }
+        // If not 'prompt' method, or if 'prompt' method and generation is done (showFullFormAfterPrompt is true)
         return (
           <AgentBasicInfoStep
             initialData={{
@@ -130,7 +275,21 @@ const CreateAgentPage = () => {
               systemPrompt: agentData.systemPrompt
             }}
             onNext={handleBasicInfoNext}
-            onBack={prevStep}
+            onBack={() => {
+              if (creationMethod === 'prompt' && showFullFormAfterPrompt) {
+                // If coming back from BasicInfo after prompt generation,
+                // go back to the prompt input screen.
+                setShowFullFormAfterPrompt(false);
+                // currentStep remains 2, so the prompt input UI will render.
+              } else {
+                // Default back behavior: go to step 1 (method selection)
+                setCurrentStep(1);
+                setCreationMethod(null);
+                setShowFullFormAfterPrompt(false);
+                setQuickCreatePrompt("");
+                setSelectedTemplateId(null); // Also reset selected template
+              }
+            }}
             creationMethod={creationMethod}
           />
         );

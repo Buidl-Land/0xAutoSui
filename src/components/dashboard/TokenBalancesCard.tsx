@@ -67,7 +67,7 @@ const TokenBalancesCard = () => {
   }
 
   return (
-    <div className="card bg-base-100 shadow-xl h-300px overflow-y-auto flex flex-col">
+    <div className="card bg-base-100 shadow-xl h-full overflow-y-auto flex flex-col">
       <div className="card-body flex-grow">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4">
           <h2 className="card-title bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 sm:mb-0">Token Portfolio</h2>

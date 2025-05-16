@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import WelcomeMessage from '@/components/dashboard/WelcomeMessage';
 import { User } from '@/types/user';
 import { fetchMockCurrentUser } from '@/data/mocks/userMocks'; // Import the new mock function
-import { ExtendedAgent, mockAgents } from '@/data/mockAgents'; // Changed to import all mockAgents
+import { ExtendedAgent, getMockAgents } from '@/data/mockAgents'; // Changed to import getMockAgents
 
 // Import new dashboard components
 import ExploreSection from '@/components/dashboard/ExploreSection'; // New Explore Section
@@ -31,7 +31,7 @@ const DashboardPage: React.FC = () => {
       try {
         const user = await fetchMockCurrentUser(); // Use the new mock function
         setCurrentUser(user);
-        setAllAgents(mockAgents); // Pass all mock agents to ExploreSection
+        setAllAgents(getMockAgents()); // Pass all mock agents to ExploreSection
       } catch (err) {
         setError('Failed to load dashboard data. Please try again.');
         console.error(err);
@@ -46,6 +46,8 @@ const DashboardPage: React.FC = () => {
   const handleNavigate = (route: string) => {
     router.push(route);
   };
+
+
 
   if (isLoading) {
     return (
@@ -75,10 +77,10 @@ const DashboardPage: React.FC = () => {
       {/* Main Dashboard Grid - Adjusted Layout */}
       {/* Row 1: Active Agents & Token Portfolio (with P/L) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1"> {/* Active Agents takes 1/3 width on large screens */}
+        <div className="lg:col-span-1 h-96 overflow-y-auto"> {/* Active Agents takes 1/3 width on large screens, fixed height and scrollable */}
           <ActiveAgentsList />
         </div>
-        <div className="lg:col-span-2"> {/* Token Portfolio takes 2/3 width on large screens */}
+        <div className="lg:col-span-2 h-96 overflow-y-auto"> {/* Token Portfolio takes 2/3 width on large screens, fixed height and scrollable */}
           <TokenBalancesCard />
         </div>
       </div>
@@ -92,6 +94,7 @@ const DashboardPage: React.FC = () => {
       <div className="mt-6"> {/* Added margin-top for spacing */}
         <ExploreSection agents={allAgents} /> {/* Pass all agents */}
       </div>
+
 
       {/* Quick Create Agent Button - Remains at the bottom */}
       <div className="flex justify-center items-center py-4 md:py-6">

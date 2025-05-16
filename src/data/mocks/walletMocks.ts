@@ -18,8 +18,8 @@ export let mockWallets: Wallet[] = [
       { id: 'solana', name: 'Solana', symbol: 'sol', balance: 2.85, priceUsd: 170.50, address: 'SoL1q2w3e4r5t6y7u8i9o0pAsDfGhjKlCzXbNm' },
       { id: 'usd-coin', name: 'USD Coin', symbol: 'usdc', balance: 500.00, priceUsd: 1.00, address: 'USDTzxcvbnm1234567890qwertyuiopasdfghjkl' },
       // Add a few more common tokens for variety
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'btc', balance: 0.05, priceUsd: 65000.00, address: 'BTC...xxx' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'eth', balance: 1.2, priceUsd: 3500.00, address: 'ETH...xxx' },
+      { id: 'bitcoin', name: 'Bitcoin', symbol: 'btc', balance: 0.05, priceUsd: 10245.00, address: 'BTC...xxx' },
+      { id: 'ethereum', name: 'Ethereum', symbol: 'eth', balance: 1.2, priceUsd: 2504.00, address: 'ETH...xxx' },
       { id: 'tether', name: 'Tether', symbol: 'usdt', balance: 1000.00, priceUsd: 1.00, address: 'USDT...tether' },
       { id: 'bonk', name: 'Bonk', symbol: 'bonk', balance: 500000000, priceUsd: 0.000025, address: 'Bonk...xxx' },
       { id: 'dogwifhat', name: 'dogwifhat', symbol: 'wif', balance: 150, priceUsd: 2.80, address: 'WIF...xxx' },

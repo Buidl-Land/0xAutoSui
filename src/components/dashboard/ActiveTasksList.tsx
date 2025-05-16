@@ -1,18 +1,18 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import { mockAgents, ExtendedAgent } from '@/data/mockAgents';
+import { allMockAgents, ExtendedAgent } from '@/data/mockAgents';
 import { AgentStatus } from '@/types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear';
 import { CpuChipIcon } from '@heroicons/react/24/outline';
 
 const ActiveAgentsList = () => {
-  const runningAgents: ExtendedAgent[] = mockAgents.filter(
+  const runningAgents: ExtendedAgent[] = allMockAgents.filter(
     (agent) => agent.status === AgentStatus.RUNNING
   );
 
   return (
-    <div className="card bg-base-100 shadow-xl h-300px flex flex-col overflow-y-auto">
+    <div className="card bg-base-100 shadow-xl h-full flex flex-col overflow-y-auto">
       <div className="card-body p-0 flex flex-col">
         <div className="p-4 flex-shrink-0">
           <h2 className="card-title bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-2 flex items-center">

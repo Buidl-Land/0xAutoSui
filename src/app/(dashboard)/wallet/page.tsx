@@ -26,6 +26,7 @@ import {
   CogIcon
 } from '@heroicons/react/24/outline';
 import ClientOnlyFormatDate from '@/components/utils/ClientOnlyFormatDate';
+import { CurrencyDollarIcon } from '@heroicons/react/24/solid'; // Placeholder icon
 
 const formatCurrency = (value: number | undefined, symbol: string = '$') => {
   if (value === undefined) return `${symbol}--.--`;
@@ -258,27 +259,33 @@ const WalletManagementPage = () => {
                   </button>
               </div>
 
-              <h3 className="text-xl font-semibold mb-3 text-base-content/90">Token Balances</h3>
+              <h3 className="text-xl font-semibold mb-4 text-base-content/90">Token Balances</h3>
               {selectedWallet.tokens && selectedWallet.tokens.length > 0 ? (
-                <div className="overflow-x-auto">
+                <div className="max-h-96 overflow-y-auto rounded-lg border border-base-300"> {/* Added max-h and overflow, plus some styling */}
                   <table className="table table-sm w-full">
-                    <thead>
+                    <thead className="sticky top-0 bg-base-100 z-10"> {/* Sticky header for scroll */}
                       <tr className="text-base-content/80">
-                        <th>Token</th>
-                        <th className="text-right">Balance</th>
-                        <th className="text-right hidden sm:table-cell">Price</th>
-                        <th className="text-right">Value (USD)</th>
+                        <th className="py-3 px-4">Token</th>
+                        <th className="text-right py-3 px-4">Balance</th>
+                        <th className="text-right hidden sm:table-cell py-3 px-4">Price</th>
+                        <th className="text-right py-3 px-4">Value (USD)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedWallet.tokens.map((token) => (
-                        <tr key={token.id} className="hover">
-                          <td>
+                        <tr key={token.id} className="hover:bg-base-200/50 transition-colors duration-150">
+                          <td className="py-3 px-4">
                             <div className="flex items-center space-x-3">
-                              {token.iconUrl && (
+                              {token.iconUrl ? (
                                 <div className="avatar">
-                                  <div className="mask mask-squircle w-8 h-8">
-                                    <Image src={token.iconUrl} alt={token.name} width={32} height={32} />
+                                  <div className="mask mask-squircle w-8 h-8 bg-base-300">
+                                    <Image src={token.iconUrl} alt={`${token.name} icon`} width={32} height={32} className="object-contain" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="avatar placeholder">
+                                  <div className="bg-neutral-focus text-neutral-content mask mask-squircle w-8 h-8">
+                                    <CurrencyDollarIcon className="w-5 h-5" />
                                   </div>
                                 </div>
                               )}
@@ -288,9 +295,9 @@ const WalletManagementPage = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="text-right font-mono text-base-content/90">{formatTokenQuantity(token.balance)}</td>
-                          <td className="text-right font-mono text-base-content/90 hidden sm:table-cell">{formatCurrency(token.priceUsd)}</td>
-                          <td className="text-right font-mono font-semibold text-base-content">{formatCurrency((token.balance || 0) * (token.priceUsd || 0))}</td>
+                          <td className="text-right font-mono text-base-content/90 py-3 px-4">{formatTokenQuantity(token.balance)}</td>
+                          <td className="text-right font-mono text-base-content/90 hidden sm:table-cell py-3 px-4">{formatCurrency(token.priceUsd)}</td>
+                          <td className="text-right font-mono font-semibold text-base-content py-3 px-4">{formatCurrency((token.balance || 0) * (token.priceUsd || 0))}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -300,16 +307,18 @@ const WalletManagementPage = () => {
                 <p className="text-base-content/70">No token balances in this wallet.</p>
               )}
 
-              <div className="divider mt-6 mb-4"></div>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-base-200/50 rounded-lg">
-                  <div>
-                    <h3 className="font-semibold text-lg text-secondary">
-                        <CreditCardIcon className="h-6 w-6 mr-2 inline-block" />
-                        0xAuto Service Credits
-                    </h3>
-                    <p className="text-3xl my-1 font-bold text-secondary">{selectedWallet.serviceCredits.toLocaleString()} <span className="text-lg font-normal">Credits</span></p>
+              <div className="divider mt-8 mb-6"></div>
+              <div className="flex flex-col sm:flex-row justify-between items-center p-6 bg-gradient-to-r from-primary to-secondary text-primary-content rounded-xl shadow-md">
+                  <div className="flex items-center">
+                    <CreditCardIcon className="h-10 w-10 mr-4" />
+                    <div>
+                        <h3 className="font-semibold text-xl">
+                            0xAuto Service Credits
+                        </h3>
+                        <p className="text-4xl my-1 font-bold">{selectedWallet.serviceCredits.toLocaleString()} <span className="text-2xl font-normal">Credits</span></p>
+                    </div>
                   </div>
-                  <button className="btn btn-secondary btn-outline mt-2 sm:mt-0" onClick={handlePurchaseServiceCredits}>
+                  <button className="btn btn-ghost btn-active mt-4 sm:mt-0 text-lg px-6 py-3" onClick={handlePurchaseServiceCredits}>
                       Purchase More
                   </button>
               </div>
@@ -318,12 +327,12 @@ const WalletManagementPage = () => {
 
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body">
-            <h2 className="card-title text-xl text-base-content">
-                <CogIcon className="h-6 w-6 mr-1" /> Auto-Refill Settings
+            <h2 className="card-title text-2xl text-base-content mb-2"> {/* Increased font size and margin */}
+                <CogIcon className="h-7 w-7 mr-2" /> Auto-Refill Settings {/* Slightly larger icon */}
             </h2>
               <div className="space-y-6 mt-4">
-                <div className="p-4 border rounded-lg bg-base-200/30">
-                  <h3 className="font-semibold text-base-content/90 mb-2">SOL for Gas Fees</h3>
+                <div className="p-5 border border-base-300 rounded-lg bg-base-100 shadow"> {/* Enhanced padding and shadow */}
+                  <h3 className="font-semibold text-lg text-base-content mb-3">SOL for Gas Fees</h3> {/* Increased font size and margin */}
                   <label className="flex items-center cursor-pointer mb-2">
                     <input
                       type="checkbox"
@@ -369,8 +378,8 @@ const WalletManagementPage = () => {
                   )}
                 </div>
 
-                <div className="p-4 border rounded-lg bg-base-200/30">
-                  <h3 className="font-semibold text-base-content/90 mb-2">Service Credits</h3>
+                <div className="p-5 border border-base-300 rounded-lg bg-base-100 shadow"> {/* Enhanced padding and shadow */}
+                  <h3 className="font-semibold text-lg text-base-content mb-3">Service Credits</h3> {/* Increased font size and margin */}
                    <label className="flex items-center cursor-pointer mb-2">
                     <input
                       type="checkbox"

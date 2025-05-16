@@ -1,7 +1,5 @@
 import type { Config } from "tailwindcss";
 import daisyui from "daisyui"; // Import daisyui
-import { addDynamicIconSelectors } from "@iconify/tailwind"; // Import addDynamicIconSelectors
-// import { plugin as iconifyPlugin } from "@iconify/tailwind"; // Commenting out the previous attempt
 
 const config: Config = {
   content: [
@@ -27,8 +25,7 @@ const config: Config = {
     },
   },
   plugins: [
-    daisyui, // Use the imported plugin
-    addDynamicIconSelectors(), // Add Iconify plugin using addDynamicIconSelectors
+    daisyui
   ],
   // daisyUI config moved inside the plugin call if needed,
   // but often default themes are sufficient initially or configured elsewhere.

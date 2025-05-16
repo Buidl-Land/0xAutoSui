@@ -3,7 +3,8 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Agent, AgentStatus } from "@/types/agent"; // Keep Agent type
-import { mockAgents } from "@/data/mockAgents";
+import { ExtendedAgent } from "@/data/mockAgents/types";
+import { getMockAgents } from "@/data/mockAgents";
 // import AgentTable from "@/components/agents/AgentTable"; // Remove AgentTable import
 import AgentCard from "@/components/agents/AgentCard"; // Import AgentCard
 import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon, PlusIcon } from "@heroicons/react/24/outline";
@@ -14,6 +15,7 @@ const AgentsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const agentsPerPage = 10; // Or make this configurable
 
+  const mockAgents: ExtendedAgent[] = getMockAgents();
   const filteredAgents = useMemo(() => {
     return mockAgents
       .filter((agent) =>
@@ -61,7 +63,7 @@ const AgentsPage = () => {
       <div className="card bg-base-100 shadow-xl mb-6">
         <div className="card-body">
           <h2 className="card-title text-xl mb-4">Search & Filter</h2>
-          
+
           <div className="bg-base-200/30 rounded-lg border border-base-300 p-5 mb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Search Input */}
@@ -94,9 +96,9 @@ const AgentsPage = () => {
                     <span className="flex items-center">
                       {statusFilter !== "All" && (
                         <span className={`w-3 h-3 rounded-full mr-2 ${
-                          statusFilter === AgentStatus.RUNNING ? 'bg-success' : 
-                          statusFilter === AgentStatus.ERROR ? 'bg-error' : 
-                          statusFilter === AgentStatus.PENDING ? 'bg-warning' : 
+                          statusFilter === AgentStatus.RUNNING ? 'bg-success' :
+                          statusFilter === AgentStatus.ERROR ? 'bg-error' :
+                          statusFilter === AgentStatus.PENDING ? 'bg-warning' :
                           statusFilter === AgentStatus.SCHEDULED ? 'bg-info' : 'bg-base-300'
                         }`}></span>
                       )}
@@ -108,13 +110,13 @@ const AgentsPage = () => {
                     <li><button onClick={() => setStatusFilter("All")} className="w-full text-left">All Statuses</button></li>
                     {Object.values(AgentStatus).map((status) => (
                       <li key={status}>
-                        <button 
+                        <button
                           onClick={() => setStatusFilter(status)}
                           className="w-full text-left flex items-center"
                         >
-                          <span className={`w-3 h-3 rounded-full mr-2 ${status === AgentStatus.RUNNING ? 'bg-success' : 
-                                                                    status === AgentStatus.ERROR ? 'bg-error' : 
-                                                                    status === AgentStatus.PENDING ? 'bg-warning' : 
+                          <span className={`w-3 h-3 rounded-full mr-2 ${status === AgentStatus.RUNNING ? 'bg-success' :
+                                                                    status === AgentStatus.ERROR ? 'bg-error' :
+                                                                    status === AgentStatus.PENDING ? 'bg-warning' :
                                                                     status === AgentStatus.SCHEDULED ? 'bg-info' : 'bg-base-300'}`}></span>
                           {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
                         </button>
@@ -123,7 +125,7 @@ const AgentsPage = () => {
                   </ul>
                 </div>
               </div>
-              
+
               {/* Advanced Filters Button */}
               <div className="form-control md:self-end">
                 <button className="btn btn-outline btn-neutral">
@@ -140,7 +142,7 @@ const AgentsPage = () => {
       <div className="card bg-base-100 shadow-xl mb-6">
         <div className="card-body">
           <h2 className="card-title text-xl mb-4">Agent List</h2>
-          
+
           {paginatedAgents.length > 0 ? (
             <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {paginatedAgents.map((agent) => (

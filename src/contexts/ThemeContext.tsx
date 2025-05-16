@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-type Theme = 'blue-white' | 'black-purple'; // Updated theme types
+type Theme = 'blue-white' | 'black-purple';
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,14 +13,21 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>('blue-white'); // Default theme to blue-white
+  const [theme, setThemeState] = useState<Theme>('blue-white'); // Default theme
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
-    const initialTheme = storedTheme || 'blue-white'; // Use stored or default to blue-white
+    const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    let initialTheme: Theme;
+    if (storedTheme) {
+      initialTheme = storedTheme;
+    } else {
+      initialTheme = prefersDarkMode ? 'black-purple' : 'blue-white';
+    }
+
     setThemeState(initialTheme);
     document.documentElement.setAttribute('data-theme', initialTheme);
-    // Removed the dependency on [theme] to prevent loop, useEffect now runs once on mount
   }, []);
 
   const setTheme = (newTheme: Theme) => {
@@ -30,8 +37,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleTheme = () => {
-    const newTheme = theme === 'blue-white' ? 'black-purple' : 'blue-white';
-    setTheme(newTheme);
+    setTheme(theme === 'blue-white' ? 'black-purple' : 'blue-white');
   };
 
   return (

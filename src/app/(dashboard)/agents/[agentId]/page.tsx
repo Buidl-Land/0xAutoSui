@@ -15,11 +15,12 @@ import {
   ClockIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
-import { Agent, AgentStatus, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency, ScheduledTriggerFrequency } from "@/types/agent"; // Adjusted imports
+import { Agent, AgentStatus, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency, ScheduledTriggerFrequency, TriggerConfig } from "@/types/agent"; // Added TriggerConfig
 import { mockAgents } from "@/data/mockAgents";
 import { ExtendedAgent, MockLog } from "@/data/mockAgents/types";
 import AgentChat from "@/components/AgentChat"; // Import AgentChat
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
+import TriggerConfigForm from "@/components/agents/TriggerConfigForm"; // Updated import path
 
 const getMockAgentData = (agentId: string | string[] | undefined): ExtendedAgent | null => {
   if (!agentId || Array.isArray(agentId)) return null;
@@ -59,14 +60,39 @@ const AgentDetailPage = () => {
   useEffect(() => {
     const currentAgent = getMockAgentData(agentId);
     setAgent(currentAgent);
-    // Default to Chat tab for Chat agents, otherwise Logs
     if (currentAgent) {
       setActiveTab("Chat");
     } else {
-      // Fallback if agent is null (though typically handled by early return)
       setActiveTab("Logs");
     }
   }, [agentId]);
+
+  const handleTriggerTypeChange = (newType: TriggerType) => {
+    if (!agent) return;
+    
+    setAgent(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        triggerType: newType,
+        triggerConfig: newType === TriggerType.SCHEDULED 
+          ? prev.triggerConfig || { frequency: ScheduledTriggerFrequency.DAILY, timeValue: '09:00' }
+          : null
+      };
+    });
+  };
+
+  const handleTriggerConfigChange = (newConfig: TriggerConfig | null) => {
+    if (!agent) return;
+    
+    setAgent(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        triggerConfig: newConfig
+      };
+    });
+  };
 
   if (!agent) {
     return (
@@ -318,72 +344,12 @@ const AgentDetailPage = () => {
             <ClockIcon className="h-7 w-7 mr-3 text-primary" />
             Trigger Configuration
           </h2>
-          <div className="grid grid-cols-1 gap-6">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text text-base">Trigger Type</span>
-              </label>
-              <select
-                className="select select-bordered w-full"
-                value={agent.triggerType}
-                disabled
-              >
-                <option value={TriggerType.MANUAL}>Manual</option>
-                <option value={TriggerType.SCHEDULED}>Scheduled</option>
-                <option value={TriggerType.EVENT_DRIVEN}>Event Driven</option>
-              </select>
-            </div>
-
-            {agent.triggerType === TriggerType.SCHEDULED && agent.triggerConfig && (
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-base">Schedule</span>
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <select
-                    className="select select-bordered w-full"
-                    value={(agent.triggerConfig as ScheduledTriggerConfig).frequency}
-                    disabled
-                  >
-                    <option value={ScheduledTriggerFrequency.HOURLY}>Hourly</option>
-                    <option value={ScheduledTriggerFrequency.DAILY}>Daily</option>
-                    <option value={ScheduledTriggerFrequency.WEEKLY}>Weekly</option>
-                    <option value={ScheduledTriggerFrequency.CUSTOM_CRON}>Custom Cron</option>
-                  </select>
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    value={(agent.triggerConfig as ScheduledTriggerConfig).timeValue}
-                    disabled
-                  />
-                </div>
-              </div>
-            )}
-
-            {agent.triggerType === TriggerType.EVENT_DRIVEN && agent.triggerConfig && (
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-base">Event Configuration</span>
-                </label>
-                <div className="grid grid-cols-1 gap-4">
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    value={(agent.triggerConfig as EventDrivenTriggerConfig).eventType}
-                    disabled
-                    placeholder="Event Type"
-                  />
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
-                    value={(agent.triggerConfig as EventDrivenTriggerConfig).eventSource}
-                    disabled
-                    placeholder="Event Source"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          <TriggerConfigForm
+            triggerType={agent.triggerType}
+            triggerConfig={agent.triggerConfig || null}
+            onTriggerTypeChange={handleTriggerTypeChange}
+            onTriggerConfigChange={handleTriggerConfigChange}
+          />
         </div>
       )}
     </div>

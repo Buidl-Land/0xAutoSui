@@ -1,4 +1,4 @@
-import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel } from '../../types/agent';
+import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel, EventType, EventSource } from '../../types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
@@ -120,12 +120,19 @@ export const alphaTraderAgent: ExtendedAgent = {
   updatedAt: new Date(Date.now() - 510000),
   ownerId: 'user-default-01',
   triggerType: TriggerType.EVENT_DRIVEN,
-  triggerConfig: { eventType: "Smart Money Movement / Twitter Event", eventSource: "On-chain & Twitter API", filterConditions: {} },
+  triggerConfig: {
+    eventType: EventType.TRANSACTION_MONITOR,
+    eventSource: EventSource.BITQUERY,
+    eventTarget: [
+      "73LnJ7G9ffBDjEBGgJDdgvLUhD5APLonKrNiHsKDCw5B",
+      "DfMxre4cKmvogbLrPigxmibVTTQDuzjdXojWzjCXXhzj"
+    ],
+    filterConditions: {}
+  },
   associatedWalletId: "wallet-main-alpha",
   autoRefillServiceCredits: true,
   serviceCreditsRefillThreshold: 100,
   serviceCreditsRefillAmount: 500,
   autoRefillSol: false,
   featuredDescription: "**Trigger:** Twitter Event / Smart Money Movement -> Find Contract Address (CA)\n**Key MCPs:** Twitter Sentiment Analysis -> CA Alert Evaluation -> Wallet Transaction (JupSwap)",
-  keyMCPs: ["Twitter Sentiment Analysis", "CA Alert Evaluation", "Wallet Transaction (JupSwap)"],
 }; 

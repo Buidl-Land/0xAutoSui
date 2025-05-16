@@ -42,5 +42,4 @@ export const featuredPerpTradingAgent: ExtendedAgent = {
   triggerConfig: { frequency: ScheduledTriggerFrequency.HOURLY, timeValue: ":00" },
   associatedWalletId: "wallet-perp-trader",
   featuredDescription: "**Trigger:** Scheduled Time\n**Key MCPs/A2A:** Fetch DEX/CEX Prices & K-lines -> A2A: K-line Pattern Analysis -> A2A: Volume Analysis -> A2A: Decision & Set TP/SL -> MCP: DEX/CEX Order Placement",
-  keyMCPs: ["Fetch DEX/CEX K-lines", "K-line Pattern Analysis (A2A)", "Volume Analysis (A2A)", "Decision & TP/SL (A2A)", "DEX/CEX Order Placement"],
 }; 

@@ -36,9 +36,23 @@ export interface ScheduledTriggerConfig {
   timeValue: string; // e.g., "08:00" or cron string "0 8 * * *"
 }
 
-export interface EventDrivenTriggerConfig { // Future use
-  eventType: string;
-  eventSource: string;
+export enum EventType {
+  ADDRESS_MONITOR = "ADDRESS_MONITOR",
+  TRANSACTION_MONITOR = "TRANSACTION_MONITOR",
+  TWITTER_MONITOR = "TWITTER_MONITOR"
+}
+
+export enum EventSource {
+  TOKENVIEW = "TOKENVIEW",
+  BITQUERY = "BITQUERY",
+  TWITTER_API = "TWITTER_API",
+  RAPID_API = "RAPID_API"
+}
+
+export interface EventDrivenTriggerConfig {
+  eventType: EventType;
+  eventSource: EventSource;
+  eventTarget: string[];
   filterConditions: Record<string, any>;
 }
 

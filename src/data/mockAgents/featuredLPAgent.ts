@@ -1,4 +1,4 @@
-import { AgentStatus, TriggerType, AIModel } from '../../types/agent';
+import { AgentStatus, TriggerType, AIModel, EventType, EventSource } from '../../types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
@@ -38,8 +38,15 @@ export const featuredLPAgent: ExtendedAgent = {
   updatedAt: new Date(Date.now() - 100000),
   ownerId: 'user-default-01',
   triggerType: TriggerType.EVENT_DRIVEN,
-  triggerConfig: { eventType: "New Pool Discovery / Smart Money LP Tracking", eventSource: "DexScreener/On-Chain", filterConditions: { minTVL: 100000 } },
+  triggerConfig: {
+    eventType: EventType.TRANSACTION_MONITOR,
+    eventSource: EventSource.BITQUERY,
+    eventTarget: [
+      "73LnJ7G9ffBDjEBGgJDdgvLUhD5APLonKrNiHsKDCw5B",
+      "DfMxre4cKmvogbLrPigxmibVTTQDuzjdXojWzjCXXhzj"
+    ],
+    filterConditions: {}
+  },
   associatedWalletId: "wallet-lp-provider",
   featuredDescription: "**Trigger:** New Pool Discovery / Smart Money LP Tracking -> Find Pool Address / Token CA\n**Key MCPs:** Pool APR & Volume Analysis -> Pool Risk Assessment (IL & Security) -> DEX LP Operation",
-  keyMCPs: ["Pool APR & Volume Analysis", "Pool Risk Assessment", "DEX LP Operation"],
 }; 

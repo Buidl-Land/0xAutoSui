@@ -33,5 +33,4 @@ export type ExtendedAgent = Omit<Agent, 'triggerConfig' | 'config' | 'status'> &
   solRefillSourceEoa?: string;
   // Field for featured agent descriptions
   featuredDescription?: string;
-  keyMCPs?: string[]; // For featured agents
 }; 

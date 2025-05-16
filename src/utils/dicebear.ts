@@ -1,6 +1,7 @@
 export const DICEBEAR_STYLES = {
   AGENT: 'bottts',
   AGENT_ALT: 'pixel-art-neutral',
+  MCP: 'bottts-neutral',
   USER: 'micah',
   USER_ALT: 'personas',
   GENERIC: 'identicon', // Fallback

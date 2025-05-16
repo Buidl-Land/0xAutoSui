@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AgentForm from "@/components/agents/AgentForm";
-import { ExtendedAgent, mockAgents } from "@/data/mockAgents";
+import { mockAgents } from "@/data/mockAgents";
+import { ExtendedAgent } from "@/data/mockAgents/types";
 import Link from "next/link";
 import { ArrowLeftIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
-import AgentChat from "@/components/AgentChat"; // Import AgentChat
 
 const getMockAgentData = (agentId: string | string[] | undefined): ExtendedAgent | null => {
   if (!agentId || Array.isArray(agentId)) return null;
@@ -62,14 +62,6 @@ const EditAgentPage = () => {
         </Link>
       </div>
       <AgentForm agent={agent} onSubmit={handleSubmit} isEditMode={true} />
-      {agent.agentType === 'Chat' && agent.id && (
-        <div className="mt-8 p-6 bg-base-200 rounded-lg shadow-xl">
-          <h2 className="text-2xl font-semibold mb-6 text-primary">
-            Chat Test
-          </h2>
-          <AgentChat agentId={agent.id} />
-        </div>
-      )}
     </div>
   );
 };

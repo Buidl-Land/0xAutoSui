@@ -4,8 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ExtendedAgent } from '@/data/mockAgents';
-import { mockMcps } from '@/data/mockMcps'; // Import mock MCPs
-import { MCP } from '@/types/mcp'; // Import MCP type
+import { MCPProvider, mockMCPProviders } from '@/data/mockMcpServers'; // 修改导入
 import { ArrowRightIcon, CpuChipIcon } from '@heroicons/react/24/outline';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear';
 
@@ -35,20 +34,18 @@ const ExploreAgentCard: React.FC<ExploreAgentCardProps> = ({ agent }) => {
 
 // MCP Card for the Explore Section
 interface McpCardProps {
-  mcp: MCP;
+  provider: MCPProvider;
 }
 
-const McpCard: React.FC<McpCardProps> = ({ mcp }) => {
-  const mcpAvatar = getDiceBearAvatar(DICEBEAR_STYLES.GENERIC, mcp.id, {size: 32});
-
+const McpCard: React.FC<McpCardProps> = ({ provider }) => {
   return (
-    <Link href={`/store/mcps/${mcp.id}`} className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col h-full group">
+    <Link href={`/mcp-hub/${provider.id}`} className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col h-full group">
       <div className="card-body p-4 flex flex-col flex-grow">
         <div className="flex items-center mb-2">
-          <Image src={mcpAvatar} alt={`${mcp.name} icon`} width={32} height={32} className="rounded-lg mr-3" />
-          <h3 className="card-title text-base font-semibold group-hover:text-secondary transition-colors">{mcp.name}</h3>
+          <Image src={provider.icon} alt={`${provider.name} icon`} width={32} height={32} className="rounded-lg mr-3" />
+          <h3 className="card-title text-base font-semibold group-hover:text-secondary transition-colors">{provider.name}</h3>
         </div>
-        <p className="text-xs text-base-content/70 flex-grow mb-3 line-clamp-2">{mcp.description}</p>
+        <p className="text-xs text-base-content/70 flex-grow mb-3 line-clamp-2">{provider.description}</p>
         <div className="mt-auto text-right">
             <span className="text-xs text-secondary group-hover:underline">View MCP <ArrowRightIcon className="w-3 h-3 inline-block ml-0.5" /></span>
         </div>
@@ -59,12 +56,11 @@ const McpCard: React.FC<McpCardProps> = ({ mcp }) => {
 
 interface ExploreSectionProps {
   agents: ExtendedAgent[]; // Receives all agents, can filter or use featured ones
-  // mcps: MCP[]; // Could also pass MCPs as props if fetched higher up
 }
 
 const ExploreSection: React.FC<ExploreSectionProps> = ({ agents }) => {
-  // For now, let's use all mock MCPs. In a real app, this might be curated.
-  const displayMcps = mockMcps.slice(0, 3); // Display first 3 MCPs as an example
+  // 只显示未安装的 MCP Servers
+  const displayMcps = mockMCPProviders.filter(provider => !provider.installed).slice(0, 3); // Display first 3 uninstalled MCPs
   const displayAgents = agents.slice(0, 3); // Display first 3 agents as an example
 
   if (displayAgents.length === 0 && displayMcps.length === 0) {
@@ -93,10 +89,10 @@ const ExploreSection: React.FC<ExploreSectionProps> = ({ agents }) => {
 
       {displayMcps.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content/90">Essential MCPs</h3>
+          <h3 className="text-xl font-semibold mb-4 text-base-content/90">Available MCPs</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {displayMcps.map((mcp) => (
-              <McpCard key={`mcp-${mcp.id}`} mcp={mcp} />
+            {displayMcps.map((provider) => (
+              <McpCard key={`mcp-${provider.id}`} provider={provider} />
             ))}
           </div>
         </div>

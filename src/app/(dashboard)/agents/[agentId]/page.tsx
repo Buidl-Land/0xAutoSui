@@ -16,7 +16,8 @@ import {
   TagIcon,
 } from "@heroicons/react/24/outline";
 import { Agent, AgentStatus, TaskAgent, ActionAgent, AgentType, TriggerType, ScheduledTriggerConfig, EventDrivenTriggerConfig, AgentDependency } from "@/types/agent"; // Adjusted imports
-import { mockAgents, ExtendedAgent, MockLog } from "@/data/mockAgents"; // Using ExtendedAgent for mock data flexibility
+import { mockAgents } from "@/data/mockAgents";
+import { ExtendedAgent, MockLog } from "@/data/mockAgents/types";
 import AgentChat from "@/components/AgentChat"; // Import AgentChat
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear'; // Import DiceBear utility
 

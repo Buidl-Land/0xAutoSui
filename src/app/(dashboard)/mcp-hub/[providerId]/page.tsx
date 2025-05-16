@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { MCPProvider, fetchMCPProviderAPI } from '@/data/mockMcpServers';
 import { MCPTool, fetchMCPToolsByProviderAPI } from '@/data/mockMcpTools';
+import Image from 'next/image';
 
 const MCPProviderDetailPage = () => {
   const params = useParams();
@@ -95,7 +96,10 @@ const MCPProviderDetailPage = () => {
           <div className="flex flex-col gap-4">
             <div>
               <div className="flex justify-between items-start">
-                <h1 className="text-3xl font-bold text-base-content">{provider.name}</h1>
+                <div className="flex items-center gap-4">
+                  <Image src={provider.icon} alt={`${provider.name} icon`} width={48} height={48} className="rounded-lg" />
+                  <h1 className="text-3xl font-bold text-base-content">{provider.name}</h1>
+                </div>
                 <div className="flex items-center gap-2">
                   <div className="badge badge-lg badge-primary flex items-center gap-1">
                     <FiStar /> {provider.rating.toFixed(1)}

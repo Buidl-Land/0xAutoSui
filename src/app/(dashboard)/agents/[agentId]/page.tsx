@@ -60,11 +60,11 @@ const AgentDetailPage = () => {
   useEffect(() => {
     const currentAgent = getMockAgentData(agentId);
     setAgent(currentAgent);
-    if (currentAgent) {
-      setActiveTab("Chat");
-    } else {
+    // if (currentAgent) {
+    //   setActiveTab("Chat");
+    // } else {
       setActiveTab("Logs");
-    }
+    // }
   }, [agentId]);
 
   const handleTriggerTypeChange = (newType: TriggerType) => {
@@ -255,7 +255,7 @@ const AgentDetailPage = () => {
                 </h3>
                 <p className="text-base-content/80">
                   {/* TODO: Display Wallet Address and SOL Balance */}
-                  Address: <span className="font-mono">XYZ...abc</span> (Balance: <span className="font-semibold">0.00 SOL</span>)
+                  Address: <span className="font-mono">Xo9...Gyc</span> (Balance: <span className="font-semibold">5.26 SOL</span>)
                 </p>
               </div>
             </div>

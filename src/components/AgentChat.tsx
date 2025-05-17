@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useChat, Message } from "@ai-sdk/react"; // Import Message type
-import { PaperClipIcon, PlusCircleIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline"; // Using Heroicon
+import { PlusCircleIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline"; // Using Heroicon
 import ReactMarkdown from "react-markdown";
 import { nanoid } from 'nanoid'; // Import nanoid for unique IDs
 
@@ -128,6 +128,10 @@ const AgentChat: React.FC<AgentChatProps> = ({
     maxSteps: 5, // Example: Limit steps if needed
     // Add error handling if desired
     onError: (error) => { console.error("Chat error:", error); },
+    onFinish: () => {
+      // This is a good place to trigger scroll after AI response is fully received
+      // However, for streaming, we need to scroll as messages arrive/update
+    }
   });
 
   useEffect(() => {
@@ -243,18 +247,6 @@ const AgentChat: React.FC<AgentChatProps> = ({
     // setIsTriggerModalOpen(true); // Assuming a state for a TriggerModal
   };
 
-  // Placeholder for attachment button functionality
-  const attachmentsNode = (
-    <button
-      type="button" // Prevent form submission
-      className="btn btn-ghost btn-sm btn-circle"
-      aria-label="Attach file"
-      // TODO: Implement file attachment logic
-      onClick={() => console.log("Attach file clicked")}
-    >
-      <PaperClipIcon className="h-5 w-5" />
-    </button>
-  );
 
   // Update toggle function to handle single collapse state
   const toggleSection = (messageId: string) => {
@@ -444,11 +436,63 @@ const AgentChat: React.FC<AgentChatProps> = ({
     }
   };
 
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messageAreaRef = useRef<HTMLDivElement | null>(null);
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    // Scroll to bottom when messages change, but only if user hasn't scrolled up
+    if (messageAreaRef.current && !userHasScrolled) {
+      const { scrollHeight, clientHeight } = messageAreaRef.current;
+      messageAreaRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+    // A more robust way is to scroll the last message into view
+    // scrollToBottom();
+  }, [messages, userHasScrolled]); // Depend on messages and userHasScrolled
+
+  // Effect to scroll to bottom when new messages are added or streamed,
+  // but only if the user is already near the bottom or hasn't manually scrolled up.
+  useEffect(() => {
+    if (messageAreaRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messageAreaRef.current;
+      // Consider "near bottom" if scrolled within a certain threshold (e.g., 100px) from the bottom
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+
+      if (!userHasScrolled || isNearBottom) {
+        // More reliable scroll to bottom for dynamic content
+        messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+        // messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }); // Can be 'smooth' or 'auto'
+      }
+    }
+  }, [messages]); // Rerun when messages change
+
+
+  const handleScroll = () => {
+    if (messageAreaRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messageAreaRef.current;
+      // If user scrolls up significantly from the bottom, set userHasScrolled to true
+      if (scrollHeight - scrollTop - clientHeight > 150) { // Threshold to detect manual scroll up
+        setUserHasScrolled(true);
+      } else if (scrollTop + clientHeight >= scrollHeight - 10) { // If user scrolls back to bottom
+        setUserHasScrolled(false);
+      }
+    }
+  };
+
+
   return (
-    <div className="flex flex-col h-full bg-base-100">
+    <div className="flex flex-col bg-base-100" style={{ height: '600px' }}>
       <style>{markdownStyles}</style>
       {/* Message List Area */}
-      <div className="flex-grow min-h-0 overflow-y-auto px-4 py-6 space-y-4">
+      <div
+        ref={messageAreaRef}
+        onScroll={handleScroll}
+        className="flex-grow min-h-0 overflow-y-auto px-4 py-6 space-y-4"
+      >
         {messages.map((message) => {
           // Determine chat alignment based on role
           const chatAlignment = message.role === "user" ? "chat-end" : "chat-start";
@@ -599,20 +643,28 @@ const AgentChat: React.FC<AgentChatProps> = ({
 
       {/* Input Area */}
       <div className="flex-none p-4 border-t border-base-300 bg-base-200">
-        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
-          {attachmentsNode}
-          <input
-            type="text"
-            className="input input-bordered flex-grow"
+        <form onSubmit={handleSendMessage} className="flex items-start space-x-2">
+          <textarea
+            className="textarea textarea-bordered flex-grow resize-none"
+            rows={3}
             value={input}
             onChange={handleInputChange}
             placeholder={`Chat with ${agentName}...`}
-            disabled={isLoadingSimulation || isStreamingHistory || isStreamingReply} // Disable input while loading or streaming
+            disabled={isLoadingSimulation || isStreamingHistory || isStreamingReply}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const submitButton = (e.currentTarget as HTMLTextAreaElement).form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+                if (submitButton && !submitButton.disabled) {
+                  (e.currentTarget as HTMLTextAreaElement).form?.requestSubmit();
+                }
+              }
+            }}
           />
           <button
             type="submit"
-            className="btn btn-primary"
-            disabled={isLoadingSimulation || isStreamingHistory || isStreamingReply || !input.trim()} // Disable if loading, streaming or input is empty
+            className="btn btn-primary self-end"
+            disabled={isLoadingSimulation || isStreamingHistory || isStreamingReply || !input.trim()}
           >
             Send
           </button>

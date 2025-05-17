@@ -18,13 +18,13 @@ export default function Home() {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between">
           <h1 className="text-7xl md:text-9xl font-bold mb-12 md:mb-0 text-white leading-none">
             <div className="mb-[-0.2em]">
-              <span className="text-indigo-500 text-8xl md:text-[12rem]">Auto</span>mate
+              <span className="text-indigo-500 text-6xl md:text-[12rem]">Auto</span>mate
             </div>
             <div className="mb-[-0em]">
               your strategy,
             </div>
-            <div className="text-4xl">
-              powered by <span className="text-3xl text-indigo-500 md:text-[6rem]">MCP&A2A</span><span className="text-4xl md:text-[6rem]">！</span>
+            <div className="text-5xl">
+              powered by <span className="text-3xl text-indigo-500 md:text-[4rem]">MCP&A2A</span><span className="text-4xl md:text-[3rem]">！</span>
             </div>
           </h1>
         </div>
@@ -36,7 +36,7 @@ export default function Home() {
             </p>
 
             <Link
-              href="/agents"
+              href="/dashboard"
               className="group relative flex flex-row items-center justify-between ml-4 px-6 py-2 rounded-xl bg-gradient-to-r from-transparent from-5% via-transparent via-20% via-indigo-400/20 via-40% via-indigo-500/30 via-60% to-indigo-600/50 text-white transform hover:translate-x-2 transition-all duration-300 border-r border-t border-b border-white/10 flex-grow flex-shrink-0 overflow-hidden pointer-events-auto"
             >
               <div className="absolute top-0 bottom-0 left-0 w-0 group-hover:w-full rounded-xl bg-gradient-to-r from-indigo-400/15 via-indigo-500/25 to-indigo-600/35 transition-[width] duration-700 ease-in-out"></div>

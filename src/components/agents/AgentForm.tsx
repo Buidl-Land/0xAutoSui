@@ -2,7 +2,7 @@
 
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { Agent, AgentStatus, TriggerType, AgentConfig, TriggerConfig, ScheduledTriggerConfig, ScheduledTriggerFrequency, MCPDependency, AgentDependency, OutputAction, AIModel } from "@/types/agent";
-import { mockAgents, ExtendedAgent } from "@/data/mockAgents"; // Using ExtendedAgent for mock data flexibility
+import { ExtendedAgent } from "@/data/mockAgents"; // Using ExtendedAgent for mock data flexibility
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { TaskData } from "@/types/task"; // Import TaskData
@@ -37,7 +37,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
     description: agent?.description || "",
     iconUrl: agent?.iconUrl || null,
     systemPrompt: agent?.systemPrompt || "You are a helpful AI assistant.",
-    model: agent?.model || AIModel.Claude37Sonnet,
+    model: agent?.model || AIModel.Gemini25Pro,
     config: agent?.config || initialAgentConfig,
     ownerId: agent?.ownerId,
     triggerType: agent?.triggerType || TriggerType.MANUAL,
@@ -65,7 +65,7 @@ const AgentForm: React.FC<AgentFormProps> = ({ agent, onSubmit, isEditMode = fal
         description: agent.description,
         iconUrl: agent.iconUrl || null,
         systemPrompt: agent.systemPrompt,
-        model: agent.model || AIModel.Claude37Sonnet,
+        model: agent.model || AIModel.Gemini25Pro,
         config: agent.config || initialAgentConfig,
         ownerId: agent.ownerId,
         triggerType: agent.triggerType,

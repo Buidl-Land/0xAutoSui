@@ -9,7 +9,7 @@ export const dcaSolAgent: ExtendedAgent = {
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "DCA SOL Agent", { size: 128, backgroundColor: ['b6e3f4'] }),
   status: AgentStatus.RUNNING,
   systemPrompt: "Act as a Dollar Cost Averaging bot for SOL, optimizing entries based on AHR999 and managing capital in DeFi.",
-  model: AIModel.GPT4,
+  model: AIModel.Gemini25Pro,
   tasks: [
     { id: 'dca-task-01', description: 'Check AHR999 index daily.', order: 1, tags: ['Data Fetch', 'Condition Check'] },
     { id: 'dca-task-02', description: 'If AHR999 < 0.45, buy 0.5 SOL.', order: 2, tags: ['Trading', 'SOL'] },

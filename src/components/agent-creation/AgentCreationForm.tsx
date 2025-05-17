@@ -10,7 +10,7 @@ const AgentCreationForm: React.FC<AgentCreationFormProps> = ({ onAgentCreated })
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
-  const [model, setModel] = useState<AIModel>(AIModel.GPT4oMini);
+  const [model, setModel] = useState<AIModel>(AIModel.Gemini25Pro);
   const [creationType, setCreationType] = useState<AgentCreationType>(AgentCreationType.BASIC);
   // Add more state for other agent properties as needed
 
@@ -21,7 +21,7 @@ const AgentCreationForm: React.FC<AgentCreationFormProps> = ({ onAgentCreated })
     setName('');
     setDescription('');
     setSystemPrompt('');
-    setModel(AIModel.GPT4oMini);
+    setModel(AIModel.Gemini25Pro);
     setCreationType(AgentCreationType.BASIC); // Reset creation type
     onAgentCreated(); // Call the callback
     alert('Agent created successfully!');

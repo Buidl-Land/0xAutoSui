@@ -13,6 +13,8 @@ export enum AIModel {
   GPT41 = "gpt-4.1",
   Claude35Sonnet = "claude-3.5-sonnet",
   Claude37Sonnet = "claude-3.7-sonnet",
+  Gemini25Pro = "gemini-2.5-pro",
+  Gemini25Flash = "gemini-2.5-flash",
   DeepSeekV3 = "deepseek-v3",
   DeepSeekR1 = "deepseek-r1",
   Qwen3 = "qwen-3"

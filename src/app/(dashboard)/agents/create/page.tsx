@@ -40,7 +40,7 @@ const CreateAgentPage = () => {
     description: '',
     iconUrl: null,
     systemPrompt: 'You are a helpful AI assistant. Be concise and friendly.', // Default system prompt
-    model: AIModel.Claude37Sonnet, // Default model
+    model: AIModel.Gemini25Pro, // Default model
     triggerType: TriggerType.MANUAL,
     triggerConfig: null, // Explicitly null
     config: { dependentMCPs: [], dependentAgents: [], outputActions: [] },

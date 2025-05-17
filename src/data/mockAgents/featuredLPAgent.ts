@@ -9,7 +9,7 @@ export const featuredLPAgent: ExtendedAgent = {
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "Liquidity Provision Optimizer", { size: 128, backgroundColor: ['d1d4f9'] }),
   status: AgentStatus.IDLE,
   systemPrompt: "Identify high-yield, relatively safe liquidity pools. Manage LP entries and exits based on market conditions and risk parameters.",
-  model: AIModel.Claude37Sonnet,
+  model: AIModel.Gemini25Pro,
   tasks: [
     { id: 'lp-task-01', description: "Scan for new pools or track smart money LP movements.", order: 1, tags: ['Discovery', 'Monitoring', 'LP'] },
     { id: 'lp-task-02', description: "For promising pools, find Pool Address / Token CA.", order: 2, tags: ['Data Fetch'] },

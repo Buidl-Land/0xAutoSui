@@ -32,7 +32,7 @@ export const mockAgentTemplates: AgentTemplate[] = [
     iconUrl: '/assets/icons/wallet-template.svg', // Placeholder icon
     systemPrompt:
       'You are an AI assistant that monitors blockchain transactions for a specified smart wallet. Alert the user on new incoming or outgoing transactions matching the criteria.',
-    model: AIModel.GPT4oMini,
+    model: AIModel.Gemini25Pro,
     triggerType: TriggerType.EVENT_DRIVEN,
     triggerConfig: {
       eventType: EventType.ADDRESS_MONITOR,
@@ -100,7 +100,7 @@ export const mockAgentTemplates: AgentTemplate[] = [
     iconUrl: '/assets/icons/trading-template.svg', // Placeholder icon
     systemPrompt:
       'You are an AI trading bot. Analyze K-line patterns for the specified trading pair and execute buy/sell orders based on predefined strategies. Manage risk and log all trades.',
-    model: AIModel.GPT4o,
+    model: AIModel.Gemini25Pro,
     triggerType: TriggerType.EVENT_DRIVEN, // Or could be scheduled for periodic checks
     triggerConfig: {
       eventType: EventType.TRANSACTION_MONITOR, // This might need a more specific event type like MARKET_DATA_UPDATE
@@ -137,7 +137,7 @@ export const mockAgentTemplates: AgentTemplate[] = [
     iconUrl: '/assets/icons/liquidity-template.svg', // Placeholder icon
     systemPrompt:
       'You are an AI assistant for optimizing liquidity mining strategies. Monitor yields, gas fees, and impermanent loss across various pools. Rebalance positions to maximize returns.',
-    model: AIModel.GPT4oMini,
+    model: AIModel.Gemini25Pro,
     triggerType: TriggerType.SCHEDULED,
     triggerConfig: {
       frequency: ScheduledTriggerFrequency.DAILY,

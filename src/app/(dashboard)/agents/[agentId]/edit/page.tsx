@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AgentForm from "@/components/agents/AgentForm";
-import { mockAgents } from "@/data/mockAgents";
+import { getMockAgents } from "@/data/mockAgents";
 import { ExtendedAgent } from "@/data/mockAgents/types";
 import Link from "next/link";
 import { ArrowLeftIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 
 const getMockAgentData = (agentId: string | string[] | undefined): ExtendedAgent | null => {
   if (!agentId || Array.isArray(agentId)) return null;
-  return mockAgents.find((agent) => agent.id === agentId) || null;
+  const agents = getMockAgents();
+  return agents.find((agent: ExtendedAgent) => agent.id === agentId) || null;
 };
 
 const EditAgentPage = () => {

@@ -94,7 +94,7 @@ export const alphaTraderAgent: ExtendedAgent = {
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "Alpha Smart Trader", { size: 128, backgroundColor: ['f9d4d4'] }),
   status: AgentStatus.RUNNING,
   systemPrompt: alphaTraderSystemPrompt,
-  model: AIModel.Claude37Sonnet,
+  model: AIModel.Gemini25Pro,
   tasks: [
     {
       id: 'alpha-trader-task-01',

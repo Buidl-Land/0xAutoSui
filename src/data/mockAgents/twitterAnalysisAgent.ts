@@ -8,7 +8,7 @@ export const twitterAnalysisAgent: ExtendedAgent = {
   description: 'Analyzes token-related Twitter content to provide sentiment analysis, key insights, and popularity metrics',
   status: AgentStatus.RUNNING,
   systemPrompt: 'Analyze Twitter content for token-related discussions, perform sentiment analysis, and extract key insights and popularity metrics.',
-  model: AIModel.Claude37Sonnet,
+  model: AIModel.Gemini25Pro,
   triggerType: TriggerType.SCHEDULED,
   triggerConfig: {
     frequency: ScheduledTriggerFrequency.DAILY,

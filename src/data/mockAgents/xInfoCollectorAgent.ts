@@ -9,7 +9,7 @@ export const xInfoCollectorAgent: ExtendedAgent = {
   iconUrl: getDiceBearAvatar(DICEBEAR_STYLES.AGENT, "X Info Collector", { size: 128, backgroundColor: ['c0aede'] }),
   status: AgentStatus.RUNNING,
   systemPrompt: "Act as an information gatherer and summarizer from X (Twitter), focusing on actionable insights.",
-  model: AIModel.Claude37Sonnet,
+  model: AIModel.Gemini25Pro,
   tasks: [
       { id: 'xinfo-task-01', description: 'Fetch tweets from @CryptoKOL for #DegenToken.', order: 1, tags: ['Twitter', 'Data Fetch'] },
       { id: 'xinfo-task-02', description: 'Filter and summarize valuable info.', order: 2, tags: ['NLP', 'Summarization'] },

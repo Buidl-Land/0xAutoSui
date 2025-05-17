@@ -598,7 +598,7 @@ const AgentChat: React.FC<AgentChatProps> = ({
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-base-300 bg-base-200">
+      <div className="flex-none p-4 border-t border-base-300 bg-base-200">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
           {attachmentsNode}
           <input

@@ -122,7 +122,7 @@ const AgentDetailPage = () => {
     : 'N/A';
 
   return (
-    <div className="container mx-auto p-4 flex flex-col h-full">
+    <div className="container mx-auto p-4 flex flex-col flex-1">
       {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">

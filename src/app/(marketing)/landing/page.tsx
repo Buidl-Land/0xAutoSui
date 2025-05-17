@@ -23,8 +23,8 @@ export default function Home() {
             <div className="mb-[-0em]">
               your strategy,
             </div>
-            <div>
-              powered by <span className="text-indigo-500 text-5xl md:text-[6rem]">MCP</span><span className="text-5xl md:text-[6rem]">！</span>
+            <div className="text-4xl">
+              powered by <span className="text-3xl text-indigo-500 md:text-[6rem]">MCP&A2A</span><span className="text-4xl md:text-[6rem]">！</span>
             </div>
           </h1>
         </div>

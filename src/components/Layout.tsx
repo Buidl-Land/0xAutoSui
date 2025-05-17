@@ -210,7 +210,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Page content */}
-      <main className="p-4 w-full flex-grow bg-base-100">{children}</main>
+      <main className="p-4 w-full flex-grow bg-base-100 flex flex-col">{children}</main>
     </div>
   );
 };

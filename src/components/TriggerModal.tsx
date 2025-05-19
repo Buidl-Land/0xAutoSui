@@ -36,7 +36,7 @@ const TriggerModal: React.FC<TriggerModalProps> = ({
     { id: "mcp4", name: "CEX Trade MCP" },
     { id: "mcp5", name: "WalletAnalyze" },
     { id: "mcp6", name: "GoPlus" },
-    { id: "mcp7", name: "JupSwap" },
+    { id: "mcp7", name: "OKX Dex" },
   ];
 
   // Function to create default state, potentially using initialPrompt

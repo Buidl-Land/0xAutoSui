@@ -2,7 +2,7 @@ import { AgentStatus, TriggerType, ScheduledTriggerFrequency, AIModel, EventType
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '../../utils/dicebear';
 import { ExtendedAgent, MockLog } from './types';
 
-const alphaTraderSystemPrompt = "Please retrieve information about the tokens traded by the corresponding wallet, analyze the information of the Swap tokens. When a Meme token is purchased for more than 5 SOL, analyze the token. This analysis needs to include the token's popularity on Twitter. If there are many positive tweets discussing this token, then use GoPlus to analyze the token's security and the top ten holders' percentage. If the token contract is relatively safe and the top ten holders' percentage does not exceed 20%, then help me use Jup Swap to buy 1 SOL of the corresponding token.";
+const alphaTraderSystemPrompt = "Please retrieve information about the tokens traded by the corresponding wallet, analyze the information of the Swap tokens. When a Meme token is purchased for more than 5 SOL, analyze the token. This analysis needs to include the token's popularity on Twitter. If there are many positive tweets discussing this token, then use GoPlus to analyze the token's security and the top ten holders' percentage. If the token contract is relatively safe and the top ten holders' percentage does not exceed 20%, then help me use OKX Dex to buy 1 SOL of the corresponding token.";
 
 const alphaTraderAgentLogs: MockLog[] = [
   {
@@ -72,17 +72,17 @@ const alphaTraderAgentLogs: MockLog[] = [
   {
     id: 'log-alpha-009',
     timestamp: Date.now() - 520000,
-    message: "Internal: Execute JupSwap for Candle.",
-    agentResponse: "Calling Jup Swap to execute the trade of 1 SOL for Candle...",
-    executionSteps: ["Initiating JupSwap for 1 SOL of Candle."],
+    message: "Internal: Execute OKX Dex for Candle.",
+    agentResponse: "Calling OKX Dex to execute the trade of 1 SOL for Candle...",
+    executionSteps: ["Initiating OKX Dex for 1 SOL of Candle."],
     status: 'info'
   },
   {
     id: 'log-alpha-010',
     timestamp: Date.now() - 510000,
-    message: "Internal: JupSwap trade complete.",
+    message: "Internal: OKX Dex trade complete.",
     agentResponse: "Trade executed successfully. Process complete.",
-    executionSteps: ["JupSwap trade successful."],
+    executionSteps: ["OKX Dex trade successful."],
     status: 'success'
   }
 ];
@@ -98,7 +98,7 @@ export const alphaTraderAgent: ExtendedAgent = {
   tasks: [
     {
       id: 'alpha-trader-task-01',
-      description: "Monitor KOL wallet for Meme token buys > 5 SOL, analyze Twitter sentiment, check GoPlus security, then trade 1 SOL via JupSwap.",
+      description: "Monitor KOL wallet for Meme token buys > 5 SOL, analyze Twitter sentiment, check GoPlus security, then trade 1 SOL via OKX Dex.",
       order: 1,
       tags: ['Monitoring', 'Trading', 'Meme Coin', 'SOL']
     }
@@ -108,7 +108,7 @@ export const alphaTraderAgent: ExtendedAgent = {
       { mcpId: 'WalletAnalyze', mcpName: 'WalletAnalyze', order: 1, parameters: {} },
       { mcpId: 'TwitterCrawler', mcpName: 'TwitterCrawler', order: 2, parameters: {} },
       { mcpId: 'GoPlus', mcpName: 'GoPlus', order: 3, parameters: {} },
-      { mcpId: 'JupSwap', mcpName: 'JupSwap', order: 4, parameters: {} }
+      { mcpId: 'OKX Dex', mcpName: 'OKX Dex', order: 4, parameters: {} }
     ],
     dependentAgents: [],
     outputActions: [{ outputType: 'TELEGRAM_NOTIFIER', outputProviderName: 'Trade Alerts TG', parameters: { chatId: '@alphatrades' } }],
@@ -134,5 +134,5 @@ export const alphaTraderAgent: ExtendedAgent = {
   serviceCreditsRefillThreshold: 100,
   serviceCreditsRefillAmount: 500,
   autoRefillSol: false,
-  featuredDescription: "**Trigger:** Twitter Event / Smart Money Movement -> Find Contract Address (CA)\n**Key MCPs:** Twitter Sentiment Analysis -> CA Alert Evaluation -> Wallet Transaction (JupSwap)",
-}; 
+  featuredDescription: "**Trigger:** Twitter Event / Smart Money Movement -> Find Contract Address (CA)\n**Key MCPs:** Twitter Sentiment Analysis -> CA Alert Evaluation -> Wallet Transaction (OKX Dex)",
+};

@@ -1,31 +1,99 @@
-0xAuto OS：自动化你的AI策略，由MCP和A2A赋能！
-还在手动肝 Web3？信息太多看不过来？错失良机拍断大腿？
-告别繁琐，拥抱智能！0xAuto OS 来了！
-0xAuto OS 是什么？
-简单来说，0xAuto OS 是一个专为 Web3 世界打造的 AI 智能操作系统。想象一下，您拥有了一支由 AI 驱动的、7x24 小时不知疲倦的智能助理团队（我们称之为 Agent）。这些 Agent 不仅能帮您自动获取和处理海量信息，还能按照您的设定，定时、自动地执行各种复杂任务，例如 DEX 交易、代币发行、监控市场异动等等——而您，则可以彻底解放双手！
-这一切都得益于我们独特的技术架构：
-- 智能 Agent： 您可以自定义的 AI 机器人，是您在 Web3 世界的自动化执行者。
-- MCP (Model Context Protocol) & A2A (Agent2Agent Protocol)： 这是我们独创的通用开放协议，让您的 Agent 能够轻松调用外部世界的能力（数据、模型、API）和其他 Agent 的能力，就像给它们插上了翅膀。开发者和项目方可以轻松接入，共建生态。
-- Multi-Agent 系统： 多个 Agent 协同作战，处理更复杂的任务，威力倍增。
-- 抽象钱包 (Abstract Wallet)： 安全、可编程的内置钱包，让您的 Agent 能够代表您自动执行链上交易和资产管理，实现真正的自动化量化投资。
-- 核心优势：定时执行！ 设置一次，Agent 自动按计划执行任务，无需您每次对话或手动启动，彻底告别重复劳动。
-0xAuto OS 解决什么痛点？
-1. 信息过载？看不完？ Agent 帮您定时搜集、筛选、总结关键信息，生成您的专属情报日报。
-2. 操作繁琐？没时间？ Agent 帮您自动化执行重复性任务，例如每日定投、监控巨鲸钱包、自动跟单。
-3. 策略复杂？不会代码？ 无需编程，通过简单配置，即可让 Agent 执行您的交易策略或自动化流程。
-4. 担心安全？不敢自动？ 抽象钱包保障资产安全，让自动化交易无后顾之忧。
-5. AI 还要聊天才能用？太麻烦！ 我们的 Agent 支持定时任务，设定后自动运行，无需人工干预。
-谁需要 0xAuto OS？
-- Web3 投资者： 无论是新手还是老炮，用它来自动获取 Alpha、执行交易策略、管理 DeFi 仓位，省时省力，快人一步。
-- Web3 开发者/项目方： 基于我们通用的 MCP 和 A2A 协议，轻松为您的项目或服务提供 Agent 能力，或将您的服务接入 0xAuto 生态。
-- 所有希望在 Web3 世界实现自动化的用户： 任何需要定时获取信息、自动执行链上或链下任务的场景，0xAuto OS 都能派上用场。
-为什么选择 0xAuto OS？—— 核心优势，简单粗暴！
-- AI 挂机，自动赚钱： 设定好您的 Agent，让它 7x24 小时为您打工，监控市场、执行策略，捕捉每一个潜在收益。
-- 定时执行，彻底解放： 独一无二的定时任务功能，告别手动重复，让 AI 真正成为您的自动化助理。
-- 无需代码，人人可用： 简单的配置界面，即使是小白用户也能轻松创建和管理自己的 AI Agent。
-- 安全交易，资产无忧： 内置抽象钱包，为您的自动化交易保驾护航。
-- 开放生态，无限可能： 通用协议设计，吸引更多开发者和服务加入，Agent 能力越来越强，选择越来越多。
-- Multi-Agent 协同，智能升级： 多个 Agent 联手，完成更复杂的任务，释放集体智能的强大潜力。
-- (未来可期) 辅助生成 Agent： 我们还在努力让创建 Agent 变得更简单，未来您可能只需要说出想法，AI 就能帮您生成 Agent！
-0xAuto OS —— 开启您的 Web3 智能自动化新纪元！
-立即探索，让 AI 为您的 Web3 之旅加速！
+# 0xAuto OS: Automate Your AI Strategies, Powered by MCP and A2A!
+
+Still managing Web3 manually? Too much information to process? Missing opportunities?
+
+Say goodbye to tedious tasks and embrace intelligence! Introducing 0xAuto OS!
+
+## What is 0xAuto OS?
+
+Simply put, 0xAuto OS is an AI-powered operating system designed specifically for the Web3 world. Imagine having a team of AI-driven, 24/7 intelligent assistants (we call them Agents) at your disposal. These Agents not only help you automatically acquire and process massive amounts of information but also execute various complex tasks on schedule according to your specifications, such as DEX trading, token issuance, market movement monitoring, and more—while you can completely free your hands!
+
+This is all made possible by our unique technical architecture:
+
+- **Intelligent Agents**: Customizable AI robots that serve as your automated executors in the Web3 world.
+- **MCP (Model Context Protocol) & A2A (Agent2Agent Protocol)**: We use universal open protocols that enable your Agents to easily access external capabilities (data, models, APIs) and other Agents' capabilities, essentially giving them wings. Developers and project teams can easily connect and contribute to the ecosystem.
+- **Multi-Agent System**: Multiple Agents working together to handle more complex tasks, multiplying their effectiveness.
+- **Abstract Wallet**: A secure, programmable built-in wallet that allows your Agents to automatically execute on-chain transactions and asset management on your behalf, enabling truly automated quantitative investments.
+- **Core Advantage: Scheduled Execution!** Set it once, and Agents automatically execute tasks according to schedule, without requiring conversation or manual initiation each time, completely eliminating repetitive labor.
+
+## Technical Architecture
+
+```mermaid
+graph TD
+     subgraph EventSystem["Event System"]
+        EB["Task Scheduler"]
+        ET["Event Trigger"]
+        TT["Cron Trigger"]
+  end
+ subgraph MultiAgents["Multi Agents"]
+        SA["Supervisor Agent"]
+        TA1["reAct Agent 1"]
+        TA2["reAct Agent 2"]
+        TAN["reAct Agent N..."]
+  end
+ subgraph ToolSystem["Tool Call System"]
+        MCP["MCP Call Controller"]
+        Tool1["Twitter MCP Server"]
+        Tool2["Telegram MCP Server"]
+        Tool3["CEX/DEX MCP Server"]
+        Tool4["Analysis MCP Server"]
+        Tool5["Partner MCP Server"]
+        ToolN["Tool N..."]
+  end
+    ET -- Trigger Event --> EB
+    TT -- Scheduled Task --> EB
+    EB -- Schedule --> SA
+    SA -- A2A --> TA1 & TA2 & TAN
+    SA -- Tool Request --> MCP
+    TA1 -- Tool Request --> MCP
+    TA2 -- Tool Request --> MCP
+    TAN -- Tool Request --> MCP
+    MCP -- Call --> Tool1 & Tool2 & Tool3 & Tool4 & Tool5 & ToolN
+     EB:::eventSystem
+     ET:::eventSystem
+     TT:::eventSystem
+     SA:::supervisor
+     TA1:::agent
+     TA2:::agent
+     TAN:::agent
+     MCP:::tools
+     Tool1:::tools
+     Tool2:::tools
+     Tool3:::tools
+     Tool4:::tools
+     Tool5:::tools
+     ToolN:::tools
+    classDef eventSystem stroke:#e83e8c,stroke-width:2px,color:#e83e8c
+    classDef supervisor stroke:#007bff,stroke-width:2px,color:#007bff
+    classDef agent stroke:#6610f2,stroke-width:2px,color:#6610f2
+    classDef tools stroke:#28a745,stroke-width:2px,color:#28a745
+    classDef multiAgents stroke:#17a2b8,stroke-width:2px,color:#17a2b8
+```
+
+## What Pain Points Does 0xAuto OS Solve?
+
+1. **Information overload?** Agents help you collect, filter, and summarize key information on schedule, generating your personalized intelligence reports.
+2. **Tasks too complicated? No time?** Agents help automate repetitive tasks, such as daily investment, monitoring whale wallets, or automatic copy trading.
+3. **Complex strategies? Don't know how to code?** No programming required—simply configure Agents to execute your trading strategies or automation workflows.
+4. **Concerned about security?** Abstract wallet ensures asset security, making automated transactions worry-free.
+5. **Tired of chatting with AI to use it?** Our Agents support scheduled tasks that run automatically once set up, without human intervention.
+
+## Who Needs 0xAuto OS?
+
+- **Web3 Investors**: Whether novice or veteran, use it to automatically obtain Alpha, execute trading strategies, and manage DeFi positions, saving time and effort to stay ahead.
+- **Web3 Developers/Projects**: Based on our universal MCP and A2A protocols, easily provide Agent capabilities for your projects or services, or integrate your services into the 0xAuto ecosystem.
+- **Anyone Seeking Automation in Web3**: 0xAuto OS can be useful in any scenario requiring scheduled information acquisition or automatic execution of on-chain or off-chain tasks.
+
+## Why Choose 0xAuto OS? — Core Advantages, Simple and Powerful!
+
+- **AI Automation, Passive Income**: Set up your Agents to work for you 24/7, monitoring markets, executing strategies, and capturing every potential profit.
+- **Scheduled Execution, Complete Freedom**: Unique scheduled task functionality eliminates manual repetition, making AI truly your automated assistant.
+- **No Code Required, User-Friendly**: Simple configuration interface allows even beginners to easily create and manage their own AI Agents.
+- **Secure Transactions, Asset Protection**: Built-in abstract wallet safeguards your automated transactions.
+- **Open Ecosystem, Unlimited Possibilities**: Universal protocol design attracts more developers and services to join, continuously enhancing Agent capabilities and expanding choices.
+- **Multi-Agent Collaboration, Intelligence Upgrade**: Multiple Agents working together complete more complex tasks, unleashing the power of collective intelligence.
+- **(Future) Assisted Agent Generation**: We're working to make creating Agents even simpler—in the future, you might only need to express your idea, and AI will help generate your Agent!
+
+## 0xAuto OS — Start Your Web3 Intelligent Automation New Era!
+
+Explore now and let AI accelerate your Web3 journey!

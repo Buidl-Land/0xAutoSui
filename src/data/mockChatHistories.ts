@@ -10,7 +10,7 @@ export const mockChatHistories: Record<string, Message[]> = {
     {
       id: nanoid(),
       role: 'user',
-      content: `Based on the trading monitoring information, analyze the Swap token information. When buying Meme tokens exceeds 5 SOL, analyze the token, check Twitter popularity, and if there are many positive discussions about this token on Twitter, use GoPlus to analyze token security and top 10 holder percentage. If the token contract is safe and top 10 holders percentage is less than 20%, help me buy 1 SOL worth of the token using Jup Swap.
+      content: `Based on the trading monitoring information, analyze the Swap token information. When buying Meme tokens exceeds 5 SOL, analyze the token, check Twitter popularity, and if there are many positive discussions about this token on Twitter, use GoPlus to analyze token security and top 10 holder percentage. If the token contract is safe and top 10 holders percentage is less than 20%, help me buy 1 SOL worth of the token using OKX Dex.
 
 Trigger Info:
 {
@@ -87,7 +87,7 @@ Trigger Info:
       role: 'data',
       content: JSON.stringify({
         type: 'tool_call',
-        tool: 'JupSwap',
+        tool: 'OKX Dex',
         parameters: {
           from_token: 'SOL',
           to_token: 'A8bcY1eSenMiMy75vgSnp6ShMfWHRHjeM6JxfM1CNDL',
@@ -111,7 +111,7 @@ Trigger Info:
 - **Security Assessment**: No security vulnerabilities. Top 10 holders: 16.5%. Contract audited, liquidity locked 90 days, security score 92/100 (low risk).
 
 ## 2. Trade Execution:
-Bought 12,452 Candle for 1 SOL via Jup Swap. Price: 1 Candle = 0.00008 SOL. TxHash: 5Drt7vvBHEubqrJGLZwGxzUbZnfMPBx3WQXFzCjDrNrv. Fee: 0.000005 SOL.
+Bought 12,452 Candle for 1 SOL via OKX Dex. Price: 1 Candle = 0.00008 SOL. TxHash: 5Drt7vvBHEubqrJGLZwGxzUbZnfMPBx3WQXFzCjDrNrv. Fee: 0.000005 SOL.
 
 ## 3. Next Steps:
 Monitor Candle's on-chain data & community sentiment (price, volume, KOL actions). Alerts set for +30%/-15% price changes.`

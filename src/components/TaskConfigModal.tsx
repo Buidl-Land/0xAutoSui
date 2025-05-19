@@ -31,7 +31,7 @@ const TaskConfigModal: React.FC<TaskConfigModalProps> = ({ // MODIFIED
     { id: "mcp4", name: "CEX Trade MCP" },
     { id: "mcp5", name: "WalletAnalyze" },
     { id: "mcp6", name: "GoPlus" },
-    { id: "mcp7", name: "JupSwap" },
+    { id: "mcp7", name: "OKX Dex" },
   ];
 
   const createDefaultState = (): TaskData => { // MODIFIED

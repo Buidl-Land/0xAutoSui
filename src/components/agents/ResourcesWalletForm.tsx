@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import { TokenIcon } from '@web3icons/react';
+import { TicketIcon } from '@heroicons/react/24/outline';
 
 // Mock wallet type, replace with actual type from your /types later
 interface Wallet {
@@ -73,10 +75,16 @@ const ResourcesWalletForm: React.FC<ResourcesWalletFormProps> = ({
             <label className="label">
               <span className="label-text text-base">Estimated Consumption</span>
             </label>
-            <p className="text-sm p-2 bg-base-200 rounded-md">
-              SOL Gas: (Mocked) 0.005 SOL / run <br />
-              Service Credits: (Mocked) 10 credits / run
-            </p>
+            <div className="text-sm p-2 bg-base-200 rounded-md space-y-1">
+              <div className="flex items-center">
+                <TokenIcon symbol="SOL" size={16} className="w-4 h-4 mr-1.5" variant="branded" />
+                <span>SOL Gas: (Mocked) 0.005 SOL / run</span>
+              </div>
+              <div className="flex items-center">
+                <TicketIcon className="w-4 h-4 mr-1.5 text-primary" />
+                <span>Service Credits: (Mocked) 10 credits / run</span>
+              </div>
+            </div>
           </div>
 
           <div className="form-control mb-2">

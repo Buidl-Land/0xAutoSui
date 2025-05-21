@@ -14,15 +14,15 @@ export let mockWallets: Wallet[] = [
     userId: mockUser.userId,
     walletName: 'Main Wallet',
     tokens: [
-      // Ensure symbols are lowercase and iconUrl is removed
-      { id: 'solana', name: 'Solana', symbol: 'sol', balance: 2.85, priceUsd: 170.50, address: 'SoL1q2w3e4r5t6y7u8i9o0pAsDfGhjKlCzXbNm' },
-      { id: 'usd-coin', name: 'USD Coin', symbol: 'usdc', balance: 500.00, priceUsd: 1.00, address: 'USDTzxcvbnm1234567890qwertyuiopasdfghjkl' },
+      // Ensure symbols are lowercase and iconUrl is added
+      { id: 'solana', name: 'Solana', symbol: 'sol', balance: 2.85, priceUsd: 170.50, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png', address: 'SoL1q2w3e4r5t6y7u8i9o0pAsDfGhjKlCzXbNm' },
+      { id: 'usd-coin', name: 'USD Coin', symbol: 'usdc', balance: 500.00, priceUsd: 1.00, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png', address: 'USDTzxcvbnm1234567890qwertyuiopasdfghjkl' },
       // Add a few more common tokens for variety
-      { id: 'bitcoin', name: 'Bitcoin', symbol: 'btc', balance: 0.05, priceUsd: 10245.00, address: 'BTC...xxx' },
-      { id: 'ethereum', name: 'Ethereum', symbol: 'eth', balance: 1.2, priceUsd: 2504.00, address: 'ETH...xxx' },
-      { id: 'tether', name: 'Tether', symbol: 'usdt', balance: 1000.00, priceUsd: 1.00, address: 'USDT...tether' },
-      { id: 'bonk', name: 'Bonk', symbol: 'bonk', balance: 500000000, priceUsd: 0.000025, address: 'Bonk...xxx' },
-      { id: 'dogwifhat', name: 'dogwifhat', symbol: 'wif', balance: 150, priceUsd: 2.80, address: 'WIF...xxx' },
+      { id: 'bitcoin', name: 'Bitcoin', symbol: 'btc', balance: 0.05, priceUsd: 10245.00, iconUrl: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png', address: 'BTC...xxx' },
+      { id: 'ethereum', name: 'Ethereum', symbol: 'eth', balance: 1.2, priceUsd: 2504.00, iconUrl: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png', address: 'ETH...xxx' },
+      { id: 'tether', name: 'Tether', symbol: 'usdt', balance: 1000.00, priceUsd: 1.00, iconUrl: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png', address: 'USDT...tether' },
+      { id: 'bonk', name: 'Bonk', symbol: 'bonk', balance: 500000000, priceUsd: 0.000025, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263/logo.png', address: 'Bonk...xxx' },
+      { id: 'dogwifhat', name: 'dogwifhat', symbol: 'wif', balance: 150, priceUsd: 2.80, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm/logo.png', address: 'WIF...xxx' },
     ],
     serviceCredits: 8916, // Match updated points display
     primarySolAddress: 'SoL1q2w3e4r5t6y7u8i9o0pAsDfGhjKlCzXbNm', // Kept for generic deposit reference if needed
@@ -47,9 +47,9 @@ export let mockWallets: Wallet[] = [
     userId: mockUser.userId,
     walletName: 'Trading Bot Wallet',
     tokens: [
-      { id: 'solana-2', name: 'Solana', symbol: 'sol', balance: 10.5, priceUsd: 170.50, address: 'SoL2xYzAaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPp' },
-      { id: 'usd-coin-2', name: 'USD Coin', symbol: 'usdc', balance: 12000.00, priceUsd: 1.00, address: 'USDTpoiuytrewqasdfghjklmnbvcxz0987654321' },
-      { id: 'render', name: 'Render Token', symbol: 'rndr', balance: 250, priceUsd: 10.50, address: 'RNDR...xxx' },
+      { id: 'solana-2', name: 'Solana', symbol: 'sol', balance: 10.5, priceUsd: 170.50, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png', address: 'SoL2xYzAaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPp' },
+      { id: 'usd-coin-2', name: 'USD Coin', symbol: 'usdc', balance: 12000.00, priceUsd: 1.00, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png', address: 'USDTpoiuytrewqasdfghjklmnbvcxz0987654321' },
+      { id: 'render', name: 'Render Token', symbol: 'rndr', balance: 250, priceUsd: 10.50, iconUrl: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof/logo.png', address: 'RNDR...xxx' },
     ],
     serviceCredits: 25000,
     primarySolAddress: 'SoL2xYzAaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPp',

@@ -8,8 +8,8 @@ interface WelcomeMessageProps {
 
 const WelcomeMessage: React.FC<WelcomeMessageProps> = ({ username }) => {
   return (
-    <div className="mb-6">
-      <h1 className="text-3xl font-bold text-white">
+    <div className="mb-8 py-4"> {/* Added more margin bottom and some padding y */}
+      <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent"> {/* Enlarged text, made bolder, and applied gradient */}
         Welcome back, {username || 'User'}!
       </h1>
     </div>

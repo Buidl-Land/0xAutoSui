@@ -27,6 +27,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ClientOnlyFormatDate from '@/components/utils/ClientOnlyFormatDate';
 import { CurrencyDollarIcon } from '@heroicons/react/24/solid'; // Placeholder icon
+import * as Web3Icons from '@web3icons/react'; // Using wildcard import for dynamic access
 
 const formatCurrency = (value: number | undefined, symbol: string = '$') => {
   if (value === undefined) return `${symbol}--.--`;
@@ -40,6 +41,75 @@ const formatTokenQuantity = (value: number | undefined) => {
   if (Math.abs(value) > 1000000) return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
   if (Math.abs(value) < 1) return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 });
   return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+// Define TokenIcon component
+interface TokenIconProps {
+  symbol: string;
+  iconUrl?: string;
+  name: string;
+  size?: number;
+}
+
+const TokenIcon: React.FC<TokenIconProps> = ({ symbol, iconUrl, name, size = 8 }) => { // Default size corresponds to w-8, h-8
+  // Attempt to find a matching Web3Icon. Case-insensitive matching for common symbols.
+  const normalizedSymbol = symbol.toUpperCase();
+  let IconComponent: React.ElementType | undefined;
+
+  // Explicit mapping for common known symbols to their likely @web3icons/react export names
+  // This map can be expanded.
+  const symbolToWeb3IconName: { [key: string]: string } = {
+    'SOL': 'Solana',
+    'USDC': 'Usdc',
+    'BTC': 'Btc',
+    'ETH': 'Eth',
+    // Add more mappings as needed, e.g., 'USDT': 'Usdt'
+  };
+
+  const web3IconName = symbolToWeb3IconName[normalizedSymbol];
+  if (web3IconName) {
+    IconComponent = (Web3Icons as any)[web3IconName];
+  }
+
+  // Fallback to direct symbol match if no explicit map and if it exists in Web3Icons
+  if (!IconComponent) {
+    const directMatchAttempt = (Web3Icons as any)[normalizedSymbol] || (Web3Icons as any)[symbol];
+    if (directMatchAttempt) {
+      IconComponent = directMatchAttempt;
+    }
+  }
+
+  const iconSizeClass = `w-${size} h-${size}`;
+  const innerIconSize = Math.floor(size * 0.7); // For icons within the mask
+
+  if (IconComponent) {
+    return (
+      <div className="avatar">
+        <div className={`mask mask-squircle ${iconSizeClass} bg-base-300 flex items-center justify-center`}>
+          <IconComponent style={{ width: `${innerIconSize}px`, height: `${innerIconSize}px` }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (iconUrl) {
+    return (
+      <div className="avatar">
+        <div className={`mask mask-squircle ${iconSizeClass} bg-base-300`}>
+          <Image src={iconUrl} alt={`${name} icon`} width={size*4} height={size*4} className="object-contain" /> {/* Image width/height are in pixels */}
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback to Heroicons CurrencyDollarIcon
+  return (
+    <div className="avatar placeholder">
+      <div className={`bg-neutral-focus text-neutral-content mask mask-squircle ${iconSizeClass} flex items-center justify-center`}>
+        <CurrencyDollarIcon style={{ width: `${innerIconSize}px`, height: `${innerIconSize}px` }} />
+      </div>
+    </div>
+  );
 };
 
 const WalletManagementPage = () => {
@@ -263,8 +333,7 @@ const WalletManagementPage = () => {
               {selectedWallet.tokens && selectedWallet.tokens.length > 0 ? (
                 <div className="max-h-96 overflow-y-auto rounded-lg border border-base-300"> {/* Added max-h and overflow, plus some styling */}
                   <table className="table table-sm w-full">
-                    <thead className="sticky top-0 bg-base-100 z-10"> {/* Sticky header for scroll */}
-                      <tr className="text-base-content/80">
+                    <thead className="sticky top-0 bg-base-100 z-10"><tr className="text-base-content/80">
                         <th className="py-3 px-4">Token</th>
                         <th className="text-right py-3 px-4">Balance</th>
                         <th className="text-right hidden sm:table-cell py-3 px-4">Price</th>
@@ -276,19 +345,7 @@ const WalletManagementPage = () => {
                         <tr key={token.id} className="hover:bg-base-200/50 transition-colors duration-150">
                           <td className="py-3 px-4">
                             <div className="flex items-center space-x-3">
-                              {token.iconUrl ? (
-                                <div className="avatar">
-                                  <div className="mask mask-squircle w-8 h-8 bg-base-300">
-                                    <Image src={token.iconUrl} alt={`${token.name} icon`} width={32} height={32} className="object-contain" />
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="avatar placeholder">
-                                  <div className="bg-neutral-focus text-neutral-content mask mask-squircle w-8 h-8">
-                                    <CurrencyDollarIcon className="w-5 h-5" />
-                                  </div>
-                                </div>
-                              )}
+                              <TokenIcon symbol={token.symbol} iconUrl={token.iconUrl} name={token.name} size={8} />
                               <div>
                                 <div className="font-bold text-base-content">{token.name}</div>
                                 <div className="text-sm opacity-70">{token.symbol}</div>

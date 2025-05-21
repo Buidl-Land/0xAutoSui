@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Added Link import
 import { allMockAgents, ExtendedAgent } from '@/data/mockAgents';
 import { AgentStatus } from '@/types/agent';
 import { getDiceBearAvatar, DICEBEAR_STYLES } from '@/utils/dicebear';
@@ -26,21 +27,23 @@ const ActiveAgentsList = () => {
               {runningAgents.map((agent) => {
                 const avatarUrl = agent.iconUrl || getDiceBearAvatar(DICEBEAR_STYLES.AGENT, agent.name, { size: 40 });
                 return (
-                  <li key={agent.id} className="p-3 bg-base-200 rounded-lg shadow flex items-center space-x-3">
-                    <Image
-                      src={avatarUrl}
-                      alt={`${agent.name} avatar`}
-                      width={40}
-                      height={40}
-                      className="rounded-full bg-base-300"
-                    />
-                    <div>
-                      <p className="font-medium text-base-content">{agent.name}</p>
-                      <p className="text-sm text-base-content/70">
-                        {agent.tasks?.length || 0} task(s) currently active.
-                      </p>
-                    </div>
-                  </li>
+                  <Link href={`/agents/${agent.id}`} key={agent.id} className="block hover:bg-base-300/50 rounded-lg transition-colors duration-150">
+                    <li className="p-3 bg-base-200 rounded-lg shadow flex items-center space-x-3">
+                      <Image
+                        src={avatarUrl}
+                        alt={`${agent.name} avatar`}
+                        width={40}
+                        height={40}
+                        className="rounded-full bg-base-300"
+                      />
+                      <div>
+                        <p className="font-medium text-base-content">{agent.name}</p>
+                        <p className="text-sm text-base-content/70">
+                          {agent.tasks?.length || 0} task(s) currently active.
+                        </p>
+                      </div>
+                    </li>
+                  </Link>
                 );
               })}
             </ul>

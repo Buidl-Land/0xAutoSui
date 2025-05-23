@@ -1,0 +1,9 @@
+[package]
+name = "AutoMCP"
+version = "0.1.0"
+
+[dependencies]
+Sui = { local = "../sui/crates/sui-framework/packages/sui-framework" }
+
+[addresses]
+automcp = "0x0" 

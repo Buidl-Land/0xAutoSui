@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ZkLoginProvider } from "@/contexts/ZkLoginContext";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -36,7 +38,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true} className="h-full">
       <body className={`${iceland.className} ${geistSans.variable} ${geistMono.variable} antialiased h-full flex flex-col`} suppressHydrationWarning={true}>
         <ThemeProvider>
-          {children}
+          <ZkLoginProvider>
+            {children}
+          </ZkLoginProvider>
         </ThemeProvider>
       </body>
     </html>

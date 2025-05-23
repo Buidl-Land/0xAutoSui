@@ -12,7 +12,7 @@ import ExploreSection from '@/components/dashboard/ExploreSection'; // New Explo
 import TokenBalancesCard from '@/components/dashboard/TokenBalancesCard';
 import ActiveAgentsList from '@/components/dashboard/ActiveTasksList'; // Imports ActiveAgentsList component from ActiveTasksList.tsx
 import AgentLogsView from '@/components/dashboard/AgentLogsView';
-import { Cog6ToothIcon, PlusCircleIcon } from '@heroicons/react/24/outline'; // For button icons
+import { PlusCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'; // For button icons
 
 // Mock API call functions - REMOVED
 // const fetchCurrentUser = async (): Promise<User> => { ... };
@@ -47,8 +47,6 @@ const DashboardPage: React.FC = () => {
     router.push(route);
   };
 
-
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-theme(spacing.24))]"> {/* Adjusted min-height */}
@@ -74,6 +72,25 @@ const DashboardPage: React.FC = () => {
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
       {currentUser && <WelcomeMessage username={currentUser.username} />}
 
+      {/* zkLogin Demo Banner */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <ShieldCheckIcon className="w-8 h-8" />
+            <div>
+              <h3 className="text-lg font-semibold">Try Sui zkLogin</h3>
+              <p className="text-blue-100">Experience seamless Web3 authentication with Google</p>
+            </div>
+          </div>
+          <button
+            onClick={() => handleNavigate('/zklogin-demo')}
+            className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+          >
+            Try Demo
+          </button>
+        </div>
+      </div>
+
       {/* Main Dashboard Grid - Adjusted Layout */}
       {/* Row 1: Active Agents & Token Portfolio (with P/L) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -94,7 +111,6 @@ const DashboardPage: React.FC = () => {
       <div className="mt-6"> {/* Added margin-top for spacing */}
         <ExploreSection agents={allAgents} /> {/* Pass all agents */}
       </div>
-
 
       {/* Quick Create Agent Button - Remains at the bottom */}
       <div className="flex justify-center items-center py-4 md:py-6">
